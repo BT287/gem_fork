@@ -30,7 +30,7 @@ def run_secondary_modeling(target_model, io_ns, config_ns, secondary_model_ns):
 
         seq_record = seq_record_BGC_num_list[0]
         total_BGC_single_seq_record = seq_record_BGC_num_list[1]
-        secondary_model_ns.temp_loc1 = 0
+        secondary_model_ns.temp_loc1 = -1
 
         region_nr = 1
 
