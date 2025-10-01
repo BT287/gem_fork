@@ -122,7 +122,7 @@ conda install -c bioconda diamond
 
 - Run modeling of primary metabolism using EC number prediction file and secondary metabolism (~40 min). 
 
-        python run_gmsm.py -i input/NC_021985.1.final_antismash4.gbk -p -e input/NC_021985.1_deepec.txt -s -d
+        python run_gmsm.py -i input/NC_021985.1.final_antismash4.gbk -p -E input/NC_021985.1_deepec.txt -s -d
 
 Note: Option `-d` is for displaying debugging statements during program running.
 
