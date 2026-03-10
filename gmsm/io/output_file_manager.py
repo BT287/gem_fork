@@ -2,6 +2,7 @@
 import cobra
 import collections
 import logging
+import os
 import pickle
 import re
 import shutil
@@ -36,11 +37,15 @@ def generate_outputs(folder, runtime, run_ns, io_ns, homology_ns, primary_model_
         write_data_for_debug(run_ns, io_ns, homology_ns, primary_model_ns)
 
 
+def _outpath(folder, filename):
+    return os.path.join(folder, filename)
+
+
 def get_model_reactions(folder, primary_model_ns, **kwargs):
 
-    fp1 = open('./%s/model_reactions.txt' %folder, 'w')
-    fp2 = open('./%s/rmc_remaining_essential_reactions_from_template_model.txt' %folder, 'w')
-    fp3 = open('./%s/rmc_reactions_added_from_kegg.txt' %folder, 'w')
+    fp1 = open(_outpath(folder, 'model_reactions.txt'), 'w')
+    fp2 = open(_outpath(folder, 'rmc_remaining_essential_reactions_from_template_model.txt'), 'w')
+    fp3 = open(_outpath(folder, 'rmc_reactions_added_from_kegg.txt'), 'w')
 
     fp1.write('reaction_ID'+'\t'+'reaction_name'+'\t'+'reaction_equation'+'\t'
             +'GPR'+'\t'+'pathway'+'\n')
@@ -50,7 +55,7 @@ def get_model_reactions(folder, primary_model_ns, **kwargs):
             +'GPR'+'\t'+'pathway'+'\n')
 
     if '4_complete_model' in folder:
-        fp4 = open('./%s/rmc_BGCs_fluxes.txt' %folder, 'w')
+        fp4 = open(_outpath(folder, 'rmc_BGCs_fluxes.txt'), 'w')
         fp4.write('reaction_ID'+'\t'+'fluxes without gap-filling reactions'+'\n')
 
     if 'cobra_model' in kwargs:
@@ -118,12 +123,12 @@ def get_model_reactions(folder, primary_model_ns, **kwargs):
 
 def get_model_metabolites(folder, cobra_model, secondary_model_ns):
 
-    fp1 = open('./%s/model_metabolites.txt' %folder, "w")
+    fp1 = open(_outpath(folder, 'model_metabolites.txt'), "w")
     fp1.write('metabolite_ID'+'\t'+'metabolite_name'+'\t'
             +'formula'+'\t'+'compartment'+'\n')
 
     if '4_complete_model' in folder:
-        fp2 = open('./%s/rmc_metabolites_gapfilling_needed.txt' %folder, "w")
+        fp2 = open(_outpath(folder, 'rmc_metabolites_gapfilling_needed.txt'), "w")
         fp2.write('metabolite_ID'+'\t'+'reaction_ID'+'\t'+'reaction_name'+'\t'
                 +'reaction_equation'+'\t'+'GPR'+'\t'+'pathway'+'\n')
 
@@ -156,7 +161,7 @@ def get_model_genes(folder, cobra_model, run_ns):
     template_model_gene_list = []
     duplicate_gene_list = []
 
-    fp1 = open('./%s/rmc_gpr_associations_from_homology_analysis.txt' %folder, "w")
+    fp1 = open(_outpath(folder, 'rmc_gpr_associations_from_homology_analysis.txt'), "w")
 
     fp1.write('gene'+'\t'+'note'+'\t'+'reaction_ID'+'\t'+'reaction_name'+'\t'+'reaction_equation'+'\t'+'GPR'+'\t'+'pathway'+'\n')
 
@@ -224,7 +229,7 @@ def get_summary_report(folder, cobra_model, runtime,
                        num_essen_rxn, num_kegg_rxn, num_bgc_rxn,
                        template_model_gene_list, duplicate_gene_list, run_ns, secondary_model_ns):
 
-    fp1 = open('./%s/summary_report.txt' %folder, "w")
+    fp1 = open(_outpath(folder, 'summary_report.txt'), "w")
 
     #log_level
     if run_ns.verbose:
@@ -278,33 +283,33 @@ def get_summary_report(folder, cobra_model, runtime,
 
 def write_data_for_debug(run_ns, io_ns, homology_ns, primary_model_ns):
 
-    with open('./%s/temp_target_BBH_dict.txt' %io_ns.outputfolder2,'w') as f:
+    with open(_outpath(io_ns.outputfolder2, 'temp_target_BBH_dict.txt'),'w') as f:
         for locustag in homology_ns.temp_target_BBH_dict:
             print('%s\t%s' %(locustag, homology_ns.temp_target_BBH_dict[locustag]), file=f)
 
     try:
-        with open('./%s/mnxr_to_add_list.txt' %io_ns.outputfolder6,'w') as f:
+        with open(_outpath(io_ns.outputfolder6, 'mnxr_to_add_list.txt'),'w') as f:
             for mnxr in primary_model_ns.mnxr_to_add_list:
                 print('%s' %mnxr, file=f)
     except AttributeError as e:
         logging.warning(e)
 
     try:
-        with open('./%s/targetGenome_locusTag_ec_nonBBH_dict.txt' %io_ns.outputfolder6,'w') as f:
+        with open(_outpath(io_ns.outputfolder6, 'targetGenome_locusTag_ec_nonBBH_dict.txt'),'w') as f:
             for rxnid in primary_model_ns.targetGenome_locusTag_ec_nonBBH_dict:
                 print('%s\t%s' %(rxnid, primary_model_ns.targetGenome_locusTag_ec_nonBBH_dict[rxnid]), file=f)
     except AttributeError as e:
         logging.warning(e)
 
     try:
-        with open('./%s/rxnid_info_dict.txt' %io_ns.outputfolder6,'w') as f:
+        with open(_outpath(io_ns.outputfolder6, 'rxnid_info_dict.txt'),'w') as f:
             for rxnid in primary_model_ns.rxnid_info_dict:
                 print('%s\t%s' %(rxnid, primary_model_ns.rxnid_info_dict[rxnid]), file=f)
     except AttributeError as e:
         logging.warning(e)
 
     try:
-        with open('./%s/rxnid_locusTag_dict.txt' %io_ns.outputfolder6,'w') as f:
+        with open(_outpath(io_ns.outputfolder6, 'rxnid_locusTag_dict.txt'),'w') as f:
             for rxnid in primary_model_ns.rxnid_locusTag_dict:
                 print('%s\t%s' %(rxnid, primary_model_ns.rxnid_locusTag_dict[rxnid]), file=f)
     except AttributeError as e:
@@ -312,7 +317,7 @@ def write_data_for_debug(run_ns, io_ns, homology_ns, primary_model_ns):
 
     if run_ns.comp:
         try:
-            with open('./%s/rxn_newComp_fate_dict.txt' %io_ns.outputfolder6,'w') as f:
+            with open(_outpath(io_ns.outputfolder6, 'rxn_newComp_fate_dict.txt'),'w') as f:
                 for rxnid in primary_model_ns.rxn_newComp_fate_dict:
                     print('%s\t%s' %(rxnid, primary_model_ns.rxn_newComp_fate_dict[rxnid]), file=f)
         except AttributeError as e:

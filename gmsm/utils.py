@@ -3,9 +3,10 @@ import cobra
 import datetime
 import logging
 import os
+import pickle
 import sys
 import subprocess
-from os.path import getmtime, isfile, join, split
+from os.path import abspath, dirname, getmtime, isfile, join, split
 
 
 def setup_logging(run_ns):
@@ -40,10 +41,52 @@ def get_git_log():
     args = ['git', 'rev-parse', '--short', 'HEAD']
     try:
         out, err, retcode = execute(args)
+        if isinstance(out, bytes):
+            return out.decode('utf-8', errors='replace').strip()
         return out.strip()
     except OSError:
         pass
     return""
+
+
+def load_legacy_cobra_pickle(path):
+    """Load legacy COBRA pickles whose optlang solver state predates current fields."""
+    try:
+        import optlang.glpk_interface as glpk_interface
+    except ImportError:
+        with open(path, 'rb') as handle:
+            return pickle.load(handle)
+
+    original_setstate = glpk_interface.Configuration.__setstate__
+
+    def _patched_setstate(self, state):
+        if "tolerances" not in state:
+            state = dict(state)
+            state["tolerances"] = {}
+        return original_setstate(self, state)
+
+    glpk_interface.Configuration.__setstate__ = _patched_setstate
+    try:
+        with open(path, 'rb') as handle:
+            loaded = pickle.load(handle)
+    finally:
+        glpk_interface.Configuration.__setstate__ = original_setstate
+
+    if isinstance(loaded, cobra.Model):
+        ensure_modern_cobra_attrs(loaded)
+    return loaded
+
+
+def ensure_modern_cobra_attrs(model):
+    """Backfill attributes expected by current COBRApy on legacy pickled objects."""
+    objects = [model]
+    objects.extend(model.reactions)
+    objects.extend(model.metabolites)
+    objects.extend(model.genes)
+
+    for obj in objects:
+        if not hasattr(obj, "_annotation"):
+            obj._annotation = {}
 
 
 def check_input_options(run_ns):
@@ -80,19 +123,31 @@ def check_input_options(run_ns):
 # Adopted from antismash.utils
 def locate_executable(name):
     "Find an executable in the path and return the full path"
-    # In windows, executables tend to end on .exe
-    if sys.platform == 'win32':
-        name += ".exe"
-    file_path, _ = split(name)
-    if file_path != "":
-        if isfile(name) and os.access(name, os.X_OK):
-            logging.debug("Found executable %r", name)
-            return name
-    for p in os.environ["PATH"].split(os.pathsep):
-        full_name = join(p, name)
-        if isfile(full_name) and os.access(full_name, os.X_OK):
-            logging.debug("Found executable %r", full_name)
-            return full_name
+    def _is_executable(candidate):
+        return isfile(candidate) and (os.access(candidate, os.X_OK) or sys.platform == 'win32')
+
+    candidate_names = [name]
+    if sys.platform == 'win32' and os.path.splitext(name)[1] == "":
+        candidate_names = [name + ".exe", name + ".bat", name + ".cmd", name]
+
+    repo_root = abspath(join(dirname(__file__), os.pardir))
+    search_paths = [join(repo_root, "bin"), join(os.getcwd(), "bin")]
+    search_paths.extend(os.environ.get("PATH", "").split(os.pathsep))
+
+    for candidate_name in candidate_names:
+        file_path, _ = split(candidate_name)
+        if file_path != "":
+            if _is_executable(candidate_name):
+                logging.debug("Found executable %r", candidate_name)
+                return candidate_name
+
+        for p in search_paths:
+            if not p:
+                continue
+            full_name = join(p, candidate_name)
+            if _is_executable(full_name):
+                logging.debug("Found executable %r", full_name)
+                return full_name
 
     return None
 
@@ -245,7 +300,9 @@ def stabilize_model(model, folder, label, diff_name=False):
     for rxn in model.reactions:
         if rxn.gene_reaction_rule == "()":
             rxn.gene_reaction_rule = ""
-                
+
+    ensure_modern_cobra_attrs(model)
+
     cobra.io.write_sbml_model(model, join('%s' %folder, model_name))
     model = cobra.io.read_sbml_model(join('%s' %folder, model_name))
 

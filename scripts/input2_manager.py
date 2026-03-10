@@ -446,7 +446,7 @@ class ParseMNXref(object):
         for each_cobra_reaction in self.cobra_reactions:
             logging.debug("Adding reaction %s to 'mnxref_model'"
                           %each_cobra_reaction.id)
-            cobra_model.add_reaction(each_cobra_reaction)
+            cobra_model.add_reactions([each_cobra_reaction])
 
         for metabolite in cobra_model.metabolites:
             old_metab = metabolite.id

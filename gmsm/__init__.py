@@ -16,7 +16,7 @@ def check_prereqs(run_ns):
     # Tuple is ( binary_name, optional)
     _required_binaries = [
         ('diamond', False),
-        ('eficaz2.5', False)
+        ('eficaz2.5', not getattr(run_ns, 'eficaz', False))
     ]
 
     failure_messages = []

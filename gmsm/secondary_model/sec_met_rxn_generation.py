@@ -166,7 +166,7 @@ def get_all_metab_coeff(io_ns, secondary_model_ns):
 def get_pickles(io_ns):
 
     if not hasattr(io_ns, 'mnxref'):
-        mnxref = pickle.load(open('./gmsm/io/data/input2/MNXref.p','rb'))
+        mnxref = utils.load_legacy_cobra_pickle('./gmsm/io/data/input2/MNXref.p')
         io_ns.mnxref = mnxref
 
     if not hasattr(io_ns, 'mnxm_compoundInfo_dict'):
@@ -229,7 +229,7 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
     rxn.gene_reaction_rule = gpr
 
     #Add a new reaction to the model
-    target_model.add_reaction(rxn)
+    target_model.add_reactions([rxn])
 
     logging.debug("%s: %s", rxn, rxn.reaction)
 
@@ -252,7 +252,7 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
     rxn.add_metabolites({product_e:1})
 
     #Add the new reaction to the model
-    target_model.add_reaction(rxn)
+    target_model.add_reactions([rxn])
 
     logging.debug("%s: %s", rxn, rxn.reaction)
 
@@ -271,7 +271,7 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
     rxn.add_metabolites({target_model.metabolites.get_by_id(str(product_e)):-1})
 
     #Add a new reaction to the model
-    target_model.add_reaction(rxn)
+    target_model.add_reactions([rxn])
 
     logging.debug("%s: %s", rxn, rxn.reaction)
 

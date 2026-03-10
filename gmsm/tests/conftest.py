@@ -5,6 +5,7 @@ from argparse import Namespace
 from Bio import SeqIO
 from cobra.io import read_sbml_model, write_sbml_model
 from os.path import join, abspath, dirname
+from gmsm import utils
 
 data_model_dir = join(dirname(abspath(__file__)), 'data')
 data_antismash_dir = join(dirname(abspath(__file__)), 'data_antismash')
@@ -43,7 +44,7 @@ def sci_secondary_model():
 def mnxref():
 
     # MNXref SBML model
-    model = pickle.load(open(join(data_model_dir, 'MNXref.p'), 'rb'))
+    model = utils.load_legacy_cobra_pickle(join(data_model_dir, 'MNXref.p'))
 
     return model
 
@@ -52,7 +53,7 @@ def mnxref():
 def precursor_model():
 
     # MNXref SBML model
-    model = pickle.load(open(join(data_model_dir, 'precursor_model.p'), 'rb'))
+    model = utils.load_legacy_cobra_pickle(join(data_model_dir, 'precursor_model.p'))
 
     return model
 

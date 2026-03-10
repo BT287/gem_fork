@@ -5,6 +5,7 @@ import os
 import pickle
 import re
 from Bio import SeqIO
+from gmsm import utils
 from gmsm.io.io_utils import (
     get_temp_fasta,
     get_features_from_gbk,
@@ -24,7 +25,7 @@ def setup_outputfolders(run_ns, io_ns):
             'tmp_model_files', 'tmp_data_files']
 
     # Keep "-o test/test" from creating "test/tes", not "test/test"
-    if '/' in run_ns.outputfolder[-1]:
+    if run_ns.outputfolder.endswith(('/', '\\')):
         run_ns.outputfolder = run_ns.outputfolder[:-1]
 
     if run_ns.eficaz:
@@ -150,6 +151,16 @@ def get_ec_file(run_ns, io_ns):
                   len(io_ns.targetGenome_locusTag_ec_dict.keys()))
 
 
+def get_eficaz_file(run_ns, io_ns):
+    """Backward-compatible alias for legacy tests using the old EC file option name."""
+    original_ec_file = getattr(run_ns, 'ec_file', None)
+    run_ns.ec_file = run_ns.eficaz_file
+    try:
+        get_ec_file(run_ns, io_ns)
+    finally:
+        run_ns.ec_file = original_ec_file
+
+
 def get_fasta_files(run_ns, io_ns):
     #Following data are needed only for primary metabolic modeling
     logging.info("Looking for a fasta file of a target genome..")
@@ -163,7 +174,7 @@ def get_fasta_files(run_ns, io_ns):
 #Only model file is not saved in Namespace
 def get_pickles_prunPhase(io_ns):
     logging.info("Loading pickle files associated with a template model..")
-    model = pickle.load(open('%s/model.p' %(io_ns.input1),'rb'))
+    model = utils.load_legacy_cobra_pickle(os.path.join(io_ns.input1, 'model.p'))
     tempModel_biggRxnid_locusTag_dict = pickle.load(open(
         '%s/tempModel_biggRxnid_locusTag_dict.p' %(io_ns.input1),'rb'))
     io_ns.tempModel_biggRxnid_locusTag_dict = tempModel_biggRxnid_locusTag_dict
@@ -184,7 +195,7 @@ def get_pickles_augPhase(io_ns):
     mnxr_kegg_dict = pickle.load(open('./gmsm/io/data/input2/mnxr_kegg_dict.p','rb'))
     io_ns.mnxr_kegg_dict = mnxr_kegg_dict
 
-    mnxref = pickle.load(open('./gmsm/io/data/input2/MNXref.p','rb'))
+    mnxref = utils.load_legacy_cobra_pickle('./gmsm/io/data/input2/MNXref.p')
     io_ns.mnxref = mnxref
 
     template_exrxnid_flux_dict = pickle.load(open('%s/tempModel_exrxnid_flux_dict.p' %(io_ns.input1),'rb'))
