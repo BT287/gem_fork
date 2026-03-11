@@ -109,6 +109,22 @@ python run_gmsm.py \
   -p -s -d
 ```
 
+## At-a-Glance Workflow
+
+Use this mental model when reading the repo:
+
+1. prepare genome input and optional EC annotations
+2. parse CDS and antiSMASH features
+3. run DIAMOND homology against the template GEM
+4. prune unsupported template reactions
+5. add primary-metabolism reactions from EC and KEGG
+6. optionally add secondary-metabolism reactions from BGC annotations
+7. export SBML, summaries, and canonical tables
+
+Short form:
+
+`input -> homology -> prune -> primary augmentation -> secondary augmentation -> SBML and reports`
+
 ## Pipeline Architecture
 
 | Stage | Main module | Purpose |
@@ -203,6 +219,18 @@ Source: `gmsm/config/gmsm.cfg`
 | `bin/` | local executables such as DIAMOND |
 | `environment.yml` | validated conda environment |
 | `requirements.txt` | pip fallback dependency list |
+
+## Which Document to Read First
+
+- New user who just wants to run GMSM once:
+  - start in `gmsm-workspace/README.md`
+  - then read `gmsm-workspace/gmsm_setup_guide.md`
+- User who wants the code-level pipeline and supported inputs:
+  - read this README
+- User who wants output semantics for UI or downstream automation:
+  - read [OUTPUTS.md](OUTPUTS.md)
+- User who wants repository-role guidance:
+  - read `gmsm-workspace/REPOSITORY_STRATEGY.md`
 
 ## Release Positioning
 
