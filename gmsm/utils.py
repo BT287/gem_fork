@@ -49,13 +49,24 @@ def get_git_log():
     return""
 
 
+def load_legacy_pickle(path):
+    """Load old Python pickles shipped with GMSM across Python 3 versions."""
+    with open(path, 'rb') as handle:
+        raw = handle.read()
+
+    try:
+        return pickle.loads(raw)
+    except (UnicodeDecodeError, pickle.UnpicklingError):
+        normalized = raw.replace(b'\r\n', b'\n')
+        return pickle.loads(normalized, encoding='latin1')
+
+
 def load_legacy_cobra_pickle(path):
     """Load legacy COBRA pickles whose optlang solver state predates current fields."""
     try:
         import optlang.glpk_interface as glpk_interface
     except ImportError:
-        with open(path, 'rb') as handle:
-            return pickle.load(handle)
+        return load_legacy_pickle(path)
 
     original_setstate = glpk_interface.Configuration.__setstate__
 
@@ -67,8 +78,7 @@ def load_legacy_cobra_pickle(path):
 
     glpk_interface.Configuration.__setstate__ = _patched_setstate
     try:
-        with open(path, 'rb') as handle:
-            loaded = pickle.load(handle)
+        loaded = load_legacy_pickle(path)
     finally:
         glpk_interface.Configuration.__setstate__ = original_setstate
 
@@ -90,31 +100,38 @@ def ensure_modern_cobra_attrs(model):
 
 
 def check_input_options(run_ns):
-    if not run_ns.input:
+    input_file = getattr(run_ns, 'input', None)
+    ec_file = getattr(run_ns, 'ec_file', getattr(run_ns, 'eficaz_file', None))
+    eficaz = getattr(run_ns, 'eficaz', False)
+    pmr_generation = getattr(run_ns, 'pmr_generation', False)
+    smr_generation = getattr(run_ns, 'smr_generation', False)
+    comp = getattr(run_ns, 'comp', None)
+
+    if not input_file:
         logging.warning("Provide input file via ('-i')")
         sys.exit(1)
 
-    if not run_ns.ec_file and \
-            not run_ns.eficaz and \
-            not run_ns.pmr_generation and \
-            not run_ns.smr_generation and \
-            not run_ns.comp:
+    if not ec_file and \
+            not eficaz and \
+            not pmr_generation and \
+            not smr_generation and \
+            not comp:
                 logging.warning("Select one of the options: '-E', '-p' or '-s'")
                 sys.exit(1)
 
-    if run_ns.comp:
-        if not run_ns.pmr_generation:
+    if comp:
+        if not pmr_generation:
             logging.warning(
                     "Primary metabolic modeling option ('-p') should also be selected")
             sys.exit(1)
 
-    if run_ns.ec_file:
-        if run_ns.eficaz:
+    if ec_file:
+        if eficaz:
             logging.warning(
                     "EC number file option ('-e') or the EFICAz run option ('-E') should be removed")
             sys.exit(1)
 
-        if not run_ns.pmr_generation:
+        if not pmr_generation:
             logging.warning(
                     "Primary metabolic modeling option ('-p') should also be selected")
             sys.exit(1)

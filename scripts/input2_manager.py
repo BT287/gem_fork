@@ -29,8 +29,7 @@ class ParseMNXref(object):
         pickle_dir = join(input2_tmp_dir, 'bigg_old_new_dict.p')
 
         if os.path.isfile(pickle_dir):
-            with open(pickle_dir, 'rb') as f:
-                bigg_old_new_dict = pickle.load(f)
+            bigg_old_new_dict = gmsm.utils.load_legacy_pickle(pickle_dir)
 
         elif not os.path.isfile(pickle_dir):
             bigg_old_new_dict = {}

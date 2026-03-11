@@ -262,13 +262,14 @@ def main():
         model_file = []
         files = glob.glob(io_ns.outputfolder3 + os.sep + '*.xml')
         model_file = [each_file for each_file in files if '.xml' in each_file]
+        total_bgc = max(getattr(io_ns, 'total_region', 0), getattr(io_ns, 'total_cluster', 0))
 
         if len(model_file) > 0 and '.xml' in model_file[0] \
-            and io_ns.total_region > 0:
+            and total_bgc > 0:
 
-            if io_ns.total_region > 0:
+            if total_bgc > 0:
                 logging.info("Generating secondary metabolite biosynthesizing reactions..")
-                logging.debug("Total number of regions: %s" %io_ns.total_region)
+                logging.debug("Total number of BGCs: %s" %total_bgc)
 
             model_file = os.path.basename(model_file[0])
             target_model = cobra.io.read_sbml_model(

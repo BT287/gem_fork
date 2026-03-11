@@ -1,133 +1,218 @@
-#**GMSM**
+# GMSM (`gem_fork`)
 
-***G***enome-scale metabolic ***M***odeling with ***S***econdary ***M***etabolism (GMSM) automatically generates secondary metabolite biosynthetic reactions in a genome-scale metabolic model (GEM) using antiSMASH output GenBank file. GMSM overall enables high-throughput modeling of both primary and secondary metabolism.
+GMSM builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
 
-#Development
-This project was initiated as a research collaboration between [Metabolic & Biomolecular Eng. Nat’l Research Laboratory (MBEL) & BioInformatics Research Center](http://mbel.kaist.ac.kr/) at KAIST and [Novo Nordisk Foundation Center for Biosustainability](http://www.biosustain.dtu.dk/english) at DTU.
+This repository is the source-of-truth codebase. Tutorial materials and workspace-level setup belong in `gmsm-workspace`.
 
-#Current features
-- Metabolic modeling for primary metabolism
+## What This Repository Does
 
-- Metabolic modeling for secondary metabolism
+Given a genome input, GMSM can:
 
-#Installation
+1. parse genome features and amino-acid sequences
+2. find homologs against a template GEM using DIAMOND
+3. prune unsupported template reactions
+4. add primary-metabolism reactions from EC annotations and KEGG
+5. add secondary-metabolism reactions from antiSMASH BGC annotations
+6. export SBML and review tables for downstream analysis
 
-###Major dependencies
+## Recommended Runtime
 
-[biopython](http://biopython.org/wiki/Biopython)
+Validated on 2026-03-11:
 
-[cobrapy](https://opencobra.github.io/cobrapy/) ([GitHub](https://github.com/opencobra/cobrapy); [Document](https://cobrapy.readthedocs.io/en/latest/))
+- Python `3.11`
+- `cobra==0.30.0`
+- `biopython==1.86`
+- `python-libsbml==5.21.1`
+- `swiglpk==5.0.13`
+- `tox -e py311`
 
-###[DIAMOND](https://github.com/bbuchfink/diamond)
+Create the recommended environment:
 
-DIAMOND is a sequence alignment program for proteins, and is known for higher speed than BLAST.
+```bash
+conda env create -f environment.yml
+conda activate gmsm
+```
 
-conda install -c bioconda diamond
+Fallback without `environment.yml`:
 
-###Gurobi (optional, internal)
-1. install Gurobi Optimizer for Python (via pip or Anaconda)
+```bash
+conda create -n gmsm python=3.11
+conda activate gmsm
+pip install -r requirements.txt
+```
 
-        conda install -c gurobi
+## External Requirements
 
-2. Get a *Free Academic* license.
- 
-###Source
-1. Clone the repository
+- `diamond` must be available on `PATH` or in the repo-local `bin/` directory
+- Git LFS is required if your checkout stores large assets through LFS
+- Internet access is required for primary-model augmentation through KEGG
 
-    (HTTPS)
+Git LFS setup:
 
-        git clone https://github.com/kaist-sbml/gem.git
-    (SSH)
+```bash
+git lfs install
+git lfs pull
+```
 
-        git clone git@github.com:kaist-sbml/gem.git
+Basic verification:
 
-2. Create and activate virtual environment
+```bash
+python run_gmsm.py -h
+tox -e py311
+```
 
-        conda create -n gmsm python=3.7
-        conda activate gmsm
+## Supported Inputs
 
-3. Install packages
+### antiSMASH versions
 
-        pip install -r requirements.txt
-        
-4. Clone large files in repository
-        
-        conda install -c conda-forge git-lfs
-        git lfs install
-        git lfs pull
-        
-5. Test GMSM
+- Recommended input version: antiSMASH `8`
+- Supported formats:
+  - antiSMASH `4` via legacy `cluster` features
+  - antiSMASH `5+` via `region` features
 
-        tox
+### File types
 
-    
-#Implementation
-###General
-- GMSM builds a GEM based on a template high-quality GEM. A default template GEM is the [high-quality GEM of Streptomyces coelicolor A3(2)](https://onlinelibrary.wiley.com/doi/full/10.1002/biot.201800180). Other template GEMs can be selected from the menu using `-m`.
+- GenBank: recommended
+- FASTA: supported for primary modeling only
 
-- Select one or combination of modeling options using: `-e` (EC number annotation), `-p` (primary metabolism modeling) and/or `-s` (secondary metabolism modeling).
-- Input file:
+### Optional companion inputs
 
-    Create an input directory at root of the GMSM directory.
+- EC prediction file via `-e`
+- EFICAz run via `-E`
+- compartment annotation file via `-C`
 
-    Input files can be a standard full GenBank file with sequences (recommended) or FASTA file.
+## First Run
 
-    [antiSMASH](https://antismash.secondarymetabolites.org)-annotated GenBank file **MUST** be provided for secondary metabolism modeling.
-    
-    An EC number prediction file can be used with the `-e` option. The file format must consist of locus tags of the sequences and the predicted EC numbers, separated by a tab.
+Primary modeling only:
 
-    EFICAz implementation and subcellular localizations (compartments) can be provided as additional inputs, with options `-E` and `-C`, respectively.
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  -e input/NC_021985.1_deepec.txt \
+  -p -d
+```
 
-- Sample input files (available in `/gmsm/input/` in the source):
+Secondary modeling only:
 
-    `NC_021985.1.final_antismash8.gbk`: an output GenBank file of antiSMASH 8.0 (for Streptomyces collinus Tu 365)
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  -s -d
+```
 
-    `NC_021985.1_deepec.txt`: an output file of DeepEC (for Streptomyces collinus Tu 365)
+Primary + secondary modeling:
 
-    `sample_compartment_info.txt`: a sample file containing subcellular localizations (compartments) for each locus tag
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  -e input/NC_021985.1_deepec.txt \
+  -p -s -d
+```
 
-    `sample_eficaz_output.txt`: a sample output file of EFICAz
+## Pipeline Architecture
 
-    `sample_input_ten_CDS.fasta`: a sample FASTA file having ten locus tags
+| Stage | Main module | Purpose |
+|---|---|---|
+| Input parsing | `gmsm/io/input_file_manager.py` | load genome records, CDS, EC annotations, BGC counts |
+| Homology | `gmsm/homology/` | build DIAMOND databases and reciprocal best hits |
+| Primary pruning | `gmsm/primary_model/prunPhase_utils.py` | remove unsupported template reactions and swap GPRs |
+| Primary augmentation | `gmsm/primary_model/augPhase_utils.py` | query KEGG and add EC-supported reactions |
+| Secondary modeling | `gmsm/secondary_model/` | convert antiSMASH BGC signals into biosynthetic reactions |
+| Output export | `gmsm/io/output_file_manager.py` | write SBML, tables, summaries, and review artifacts |
 
-    `sample_input_two_CDS.gb`: a sample GenBank file having two locus tags
+## Input Files
 
-- Output directory:
+| File | Meaning |
+|---|---|
+| `input/NC_021985.1_antismash8.gbk` | sample antiSMASH 8 GenBank input |
+| `input/NC_021985.1_deepec.txt` | sample EC prediction file |
+| `input/sample_compartment_info.txt` | sample compartment annotation file |
+| `input/sample_eficaz_output.txt` | sample EFICAz output |
+| `input/sample_input_ten_CDS.fasta` | minimal FASTA sample |
+| `input/sample_input_two_CDS.gb` | minimal GenBank sample |
 
-    Defining output directory is *optional*.
+## Output Layout
 
-    Create an output directory at root of the GMSM directory.
+GMSM writes:
 
-    If output directory is not given, an output directory `output` is automatically generated at root of the GMSM repository. **Note**: New result files will override existing files in the default `output` directory.
+- `3_primary_metabolic_model/` for the primary-model stage
+- `4_complete_model/` for the final model with secondary metabolism
 
-- User's computer should be connected to the internet while modeling primary metabolism as GMSM accesses [KEGG](http://www.kegg.jp/kegg/rest/) to retrieve new reactions.
-  
-- For more information:
+Each output folder now contains:
 
-        python run_gmsm.py -h
+- `model.xml`: SBML model
+- `summary_report.txt`: legacy text summary
+- `summary_report.json`: machine-readable run summary
+- `report.md`: human-readable output overview
+- `manifest.json`: file inventory for automation
+- canonical TSV tables such as `reactions.tsv` and `metabolites.tsv`
+- legacy `rmc_*.txt` review files for backward compatibility
 
-###Examples
+Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
 
-- Run modeling of primary metabolism (~30 min). This run will create the primary metabolism model necessary for secondary metabolism modeling.
+## Canonical Output Files
 
-        python run_gmsm.py -i input/NC_021985.1_antismash8.gbk -p -d
+| File | Purpose |
+|---|---|
+| `summary_report.json` | compact metadata for pipelines and UI layers |
+| `report.md` | quick human-readable run report |
+| `reactions.tsv` | all reactions |
+| `metabolites.tsv` | all metabolites |
+| `template_remaining_reactions.tsv` | reactions kept from the template after pruning |
+| `kegg_added_reactions.tsv` | reactions added during KEGG augmentation |
+| `gpr_notes.tsv` | template-gene carryover and duplicate-gene notes |
+| `bgc_fluxes.tsv` | per-BGC export fluxes in complete-model output |
+| `gapfilling_needed.tsv` | metabolites still blocking secondary production |
 
-- Run modeling of secondary metabolism (only with antiSMASH output GenBank file, ~3 min). A GMSM-derived primary metabolism model should be available in an automatically generated folder `/output/3_primary_metabolic_model/`.
+## Key Hyperparameters
 
-        python run_gmsm.py -i input/NC_021985.1_antismash8.gbk -s -d
+Source: `gmsm/config/gmsm.cfg`
 
-- Run modeling of primary and secondary metabolism (~40 min).
+| Parameter | Default | Meaning |
+|---|---|---|
+| `blastp.evalue` | `1e-30` | DIAMOND hit cutoff for homology acceptance |
+| `cobrapy.non_zero_flux_cutoff` | `1e-3` | flux threshold for treating production as non-zero |
+| `cobrapy.nutrient_uptake_rate` | `2` | nutrient uptake bound used in model setup |
+| `cobrapy.gapfill_iter` | `1` | number of SMILEY gap-filling iterations |
+| `utils.time_bomb_duration` | `90` | cache lifetime in days for KEGG-derived data |
 
-        python run_gmsm.py -i input/NC_021985.1_antismash8.gbk -p -s -d
+## CLI Options You Will Actually Use
 
-- Run modeling of primary metabolism using EC number prediction file and secondary metabolism (~40 min). 
+| Option | Meaning |
+|---|---|
+| `-i` | input GenBank or FASTA |
+| `-o` | output directory |
+| `-m` | template GEM organism |
+| `-e` | EC prediction file |
+| `-p` | primary modeling |
+| `-s` | secondary modeling |
+| `-E` | run EFICAz |
+| `-C` | compartment annotation file |
+| `-c` | CPU count |
+| `-d` | debug logging |
+| `-v` | verbose logging |
 
-        python run_gmsm.py -i input/NC_021985.1.final_antismash4.gbk -p -E input/NC_021985.1_deepec.txt -s -d
+## Repository Structure
 
-Note: Option `-d` is for displaying debugging statements during program running.
+| Path | Meaning |
+|---|---|
+| `run_gmsm.py` | CLI entrypoint |
+| `gmsm/` | implementation package |
+| `gmsm/tests/` | pytest suite |
+| `input/` | sample inputs |
+| `bin/` | local executables such as DIAMOND |
+| `environment.yml` | validated conda environment |
+| `requirements.txt` | pip fallback dependency list |
 
-#Model refinement
-Model draft created by GMSM should be refined to ensure its quality. Output files with prefix `rmc_` provide starting points for manual curation. `rmc_` stands for 'resource for manual curation'.
+## Release Positioning
 
-#Publication
+- `gem_fork` should remain the clean source repo to release under the final SBML account
+- beginner walkthroughs, rendered examples, and teaching material should not dominate this repo
+- this repo should keep a concise quickstart and output reference, not a large tutorial corpus
 
+## Troubleshooting
+
+- If `diamond` is not found, install it or use the local `bin/diamond*` binary
+- If primary modeling stalls, verify internet access to KEGG
+- If you have an old environment, recreate it from `environment.yml`
+- If you are using antiSMASH 4 input, make sure the input is the GenBank export with `cluster` annotations

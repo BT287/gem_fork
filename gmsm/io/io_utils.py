@@ -4,6 +4,30 @@ import os
 import sys
 
 
+def _is_bgc_feature(feature):
+    return feature.type in ('region', 'cluster')
+
+
+def _normalize_path(path):
+    return path.replace(os.sep, '/')
+
+
+def get_antismash_version_from_gbk(seq_record, io_ns):
+    anti_data = seq_record.annotations.get('structured_comment', {}).get('antiSMASH-Data', {})
+    version = anti_data.get('Version')
+    if version:
+        io_ns.anti_version = int(str(version).split('.')[0])
+        return
+
+    bgc_feature_types = {feature.type for feature in seq_record.features}
+    if 'cluster' in bgc_feature_types:
+        io_ns.anti_version = 4
+    elif 'region' in bgc_feature_types:
+        io_ns.anti_version = 5
+    else:
+        io_ns.anti_version = None
+
+
 def get_features_from_gbk(seq_record, run_ns, io_ns):
 
     seq_record_BGC_num_list = []
@@ -58,7 +82,7 @@ def get_features_from_gbk(seq_record, run_ns, io_ns):
                     ecnum = feature.qualifiers.get('EC_number')
                     io_ns.targetGenome_locusTag_ec_dict[locusTag] = ecnum
 
-        if feature.type == 'region':
+        if _is_bgc_feature(feature):
             io_ns.total_region += 1
             BGC_num += 1
 
@@ -81,7 +105,7 @@ def get_target_fasta(io_ns):
             for locusTag in io_ns.targetGenome_locusTag_aaSeq_dict.keys():
                 print('>%s\n%s' \
                 %(str(locusTag), str(io_ns.targetGenome_locusTag_aaSeq_dict[locusTag])), file=f)
-        io_ns.target_fasta = target_fasta_dir
+        io_ns.target_fasta = _normalize_path(target_fasta_dir)
     else:
         logging.warning("FASTA file 'targetGenome_locusTag_aaSeq.fa' not found")
 
@@ -93,8 +117,8 @@ def get_temp_fasta(run_ns, io_ns):
         for f in files:
             if f.endswith('.fa'):
                 tempFasta = os.path.join(root, f)
-                io_ns.input1 = root
-                io_ns.temp_fasta = tempFasta
+                io_ns.input1 = _normalize_path(root).rstrip('/') + '/'
+                io_ns.temp_fasta = _normalize_path(tempFasta)
 
     if io_ns.temp_fasta:
         logging.debug("FASTA file for '%s' found", run_ns.orgName)

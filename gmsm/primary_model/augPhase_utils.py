@@ -74,9 +74,7 @@ def load_cache(cache_dir, cache_data):
         #utils.time_bomb(cache_dir, config_ns)
 
         try:
-            with open(cache_dir, 'rb') as f:
-                cache_data = pickle.load(f)
-                return cache_data
+            return utils.load_legacy_pickle(cache_dir)
         except Exception as e:
             logging.warning("Error occured from '%s': %s", cache_dir, e)
             return cache_data

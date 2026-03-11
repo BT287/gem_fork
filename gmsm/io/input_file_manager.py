@@ -58,14 +58,14 @@ def setup_outputfolders(run_ns, io_ns):
 
 def show_input_options(run_ns):
 
-    logging.debug("input_file: %s", run_ns.input)
-    logging.debug("outputfolder: %s", run_ns.outputfolder)
-    logging.debug("template_model_organism: %s", run_ns.orgName)
-    logging.debug("eficaz: %s", run_ns.eficaz)
-    logging.debug("primary_metabolic_modeling: %s", run_ns.pmr_generation)
-    logging.debug("secondary_metabolic_modeling: %s", run_ns.smr_generation)
-    logging.debug("ec_number_file: %s", run_ns.ec_file)
-    logging.debug("compartment_file: %s", run_ns.comp)
+    logging.debug("input_file: %s", getattr(run_ns, 'input', None))
+    logging.debug("outputfolder: %s", getattr(run_ns, 'outputfolder', None))
+    logging.debug("template_model_organism: %s", getattr(run_ns, 'orgName', None))
+    logging.debug("eficaz: %s", getattr(run_ns, 'eficaz', None))
+    logging.debug("primary_metabolic_modeling: %s", getattr(run_ns, 'pmr_generation', None))
+    logging.debug("secondary_metabolic_modeling: %s", getattr(run_ns, 'smr_generation', None))
+    logging.debug("ec_number_file: %s", getattr(run_ns, 'ec_file', getattr(run_ns, 'eficaz_file', None)))
+    logging.debug("compartment_file: %s", getattr(run_ns, 'comp', None))
 
 
 def check_input_filetype(run_ns):
@@ -86,6 +86,7 @@ def get_target_genome_from_input(filetype, run_ns, io_ns):
     io_ns.targetGenome_locusTag_prod_dict = {}
     io_ns.seq_record_BGC_num_lists = []
     io_ns.total_region = 0
+    io_ns.total_cluster = 0
 
     seq_records = list(SeqIO.parse(run_ns.input, filetype))
     # len(seq_records) == 1: e.g., A complete bacterial genome (1 contig)
@@ -97,7 +98,7 @@ def get_target_genome_from_input(filetype, run_ns, io_ns):
             logging.debug("Multiple records are found in genome data")
 
         # Ignore existing annotations of EC numbers in an input gbk file as they are from a different source.
-        if run_ns.eficaz or run_ns.ec_file:
+        if getattr(run_ns, 'eficaz', False) or getattr(run_ns, 'ec_file', False):
             logging.info("Ignoring EC annotations from input gbk file")
         else:
             logging.info("Using EC annotations from input gbk file")
@@ -124,6 +125,7 @@ def get_target_genome_from_input(filetype, run_ns, io_ns):
     logging.debug(
                 "len(io_ns.targetGenome_locusTag_ec_dict.keys): %s"
                 %len(io_ns.targetGenome_locusTag_ec_dict.keys()))
+    io_ns.total_cluster = io_ns.total_region
 
 
 def get_ec_file(run_ns, io_ns):
@@ -152,13 +154,33 @@ def get_ec_file(run_ns, io_ns):
 
 
 def get_eficaz_file(run_ns, io_ns):
-    """Backward-compatible alias for legacy tests using the old EC file option name."""
-    original_ec_file = getattr(run_ns, 'ec_file', None)
-    run_ns.ec_file = run_ns.eficaz_file
-    try:
-        get_ec_file(run_ns, io_ns)
-    finally:
-        run_ns.ec_file = original_ec_file
+    logging.info("Reading EFICAz prediction file..")
+
+    with open(run_ns.eficaz_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            parts = [part.strip() for part in line.split(',')]
+            if not parts:
+                continue
+
+            locustag = parts[0]
+            match = re.search(r'(\d+\.\d+\.\d+\.\d+)', line)
+            if not match:
+                continue
+
+            ec_num = match.group(1)
+            if locustag not in io_ns.targetGenome_locusTag_ec_dict:
+                io_ns.targetGenome_locusTag_ec_dict[locustag] = []
+            io_ns.targetGenome_locusTag_ec_dict[locustag].append(ec_num)
+
+            logging.debug(
+                    "Locus tag: %s; EC number with 4 digits: %s", locustag, ec_num)
+
+    logging.debug("len(io_ns.targetGenome_locusTag_ec_dict.keys): %s",
+                  len(io_ns.targetGenome_locusTag_ec_dict.keys()))
 
 
 def get_fasta_files(run_ns, io_ns):
@@ -175,8 +197,8 @@ def get_fasta_files(run_ns, io_ns):
 def get_pickles_prunPhase(io_ns):
     logging.info("Loading pickle files associated with a template model..")
     model = utils.load_legacy_cobra_pickle(os.path.join(io_ns.input1, 'model.p'))
-    tempModel_biggRxnid_locusTag_dict = pickle.load(open(
-        '%s/tempModel_biggRxnid_locusTag_dict.p' %(io_ns.input1),'rb'))
+    tempModel_biggRxnid_locusTag_dict = utils.load_legacy_pickle(
+        '%s/tempModel_biggRxnid_locusTag_dict.p' %(io_ns.input1))
     io_ns.tempModel_biggRxnid_locusTag_dict = tempModel_biggRxnid_locusTag_dict
 
     return model
@@ -186,19 +208,19 @@ def get_pickles_prunPhase(io_ns):
 def get_pickles_augPhase(io_ns):
     logging.info("Loading pickle files necessary for the model augmentation phase..")
 
-    bigg_mnxr_dict = pickle.load(open('./gmsm/io/data/input2/bigg_mnxr_dict.p','rb'))
+    bigg_mnxr_dict = utils.load_legacy_pickle('./gmsm/io/data/input2/bigg_mnxr_dict.p')
     io_ns.bigg_mnxr_dict = bigg_mnxr_dict
 
-    mnxm_compoundInfo_dict = pickle.load(open('./gmsm/io/data/input2/mnxm_compoundInfo_dict.p','rb'))
+    mnxm_compoundInfo_dict = utils.load_legacy_pickle('./gmsm/io/data/input2/mnxm_compoundInfo_dict.p')
     io_ns.mnxm_compoundInfo_dict = mnxm_compoundInfo_dict
 
-    mnxr_kegg_dict = pickle.load(open('./gmsm/io/data/input2/mnxr_kegg_dict.p','rb'))
+    mnxr_kegg_dict = utils.load_legacy_pickle('./gmsm/io/data/input2/mnxr_kegg_dict.p')
     io_ns.mnxr_kegg_dict = mnxr_kegg_dict
 
     mnxref = utils.load_legacy_cobra_pickle('./gmsm/io/data/input2/MNXref.p')
     io_ns.mnxref = mnxref
 
-    template_exrxnid_flux_dict = pickle.load(open('%s/tempModel_exrxnid_flux_dict.p' %(io_ns.input1),'rb'))
+    template_exrxnid_flux_dict = utils.load_legacy_pickle('%s/tempModel_exrxnid_flux_dict.p' %(io_ns.input1))
     io_ns.template_exrxnid_flux_dict = template_exrxnid_flux_dict
 
 
