@@ -2,7 +2,7 @@
 
 GMSM builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
 
-This repository is the source-of-truth codebase. Tutorial materials and workspace-level setup belong in `gmsm-workspace`.
+This repository is self-contained. A first-time user should be able to create the environment, run GMSM end-to-end, and inspect outputs from this repo alone.
 
 ## What This Repository Does
 
@@ -89,7 +89,8 @@ Primary modeling only:
 python run_gmsm.py \
   -i input/NC_021985.1_antismash8.gbk \
   -e input/NC_021985.1_deepec.txt \
-  -p -d
+  -p -d \
+  -o output_primary
 ```
 
 Secondary modeling only:
@@ -97,7 +98,8 @@ Secondary modeling only:
 ```bash
 python run_gmsm.py \
   -i input/NC_021985.1_antismash8.gbk \
-  -s -d
+  -s -d \
+  -o output_secondary
 ```
 
 Primary + secondary modeling:
@@ -106,7 +108,8 @@ Primary + secondary modeling:
 python run_gmsm.py \
   -i input/NC_021985.1_antismash8.gbk \
   -e input/NC_021985.1_deepec.txt \
-  -p -s -d
+  -p -s -d -c 4 \
+  -o output_e2e
 ```
 
 ## At-a-Glance Workflow
@@ -223,14 +226,14 @@ Source: `gmsm/config/gmsm.cfg`
 ## Which Document to Read First
 
 - New user who just wants to run GMSM once:
-  - start in `gmsm-workspace/README.md`
-  - then read `gmsm-workspace/gmsm_setup_guide.md`
+  - start with this README
+  - run one of the commands in `First Run`
 - User who wants the code-level pipeline and supported inputs:
   - read this README
 - User who wants output semantics for UI or downstream automation:
   - read [OUTPUTS.md](OUTPUTS.md)
-- User who wants repository-role guidance:
-  - read `gmsm-workspace/REPOSITORY_STRATEGY.md`
+- User who is using an external tutorial workspace:
+  - read that workspace's README after finishing the setup in this repo
 
 ## Release Positioning
 

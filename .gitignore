@@ -35,6 +35,7 @@ pytest-cache-files-*
 *.log
 *.pyc
 *.swp
+__pycache__/
 bin/diamond
 bin/diamond.exe
 bin/diamond-win/
