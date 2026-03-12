@@ -140,6 +140,8 @@ python run_gmsm.py \
   -o output_e2e
 ```
 
+Use a fresh `-o` directory name when you want a clean comparison. Reusing an existing output directory overwrites files for the stages you rerun, and an older `4_complete_model/` can remain if you later rerun only `-p`.
+
 ## At-a-Glance Workflow
 
 Use this mental model when reading the repo:
