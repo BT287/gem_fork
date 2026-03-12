@@ -13,11 +13,11 @@ warnings.filterwarnings("ignore")
 class TestUtils:
     """Test functions in gmsm.utils"""
     
-    def test_setup_logging(self, options):
+    def test_setup_logging(self, options, tmp_test_dir):
         
         options.verbose = False
         options.debug = True
-        options.outputfolder = './tmp'
+        options.outputfolder = join(tmp_test_dir, 'log-output')
         
         if isfile(join(options.outputfolder, 'gmsm.log')):
             remove(join(options.outputfolder, 'gmsm.log'))

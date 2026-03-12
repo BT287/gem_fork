@@ -20,6 +20,7 @@ def setup_logging(run_ns):
     logging.basicConfig(format='%(levelname)s: %(message)s', level=log_level)
 
     if run_ns.verbose or run_ns.debug:
+        os.makedirs(run_ns.outputfolder, exist_ok=True)
         logger = logging.getLogger('')
         fomatter = logging.Formatter(
                 '[%(levelname)s|%(filename)s:%(lineno)s] > %(message)s')
