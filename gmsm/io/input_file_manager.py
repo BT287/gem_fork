@@ -10,7 +10,8 @@ from gmsm.io.io_utils import (
     get_temp_fasta,
     get_features_from_gbk,
     get_features_from_fasta,
-    get_target_fasta
+    get_target_fasta,
+    should_ignore_input_gbk_ec_annotations,
 )
 
 
@@ -98,7 +99,7 @@ def get_target_genome_from_input(filetype, run_ns, io_ns):
             logging.debug("Multiple records are found in genome data")
 
         # Ignore existing annotations of EC numbers in an input gbk file as they are from a different source.
-        if getattr(run_ns, 'eficaz', False) or getattr(run_ns, 'ec_file', False):
+        if should_ignore_input_gbk_ec_annotations(run_ns):
             logging.info("Ignoring EC annotations from input gbk file")
         else:
             logging.info("Using EC annotations from input gbk file")

@@ -18,6 +18,7 @@ class TestIo_utils:
     def test_get_features_from_gbk(self, seq_record, options):
         
         options.eficaz = False
+        options.ec_file = False
         options.eficaz_file = False
         options.targetGenome_locusTag_aaSeq_dict = {}
         options.targetGenome_locusTag_ec_dict = {}
@@ -31,6 +32,25 @@ class TestIo_utils:
         assert 'B446_17290' in options.targetGenome_locusTag_aaSeq_dict
         assert options.targetGenome_locusTag_prod_dict['B446_17290'] == 'integral membrane ATPase'
         assert options.targetGenome_locusTag_ec_dict['B446_24090'] == ['3.5.1.103']
+
+
+    def test_get_features_from_gbk_ignores_embedded_ec_with_external_ec_file(self, seq_record, options):
+
+        options.eficaz = False
+        options.ec_file = 'external_ec.tsv'
+        options.eficaz_file = False
+        options.targetGenome_locusTag_aaSeq_dict = {}
+        options.targetGenome_locusTag_ec_dict = {}
+        options.targetGenome_locusTag_prod_dict = {}
+        options.seq_record_BGC_num_lists = []
+        options.total_region = 0
+        options.total_cluster = 0
+
+        io_utils.get_features_from_gbk(seq_record, options, options)
+
+        assert 'B446_17290' in options.targetGenome_locusTag_aaSeq_dict
+        assert options.targetGenome_locusTag_prod_dict['B446_17290'] == 'integral membrane ATPase'
+        assert options.targetGenome_locusTag_ec_dict == {}
 
  
     def test_get_features_from_fasta(self, input_fasta, options):

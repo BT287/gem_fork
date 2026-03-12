@@ -12,6 +12,14 @@ def _normalize_path(path):
     return path.replace(os.sep, '/')
 
 
+def should_ignore_input_gbk_ec_annotations(run_ns):
+    return bool(
+        getattr(run_ns, 'eficaz', False)
+        or getattr(run_ns, 'ec_file', False)
+        or getattr(run_ns, 'eficaz_file', False)
+    )
+
+
 def get_antismash_version_from_gbk(seq_record, io_ns):
     anti_data = seq_record.annotations.get('structured_comment', {}).get('antiSMASH-Data', {})
     version = anti_data.get('Version')
@@ -34,15 +42,7 @@ def get_features_from_gbk(seq_record, run_ns, io_ns):
     seq_record_BGC_num_list.append(seq_record)
     BGC_num = 0
 
-    # Ignore existing annotations of EC numbers in an input gbk file as they are from a different source.
-    # Try-except to avoid options' attributes, eficaz and eficaz_file, in input1_manager.py
-    try:
-        if run_ns.eficaz or run_ns.eficaz_file:
-            logging.info("Ignoring EC annotations from input gbk file")
-        else:
-            logging.info("Using EC annotations from input gbk file")
-    except:
-        logging.info("Using EC annotations from input gbk file")
+    ignore_embedded_ec = should_ignore_input_gbk_ec_annotations(run_ns)
 
     for feature in seq_record.features:
         if feature.type == 'CDS':
@@ -67,18 +67,10 @@ def get_features_from_gbk(seq_record, run_ns, io_ns):
                 product = feature.qualifiers.get('product')[0]
                 io_ns.targetGenome_locusTag_prod_dict[locusTag] = product
                 
-            # Try-except to avoid options' attributes, eficaz and eficaz_file, in input1_manager.py
-            try:
-                if run_ns.eficaz or run_ns.eficaz_file:
-                    pass
-                else:
+            if not ignore_embedded_ec:
+                if feature.qualifiers.get('EC_number'):
                     # Multiple 'EC_number's may exit for a single CDS.
                     # Never use '[0]' for the 'qualifiers.get' list.
-                    if feature.qualifiers.get('EC_number'):
-                        ecnum = feature.qualifiers.get('EC_number')
-                        io_ns.targetGenome_locusTag_ec_dict[locusTag] = ecnum
-            except:
-                if feature.qualifiers.get('EC_number'):
                     ecnum = feature.qualifiers.get('EC_number')
                     io_ns.targetGenome_locusTag_ec_dict[locusTag] = ecnum
 
