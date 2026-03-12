@@ -1,5 +1,6 @@
 
 import warnings
+import pytest
 from cobra import Reaction, Metabolite
 from gmsm import utils
 from gmsm.config import load_config
@@ -49,6 +50,20 @@ class TestUtils:
         options.comp = ' '
         
         utils.check_input_options(options)
+
+
+    def test_check_input_options_rejects_removed_eficaz(self, options):
+
+        options.input = 'input.gbk'
+        options.eficaz = True
+        options.eficaz_file = False
+        options.ec_file = False
+        options.pmr_generation = False
+        options.smr_generation = False
+        options.comp = False
+
+        with pytest.raises(SystemExit):
+            utils.check_input_options(options)
         
         
     def test_locate_executable(self):

@@ -111,12 +111,18 @@ def check_input_options(run_ns):
         logging.warning("Provide input file via ('-i')")
         sys.exit(1)
 
+    if eficaz:
+        logging.warning(
+                "The EFICAz auto-run option ('-E'/'--EFICAz') has been removed from the supported workflow")
+        logging.warning(
+                "Provide an external EC prediction file via ('-e') and run primary modeling with ('-p')")
+        sys.exit(1)
+
     if not ec_file and \
-            not eficaz and \
             not pmr_generation and \
             not smr_generation and \
             not comp:
-                logging.warning("Select one of the options: '-E', '-p' or '-s'")
+                logging.warning("Select one of the options: '-p' or '-s'")
                 sys.exit(1)
 
     if comp:
@@ -126,11 +132,6 @@ def check_input_options(run_ns):
             sys.exit(1)
 
     if ec_file:
-        if eficaz:
-            logging.warning(
-                    "EC number file option ('-e') or the EFICAz run option ('-E') should be removed")
-            sys.exit(1)
-
         if not pmr_generation:
             logging.warning(
                     "Primary metabolic modeling option ('-p') should also be selected")

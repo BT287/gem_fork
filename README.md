@@ -106,8 +106,9 @@ tox -e py311
 ### Optional companion inputs
 
 - EC prediction file via `-e`
-- EFICAz run via `-E`
 - compartment annotation file via `-C`
+
+Automatic EFICAz execution via `-E` is retired in the current supported workflow. Use a precomputed external EC prediction file with `-e` instead.
 
 ## First Run
 
@@ -176,7 +177,6 @@ Short form:
 | `input/NC_021985.1_antismash8.gbk` | sample antiSMASH 8 GenBank input |
 | `input/NC_021985.1_deepec.txt` | sample EC prediction file |
 | `input/sample_compartment_info.txt` | sample compartment annotation file |
-| `input/sample_eficaz_output.txt` | sample EFICAz output |
 | `input/sample_input_ten_CDS.fasta` | minimal FASTA sample |
 | `input/sample_input_two_CDS.gb` | minimal GenBank sample |
 
@@ -235,7 +235,6 @@ Source: `gmsm/config/gmsm.cfg`
 | `-e` | EC prediction file |
 | `-p` | primary modeling |
 | `-s` | secondary modeling |
-| `-E` | run EFICAz |
 | `-C` | compartment annotation file |
 | `-c` | CPU count |
 | `-d` | debug logging |
