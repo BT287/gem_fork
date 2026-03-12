@@ -33,6 +33,13 @@ conda env create -f environment.yml
 conda activate gmsm
 ```
 
+If you already created `gmsm` before this refresh, update it in place:
+
+```bash
+conda env update -n gmsm -f environment.yml --prune
+conda activate gmsm
+```
+
 Fallback without `environment.yml`:
 
 ```bash
@@ -44,8 +51,28 @@ pip install -r requirements.txt
 ## External Requirements
 
 - `diamond` must be available on `PATH` or in the repo-local `bin/` directory
+- On Windows, the executable must be `diamond.exe`; a Unix `bin/diamond` file is not usable
 - Git LFS is required if your checkout stores large assets through LFS
 - Internet access is required for primary-model augmentation through KEGG
+
+Install DIAMOND after creating the Python environment:
+
+- Linux or macOS:
+
+```bash
+conda install -n gmsm -c bioconda -c conda-forge diamond
+```
+
+- Windows:
+  - download the official Windows release of DIAMOND and extract `diamond.exe`
+  - place `diamond.exe` on `PATH` or copy it to `bin/diamond.exe`
+  - if DIAMOND reports a missing runtime, install the Microsoft Visual C++ Redistributable
+
+Verify DIAMOND before running `tox` or `run_gmsm.py`:
+
+```bash
+diamond --version
+```
 
 Git LFS setup:
 
@@ -57,6 +84,7 @@ git lfs pull
 Basic verification:
 
 ```bash
+diamond --version
 python run_gmsm.py -h
 tox -e py311
 ```
@@ -243,7 +271,7 @@ Source: `gmsm/config/gmsm.cfg`
 
 ## Troubleshooting
 
-- If `diamond` is not found, install it or use the local `bin/diamond*` binary
+- If `diamond` is not found on Windows, install the official `diamond.exe` and place it on `PATH` or in `bin/diamond.exe`
 - If primary modeling stalls, verify internet access to KEGG
 - If you have an old environment, recreate it from `environment.yml`
 - If you are using antiSMASH 4 input, make sure the input is the GenBank export with `cluster` annotations

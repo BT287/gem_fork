@@ -140,12 +140,18 @@ def check_input_options(run_ns):
 # Adopted from antismash.utils
 def locate_executable(name):
     "Find an executable in the path and return the full path"
+    valid_windows_suffixes = {".exe", ".bat", ".cmd"}
+
     def _is_executable(candidate):
-        return isfile(candidate) and (os.access(candidate, os.X_OK) or sys.platform == 'win32')
+        if not isfile(candidate):
+            return False
+        if sys.platform == 'win32':
+            return os.path.splitext(candidate)[1].lower() in valid_windows_suffixes
+        return os.access(candidate, os.X_OK)
 
     candidate_names = [name]
     if sys.platform == 'win32' and os.path.splitext(name)[1] == "":
-        candidate_names = [name + ".exe", name + ".bat", name + ".cmd", name]
+        candidate_names = [name + ".exe", name + ".bat", name + ".cmd"]
 
     repo_root = abspath(join(dirname(__file__), os.pardir))
     search_paths = [join(repo_root, "bin"), join(os.getcwd(), "bin")]

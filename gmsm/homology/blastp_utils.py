@@ -13,7 +13,9 @@ from gmsm import utils
 def _get_diamond_executable():
     diamond = utils.locate_executable("diamond")
     if diamond is None:
-        raise FileNotFoundError("diamond executable not found")
+        raise FileNotFoundError(
+            "diamond executable not found. On Windows, install diamond.exe on PATH or in bin/."
+        )
     return diamond
 
 #Make database files using fasta files
