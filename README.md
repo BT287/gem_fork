@@ -1,8 +1,9 @@
-# GMSM (`gem_fork`)
+# GMSM
 
-GMSM builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
+***G***enome-scale metabolic ***M***odeling with ***S***econdary ***M***etabolism (GMSM) builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
 
-This repository is self-contained. A first-time user should be able to create the environment, run GMSM end-to-end, and inspect outputs from this repo alone.
+#Development
+This project was initiated as a research collaboration between [Metabolic & Biomolecular Eng. Nat’l Research Laboratory (MBEL) & BioInformatics Research Center](http://mbel.kaist.ac.kr/) at KAIST and [Novo Nordisk Foundation Center for Biosustainability](http://www.biosustain.dtu.dk/english) at DTU.
 
 ## What This Repository Does
 
@@ -15,7 +16,7 @@ Given a genome input, GMSM can:
 5. add secondary-metabolism reactions from antiSMASH BGC annotations
 6. export SBML and review tables for downstream analysis
 
-## Recommended Runtime
+## Recommended Runtime and Installation
 
 Validated on 2026-03-11:
 
@@ -26,34 +27,39 @@ Validated on 2026-03-11:
 - `swiglpk==5.0.13`
 - `tox -e py311`
 
-Create the recommended environment:
+1. Clone the repository
 
-```bash
-conda env create -f environment.yml
-conda activate gmsm
-```
+       git clone https://github.com/kaist-sbml/gem.git
 
-If you already created `gmsm` before this refresh, update it in place:
+2. Create the recommended environment:
 
-```bash
-conda env update -n gmsm -f environment.yml --prune
-conda activate gmsm
-```
+    2-A) From scratch:
 
-Fallback without `environment.yml`:
+        conda env create -f environment.yml
+        conda activate gmsm
+        
 
-```bash
-conda create -n gmsm python=3.11
-conda activate gmsm
-pip install -r requirements.txt
-```
+    2-B) If you already created `gmsm` before this refresh, update it in place:
+    
+        conda env update -n gmsm -f environment.yml --prune
+        conda activate gmsm
+
+    2-C) Fallback without `environment.yml`:
+
+        conda create -n gmsm python=3.11
+        conda activate gmsm
+        pip install -r requirements.txt
+
 
 ## External Requirements
 
 - `diamond` must be available on `PATH` or in the repo-local `bin/` directory
 - On Windows, the executable must be `diamond.exe`; a Unix `bin/diamond` file is not usable
 - Git LFS is required if your checkout stores large assets through LFS
+- Guorbi is required if you need large-scale and faster optimization
 - Internet access is required for primary-model augmentation through KEGG
+
+### DIAMOND
 
 Install DIAMOND after creating the Python environment:
 
@@ -64,7 +70,7 @@ conda install -n gmsm -c bioconda -c conda-forge diamond
 ```
 
 - Windows:
-  - download the official Windows release of DIAMOND and extract `diamond.exe`
+  - download the [official Windows release](https://github.com/bbuchfink/diamond/releases) of DIAMOND and extract `diamond.exe` 
   - place `diamond.exe` on `PATH` or copy it to `bin/diamond.exe`
   - if DIAMOND reports a missing runtime, install the Microsoft Visual C++ Redistributable
 
@@ -74,14 +80,23 @@ Verify DIAMOND before running `tox` or `run_gmsm.py`:
 diamond --version
 ```
 
-Git LFS setup:
+### Git LFS setup
 
 ```bash
 git lfs install
 git lfs pull
 ```
 
-Basic verification:
+### Gurobi (optional)
+
+1. install Gurobi Optimizer for Python
+
+       conda install -c gurobi
+
+2. Get a *Free Academic* license. [Gurobi license](https://www.gurobi.com/academia/academic-program-and-licenses/)
+
+
+### Basic verification
 
 ```bash
 diamond --version
@@ -108,7 +123,6 @@ tox -e py311
 - EC prediction file via `-e`
 - compartment annotation file via `-C`
 
-Automatic EFICAz execution via `-E` is retired in the current supported workflow. Use a precomputed external EC prediction file with `-e` instead.
 
 ## First Run
 
@@ -221,7 +235,7 @@ Source: `gmsm/config/gmsm.cfg`
 |---|---|---|
 | `blastp.evalue` | `1e-30` | DIAMOND hit cutoff for homology acceptance |
 | `cobrapy.non_zero_flux_cutoff` | `1e-3` | flux threshold for treating production as non-zero |
-| `cobrapy.nutrient_uptake_rate` | `2` | nutrient uptake bound used in model setup |
+| `cobrapy.nutrient_uptake_rate` | `2` | nutrient uptake fold change bound used in model setup |
 | `cobrapy.gapfill_iter` | `1` | number of SMILEY gap-filling iterations |
 | `utils.time_bomb_duration` | `90` | cache lifetime in days for KEGG-derived data |
 
@@ -263,16 +277,3 @@ Source: `gmsm/config/gmsm.cfg`
   - read [OUTPUTS.md](OUTPUTS.md)
 - User who is using an external tutorial workspace:
   - read that workspace's README after finishing the setup in this repo
-
-## Release Positioning
-
-- `gem_fork` should remain the clean source repo to release under the final SBML account
-- beginner walkthroughs, rendered examples, and teaching material should not dominate this repo
-- this repo should keep a concise quickstart and output reference, not a large tutorial corpus
-
-## Troubleshooting
-
-- If `diamond` is not found on Windows, install the official `diamond.exe` and place it on `PATH` or in `bin/diamond.exe`
-- If primary modeling stalls, verify internet access to KEGG
-- If you have an old environment, recreate it from `environment.yml`
-- If you are using antiSMASH 4 input, make sure the input is the GenBank export with `cluster` annotations
