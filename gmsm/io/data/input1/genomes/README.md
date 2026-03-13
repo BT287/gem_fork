@@ -30,3 +30,11 @@ You can validate a genome bank with:
 python scripts/check_template_genome_bank.py
 python scripts/check_template_genome_bank.py --bank /path/to/template_genomes
 ```
+
+You can also install a prepared bundle into this directory with:
+
+```bash
+python scripts/fetch_template_genome_bank.py --bundle /path/to/template_genome_bank.zip
+```
+
+The bundle can be a local archive or an HTTP(S) URL.

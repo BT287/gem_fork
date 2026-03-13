@@ -83,6 +83,13 @@ skani -V
 python scripts/check_template_genome_bank.py --allow-missing
 ```
 
+Install a template genome bank from a bundle when you are ready to use `skani`-first recommendation:
+
+```bash
+python scripts/fetch_template_genome_bank.py --bundle /path/to/template_genome_bank.zip
+python scripts/check_template_genome_bank.py
+```
+
 Git LFS setup:
 
 ```bash
@@ -250,6 +257,14 @@ To validate that a genome bank is complete before running GMSM:
 python scripts/check_template_genome_bank.py
 python scripts/check_template_genome_bank.py --bank /path/to/template_genomes
 ```
+
+To install a bank bundle into the default location:
+
+```bash
+python scripts/fetch_template_genome_bank.py --bundle /path/to/template_genome_bank.zip
+```
+
+The bundle may be a local `.zip`/`.tar.gz` file or an HTTP(S) URL.
 
 Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
 

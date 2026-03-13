@@ -25,13 +25,53 @@ def load_catalog(input1_root):
     return payload.get('templates', {})
 
 
-def resolve_expected_path(template_id, metadata, input1_root, bank_root):
+def resolve_expected_relative_path(template_id, metadata):
     configured = metadata.get('genome_fasta')
     if configured:
-        if os.path.isabs(configured):
-            return configured
-        return os.path.abspath(os.path.join(input1_root, configured))
-    return os.path.join(bank_root, '%s.fna' % template_id)
+        return configured
+    return os.path.join('genomes', '%s.fna' % template_id)
+
+
+def resolve_expected_path(template_id, metadata, input1_root, bank_root):
+    relative_path = resolve_expected_relative_path(template_id, metadata)
+    if os.path.isabs(relative_path):
+        return relative_path
+
+    relative_path = os.path.normpath(relative_path)
+    if relative_path.startswith('genomes' + os.sep) or relative_path == 'genomes':
+        relative_path = os.path.relpath(relative_path, 'genomes')
+    return os.path.abspath(os.path.join(bank_root, relative_path))
+
+
+def collect_bank_status(catalog, input1_root, bank_root):
+    rows = []
+    missing = []
+    for template_id in sorted(catalog):
+        metadata = catalog[template_id]
+        expected_path = resolve_expected_path(template_id, metadata, input1_root, bank_root)
+        status = 'present' if os.path.isfile(expected_path) else 'missing'
+        if status == 'missing':
+            missing.append(template_id)
+        rows.append(
+            {
+                'template_id': template_id,
+                'organism': metadata.get('organism', template_id),
+                'expected_path': expected_path,
+                'status': status,
+            }
+        )
+    return rows, missing
+
+
+def print_status_table(rows):
+    print('template_id\torganism\texpected_path\tstatus')
+    for row in rows:
+        print('%s\t%s\t%s\t%s' % (
+            row['template_id'],
+            row['organism'],
+            row['expected_path'],
+            row['status'],
+        ))
 
 
 def main():
@@ -47,20 +87,8 @@ def main():
     catalog = load_catalog(input1_root)
     bank_root = os.path.abspath(args.bank)
 
-    print('template_id\torganism\texpected_path\tstatus')
-    missing = []
-    for template_id in sorted(catalog):
-        metadata = catalog[template_id]
-        expected_path = resolve_expected_path(template_id, metadata, input1_root, bank_root)
-        status = 'present' if os.path.isfile(expected_path) else 'missing'
-        if status == 'missing':
-            missing.append(template_id)
-        print('%s\t%s\t%s\t%s' % (
-            template_id,
-            metadata.get('organism', template_id),
-            expected_path,
-            status,
-        ))
+    rows, missing = collect_bank_status(catalog, input1_root, bank_root)
+    print_status_table(rows)
 
     if missing:
         print('\nMissing templates: %s' % ', '.join(missing), file=sys.stderr)
