@@ -106,6 +106,11 @@ def main():
                         default=3,
                         type=int,
                         help="How many template candidates to keep in the recommendation output (default: %(default)s)")
+    group.add_argument('--template-rerank-topn',
+                        dest='template_rerank_topn',
+                        default=3,
+                        type=int,
+                        help="How many top template candidates to rerank with reciprocal hits (default: %(default)s)")
 
     group = parser.add_argument_group('GMSM modeling options',
                         "At least one of the two options should be selected:"

@@ -108,6 +108,7 @@ def check_input_options(run_ns):
     smr_generation = getattr(run_ns, 'smr_generation', False)
     comp = getattr(run_ns, 'comp', None)
     template_topk = getattr(run_ns, 'template_topk', 3)
+    template_rerank_topn = getattr(run_ns, 'template_rerank_topn', 3)
 
     if not input_file:
         logging.warning("Provide input file via ('-i')")
@@ -141,6 +142,10 @@ def check_input_options(run_ns):
 
     if template_topk is not None and int(template_topk) < 1:
         logging.warning("Template recommendation requires '--template-topk' to be at least 1")
+        sys.exit(1)
+
+    if template_rerank_topn is not None and int(template_rerank_topn) < 0:
+        logging.warning("Template recommendation requires '--template-rerank-topn' to be 0 or greater")
         sys.exit(1)
 
 

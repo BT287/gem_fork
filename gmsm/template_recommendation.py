@@ -3,11 +3,13 @@ import json
 import logging
 import os
 import shutil
+from types import SimpleNamespace
 from statistics import mean
 
 from Bio import SeqIO
 
 from gmsm import utils
+from gmsm.homology.blastp_utils import getBBH, makeBestHits_dict
 
 
 _TEMPLATE_METADATA = {
@@ -44,6 +46,7 @@ def recommend_template(filetype, run_ns, io_ns):
     if not candidates:
         raise RuntimeError("Automatic template recommendation did not produce any candidates")
 
+    candidates = rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog)
     sorted_candidates = sorted(
         candidates,
         key=lambda item: (
@@ -57,11 +60,14 @@ def recommend_template(filetype, run_ns, io_ns):
     topk = max(1, int(getattr(run_ns, 'template_topk', 3)))
     selected_candidates = sorted_candidates[:topk]
     selected_template = selected_candidates[0]['template_id']
-    confidence = classify_recommendation_confidence(selected_candidates)
+    confidence = classify_recommendation_confidence(sorted_candidates)
+    rerank_applied = any(candidate.get('rerank_applied') for candidate in sorted_candidates)
 
     result = {
         'selection_mode': 'auto',
         'backend': backend,
+        'selection_strategy': 'coarse_plus_bbh' if rerank_applied else 'coarse_only',
+        'rerank_topn': int(getattr(run_ns, 'template_rerank_topn', 3)),
         'recommended_template': selected_template,
         'previous_template': getattr(run_ns, 'orgName', None),
         'confidence': confidence,
@@ -72,6 +78,7 @@ def recommend_template(filetype, run_ns, io_ns):
     run_ns.template_selection_mode = 'auto'
     run_ns.template_selection_backend = backend
     run_ns.template_selection_confidence = confidence
+    run_ns.template_selection_strategy = result['selection_strategy']
     run_ns.template_selection_topk = topk
     run_ns.template_selection_result = result
 
@@ -243,9 +250,13 @@ def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
             'organism': get_template_metadata(template_id, catalog).get('organism', template_id),
             'model': get_template_metadata(template_id, catalog).get('model', template_id),
             'backend': 'skani',
+            'coarse_backend': 'skani',
             'score': score,
+            'coarse_score': score,
             'primary_metric': ani or 0.0,
             'secondary_metric': af_mean or 0.0,
+            'coarse_primary_metric': ani or 0.0,
+            'coarse_secondary_metric': af_mean or 0.0,
             'ani': ani,
             'aligned_fraction': af_mean,
             'aligned_fraction_ref': af_ref,
@@ -255,6 +266,15 @@ def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
             'hit_coverage': None,
             'mean_identity': None,
             'mean_bitscore': None,
+            'rerank_score': None,
+            'rerank_applied': False,
+            'coarse_rank': None,
+            'bbh_pairs': None,
+            'bbh_target_hits': None,
+            'bbh_template_gene_count': None,
+            'bbh_target_coverage': None,
+            'bbh_template_coverage': None,
+            'selection_stage': 'coarse',
         }
 
     candidates = []
@@ -267,8 +287,12 @@ def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
                 'model': entry['model'],
                 'backend': 'skani',
                 'score': 0.0,
+                'coarse_backend': 'skani',
+                'coarse_score': 0.0,
                 'primary_metric': 0.0,
                 'secondary_metric': 0.0,
+                'coarse_primary_metric': 0.0,
+                'coarse_secondary_metric': 0.0,
                 'ani': None,
                 'aligned_fraction': 0.0,
                 'aligned_fraction_ref': None,
@@ -278,6 +302,15 @@ def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
                 'hit_coverage': None,
                 'mean_identity': None,
                 'mean_bitscore': None,
+                'rerank_score': None,
+                'rerank_applied': False,
+                'coarse_rank': None,
+                'bbh_pairs': None,
+                'bbh_target_hits': None,
+                'bbh_template_gene_count': None,
+                'bbh_target_coverage': None,
+                'bbh_template_coverage': None,
+                'selection_stage': 'coarse',
             },
         )
         candidates.append(candidate)
@@ -336,9 +369,13 @@ def score_templates_with_diamond(run_ns, io_ns, catalog):
                 'organism': entry['organism'],
                 'model': entry['model'],
                 'backend': 'diamond',
+                'coarse_backend': 'diamond',
                 'score': score,
+                'coarse_score': score,
                 'primary_metric': hit_coverage,
                 'secondary_metric': mean_identity or 0.0,
+                'coarse_primary_metric': hit_coverage,
+                'coarse_secondary_metric': mean_identity or 0.0,
                 'ani': None,
                 'aligned_fraction': None,
                 'aligned_fraction_ref': None,
@@ -348,10 +385,170 @@ def score_templates_with_diamond(run_ns, io_ns, catalog):
                 'hit_coverage': round(hit_coverage, 6),
                 'mean_identity': round(mean_identity, 6) if mean_identity is not None else None,
                 'mean_bitscore': round(mean_bitscore, 6) if mean_bitscore is not None else None,
+                'rerank_score': None,
+                'rerank_applied': False,
+                'coarse_rank': None,
+                'bbh_pairs': None,
+                'bbh_target_hits': None,
+                'bbh_template_gene_count': None,
+                'bbh_target_coverage': None,
+                'bbh_template_coverage': None,
+                'selection_stage': 'coarse',
             }
         )
 
     return candidates
+
+
+def rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog):
+    topn = max(0, int(getattr(run_ns, 'template_rerank_topn', 3)))
+    if topn == 0 or not io_ns.targetGenome_locusTag_aaSeq_dict:
+        return candidates
+
+    catalog_by_id = {entry['template_id']: entry for entry in catalog}
+    ranked = sorted(
+        candidates,
+        key=lambda item: (
+            -float(item.get('score', 0.0)),
+            -float(item.get('primary_metric', 0.0)),
+            -float(item.get('secondary_metric', 0.0)),
+            item['template_id'],
+        ),
+    )
+
+    for index, candidate in enumerate(ranked, start=1):
+        candidate['coarse_rank'] = index
+
+    rerank_candidates = ranked[:topn]
+    if not rerank_candidates:
+        return candidates
+
+    target_fasta = prepare_target_proteome_fasta(io_ns, ensure_tmp_template_dir(io_ns))
+    for candidate in rerank_candidates:
+        template_entry = catalog_by_id.get(candidate['template_id'])
+        if template_entry is None:
+            continue
+        metrics = compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry)
+        candidate['rerank_applied'] = True
+        candidate['selection_stage'] = 'coarse+bbh'
+        candidate['bbh_pairs'] = metrics['bbh_pairs']
+        candidate['bbh_target_hits'] = metrics['bbh_target_hits']
+        candidate['bbh_template_gene_count'] = metrics['bbh_template_gene_count']
+        candidate['bbh_target_coverage'] = metrics['bbh_target_coverage']
+        candidate['bbh_template_coverage'] = metrics['bbh_template_coverage']
+        candidate['rerank_score'] = metrics['rerank_score']
+        candidate['primary_metric'] = metrics['bbh_template_coverage']
+        candidate['secondary_metric'] = metrics['bbh_target_coverage']
+        candidate['score'] = round((0.6 * candidate['coarse_score']) + (0.4 * metrics['rerank_score']), 6)
+
+    return ranked
+
+
+def compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry):
+    tmp_dir = ensure_tmp_template_dir(io_ns)
+    diamond = utils.locate_executable('diamond')
+    if diamond is None:
+        raise RuntimeError("diamond executable not found for template BBH reranking")
+
+    target_db = os.path.join(tmp_dir, 'target_rerank_db')
+    if not os.path.isfile(target_db + '.dmnd'):
+        run_command(
+            [diamond, 'makedb', '--in', target_fasta, '-d', target_db],
+            "DIAMOND database creation failed for target rerank database",
+        )
+
+    template_db = os.path.join(tmp_dir, '%s_rerank_db' % template_entry['template_id'])
+    run_command(
+        [diamond, 'makedb', '--in', template_entry['proteome_fasta'], '-d', template_db],
+        "DIAMOND database creation failed for template '%s'" % template_entry['template_id'],
+    )
+
+    forward_output = os.path.join(tmp_dir, '%s_target_vs_template.tsv' % template_entry['template_id'])
+    reverse_output = os.path.join(tmp_dir, '%s_template_vs_target.tsv' % template_entry['template_id'])
+
+    run_command(
+        [
+            diamond,
+            'blastp',
+            '-d',
+            template_db,
+            '-q',
+            target_fasta,
+            '-o',
+            forward_output,
+            '--evalue',
+            '1e-30',
+            '--id',
+            '30',
+            '--max-target-seqs',
+            '5',
+            '--outfmt',
+            '6',
+            'qseqid',
+            'sseqid',
+            'evalue',
+            'score',
+            'length',
+            'pident',
+        ],
+        "DIAMOND forward BBH search failed for template '%s'" % template_entry['template_id'],
+    )
+    run_command(
+        [
+            diamond,
+            'blastp',
+            '-d',
+            target_db,
+            '-q',
+            template_entry['proteome_fasta'],
+            '-o',
+            reverse_output,
+            '--evalue',
+            '1e-30',
+            '--id',
+            '30',
+            '--max-target-seqs',
+            '5',
+            '--outfmt',
+            '6',
+            'qseqid',
+            'sseqid',
+            'evalue',
+            'score',
+            'length',
+            'pident',
+        ],
+        "DIAMOND reverse BBH search failed for template '%s'" % template_entry['template_id'],
+    )
+
+    best_hits_forward = makeBestHits_dict(forward_output)
+    best_hits_reverse = makeBestHits_dict(reverse_output)
+    homology_ns = SimpleNamespace()
+    getBBH(best_hits_forward, best_hits_reverse, homology_ns)
+
+    template_gene_count = count_fasta_records(template_entry['proteome_fasta'])
+    target_gene_count = max(1, len(io_ns.targetGenome_locusTag_aaSeq_dict))
+    bbh_pairs = len(getattr(homology_ns, 'temp_target_BBH_dict', {}))
+    bbh_target_hits = len(getattr(homology_ns, 'targetBBH_list', []))
+    bbh_template_coverage = round(bbh_pairs / float(max(1, template_gene_count)), 6)
+    bbh_target_coverage = round(bbh_target_hits / float(target_gene_count), 6)
+    rerank_score = round((0.7 * bbh_template_coverage) + (0.3 * bbh_target_coverage), 6)
+
+    return {
+        'bbh_pairs': bbh_pairs,
+        'bbh_target_hits': bbh_target_hits,
+        'bbh_template_gene_count': template_gene_count,
+        'bbh_template_coverage': bbh_template_coverage,
+        'bbh_target_coverage': bbh_target_coverage,
+        'rerank_score': rerank_score,
+    }
+
+
+def count_fasta_records(path):
+    count = 0
+    for _record in SeqIO.parse(path, 'fasta'):
+        count += 1
+    return count
 
 
 def parse_diamond_template_hits(path):
@@ -448,6 +645,19 @@ def write_template_candidates_tsv(folder, result):
         'score',
         'primary_metric',
         'secondary_metric',
+        'coarse_backend',
+        'coarse_score',
+        'coarse_primary_metric',
+        'coarse_secondary_metric',
+        'coarse_rank',
+        'rerank_applied',
+        'rerank_score',
+        'bbh_pairs',
+        'bbh_target_hits',
+        'bbh_template_gene_count',
+        'bbh_template_coverage',
+        'bbh_target_coverage',
+        'selection_stage',
         'ani',
         'aligned_fraction',
         'aligned_fraction_ref',

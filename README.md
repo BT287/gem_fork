@@ -157,6 +157,12 @@ python run_gmsm.py \
 
 `--auto-template` prefers `skani` when a template genome bank and `skani` executable are available. Otherwise it falls back to a DIAMOND-based proteome ranking using the bundled template proteomes.
 
+The current recommendation flow is intentionally staged for runtime safety:
+
+1. coarse template ranking with `skani` when a genome bank is available, otherwise DIAMOND proteome coverage
+2. optional reciprocal-hit reranking on only the top `--template-rerank-topn` candidates
+3. handoff of the selected template into the existing homology, pruning, augmentation, and secondary-modeling pipeline
+
 ## At-a-Glance Workflow
 
 Use this mental model when reading the repo:
@@ -216,7 +222,7 @@ Each output folder now contains:
 
 When `--auto-template` is enabled, `0_template_recommendation/` contains:
 
-- `template_candidates.tsv`: ranked template candidates with backend-specific metrics
+- `template_candidates.tsv`: ranked template candidates with coarse metrics, optional BBH rerank metrics, and the final score
 - `template_recommendation.json`: selected template, confidence, and the top-k candidate list
 
 Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
@@ -259,6 +265,7 @@ Source: `gmsm/config/gmsm.cfg`
 | `--auto-template` | automatically rank and select a starting template before primary modeling |
 | `--template-backend` | template-ranking backend: `auto`, `skani`, or `diamond` |
 | `--template-topk` | number of ranked template candidates to keep in the recommendation output |
+| `--template-rerank-topn` | rerank only the top N coarse candidates with reciprocal hits; set `0` to disable reranking |
 | `-e` | EC prediction file |
 | `-p` | primary modeling |
 | `-s` | secondary modeling |

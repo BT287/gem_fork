@@ -131,6 +131,7 @@ def write_markdown_report(folder, model_summary_dict):
         ('Template model', model_summary_dict['template_model_organism']),
         ('Template selection mode', model_summary_dict.get('template_selection_mode')),
         ('Template recommendation backend', model_summary_dict.get('template_selection_backend')),
+        ('Template selection strategy', model_summary_dict.get('template_selection_strategy')),
         ('Template recommendation confidence', model_summary_dict.get('template_selection_confidence')),
         ('Primary modeling', model_summary_dict['primary_metabolic_modeling']),
         ('Secondary modeling', model_summary_dict['secondary_metabolic_modeling']),
@@ -440,6 +441,7 @@ def get_summary_report(folder, cobra_model, runtime,
     model_summary_dict['template_model_organism']=getattr(run_ns, 'orgName', None)
     model_summary_dict['template_selection_mode']=getattr(run_ns, 'template_selection_mode', 'manual')
     model_summary_dict['template_selection_backend']=getattr(run_ns, 'template_selection_backend', None)
+    model_summary_dict['template_selection_strategy']=getattr(run_ns, 'template_selection_strategy', None)
     model_summary_dict['template_selection_confidence']=getattr(run_ns, 'template_selection_confidence', None)
     model_summary_dict['eficaz']=getattr(run_ns, 'eficaz', None)
     model_summary_dict['primary_metabolic_modeling']=getattr(run_ns, 'pmr_generation', None)

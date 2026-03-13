@@ -26,8 +26,17 @@ These files appear in `0_template_recommendation/` when `--auto-template` is ena
 
 | File | Format | Meaning |
 |---|---|---|
-| `template_candidates.tsv` | TSV | ranked template candidates with backend-specific metrics |
-| `template_recommendation.json` | JSON | selected template, confidence, backend, and the retained top-k candidates |
+| `template_candidates.tsv` | TSV | ranked template candidates with coarse metrics, optional BBH rerank metrics, and the final recommendation score |
+| `template_recommendation.json` | JSON | selected template, confidence, backend, strategy, and the retained top-k candidates |
+
+Key columns in `template_candidates.tsv`:
+
+- `coarse_backend`: initial retrieval backend used for ranking
+- `coarse_score`: score before any reciprocal-hit reranking
+- `primary_metric` / `secondary_metric`: the metrics that actually determined the final ranking
+- `bbh_template_coverage`: fraction of template genes supported by reciprocal best hits
+- `bbh_target_coverage`: fraction of target genes participating in reciprocal best hits
+- `selection_stage`: `coarse` or `coarse+bbh`
 
 ## Canonical Tables
 

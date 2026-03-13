@@ -64,6 +64,7 @@ class TestTemplateRecommendation:
         options.auto_template = True
         options.template_backend = 'auto'
         options.template_topk = 2
+        options.template_rerank_topn = 3
         options.orgName = 'sco'
         options.input = 'input.gbk'
 
@@ -136,6 +137,11 @@ class TestTemplateRecommendation:
                 },
             ],
         )
+        monkeypatch.setattr(
+            template_recommendation,
+            'rerank_templates_with_bbh',
+            lambda run_ns, io_ns, candidates, catalog: candidates,
+        )
 
         result = template_recommendation.recommend_template('genbank', options, options)
 
@@ -143,6 +149,7 @@ class TestTemplateRecommendation:
         assert options.template_selection_mode == 'auto'
         assert options.template_selection_backend == 'diamond'
         assert result['recommended_template'] == 'mtu'
+        assert result['selection_strategy'] == 'coarse_only'
         assert isfile(join(options.outputfolder0, 'template_candidates.tsv'))
         assert isfile(join(options.outputfolder0, 'template_recommendation.json'))
 
@@ -159,4 +166,121 @@ class TestTemplateRecommendation:
         assert reader.fieldnames is not None
         assert 'primary_metric' in reader.fieldnames
         assert 'secondary_metric' in reader.fieldnames
+        assert 'coarse_score' in reader.fieldnames
+        assert 'selection_stage' in reader.fieldnames
         assert rows[0]['template_id'] == 'mtu'
+
+    def test_rerank_templates_with_bbh_updates_top_candidates(self, options, monkeypatch):
+        options.template_rerank_topn = 1
+        options.targetGenome_locusTag_aaSeq_dict = {'gene1': 'MPEPTIDE', 'gene2': 'MPEPTIDE'}
+        options.outputfolder6 = 'tmp'
+
+        candidates = [
+            {
+                'template_id': 'sco',
+                'organism': 'Streptomyces coelicolor A3(2)',
+                'model': 'iKS1317',
+                'backend': 'diamond',
+                'coarse_backend': 'diamond',
+                'score': 0.80,
+                'coarse_score': 0.80,
+                'primary_metric': 0.80,
+                'secondary_metric': 85.0,
+                'coarse_primary_metric': 0.80,
+                'coarse_secondary_metric': 85.0,
+                'ani': None,
+                'aligned_fraction': None,
+                'aligned_fraction_ref': None,
+                'aligned_fraction_query': None,
+                'matched_queries': 8,
+                'total_queries': 10,
+                'hit_coverage': 0.8,
+                'mean_identity': 85.0,
+                'mean_bitscore': 200.0,
+                'rerank_score': None,
+                'rerank_applied': False,
+                'coarse_rank': None,
+                'bbh_pairs': None,
+                'bbh_target_hits': None,
+                'bbh_template_gene_count': None,
+                'bbh_target_coverage': None,
+                'bbh_template_coverage': None,
+                'selection_stage': 'coarse',
+            },
+            {
+                'template_id': 'mtu',
+                'organism': 'Mycobacterium tuberculosis H37Rv',
+                'model': 'iNJ661',
+                'backend': 'diamond',
+                'coarse_backend': 'diamond',
+                'score': 0.70,
+                'coarse_score': 0.70,
+                'primary_metric': 0.70,
+                'secondary_metric': 82.0,
+                'coarse_primary_metric': 0.70,
+                'coarse_secondary_metric': 82.0,
+                'ani': None,
+                'aligned_fraction': None,
+                'aligned_fraction_ref': None,
+                'aligned_fraction_query': None,
+                'matched_queries': 7,
+                'total_queries': 10,
+                'hit_coverage': 0.7,
+                'mean_identity': 82.0,
+                'mean_bitscore': 180.0,
+                'rerank_score': None,
+                'rerank_applied': False,
+                'coarse_rank': None,
+                'bbh_pairs': None,
+                'bbh_target_hits': None,
+                'bbh_template_gene_count': None,
+                'bbh_target_coverage': None,
+                'bbh_template_coverage': None,
+                'selection_stage': 'coarse',
+            },
+        ]
+        catalog = [
+            {'template_id': 'sco', 'proteome_fasta': 'sco.fa'},
+            {'template_id': 'mtu', 'proteome_fasta': 'mtu.fa'},
+        ]
+
+        monkeypatch.setattr(
+            template_recommendation,
+            'prepare_target_proteome_fasta',
+            lambda io_ns, output_dir: 'target.faa',
+        )
+        monkeypatch.setattr(
+            template_recommendation,
+            'ensure_tmp_template_dir',
+            lambda io_ns: 'tmp',
+        )
+        monkeypatch.setattr(
+            template_recommendation,
+            'compute_bbh_rerank_metrics',
+            lambda io_ns, target_fasta, template_entry: {
+                'bbh_pairs': 9 if template_entry['template_id'] == 'sco' else 5,
+                'bbh_target_hits': 8 if template_entry['template_id'] == 'sco' else 4,
+                'bbh_template_gene_count': 10,
+                'bbh_template_coverage': 0.9 if template_entry['template_id'] == 'sco' else 0.5,
+                'bbh_target_coverage': 0.8 if template_entry['template_id'] == 'sco' else 0.4,
+                'rerank_score': 0.87 if template_entry['template_id'] == 'sco' else 0.47,
+            },
+        )
+
+        reranked = template_recommendation.rerank_templates_with_bbh(options, options, candidates, catalog)
+
+        assert reranked[0]['template_id'] == 'sco'
+        assert reranked[0]['rerank_applied'] is True
+        assert reranked[0]['bbh_template_coverage'] == 0.9
+        assert reranked[0]['score'] > reranked[1]['score']
+        assert reranked[1]['rerank_applied'] is False
+
+    def test_recommendation_confidence_does_not_depend_on_topk(self):
+        candidates = [
+            {'template_id': 'sco', 'score': 0.61},
+            {'template_id': 'mtu', 'score': 0.60},
+        ]
+
+        confidence = template_recommendation.classify_recommendation_confidence(candidates)
+
+        assert confidence == 'low'

@@ -70,6 +70,7 @@ def show_input_options(run_ns):
     logging.debug("automatic_template_recommendation: %s", getattr(run_ns, 'auto_template', None))
     logging.debug("template_recommendation_backend: %s", getattr(run_ns, 'template_backend', None))
     logging.debug("template_recommendation_topk: %s", getattr(run_ns, 'template_topk', None))
+    logging.debug("template_rerank_topn: %s", getattr(run_ns, 'template_rerank_topn', None))
     logging.debug("eficaz: %s", getattr(run_ns, 'eficaz', None))
     logging.debug("primary_metabolic_modeling: %s", getattr(run_ns, 'pmr_generation', None))
     logging.debug("secondary_metabolic_modeling: %s", getattr(run_ns, 'smr_generation', None))
