@@ -138,7 +138,9 @@ def resolve_template_backend(filetype, run_ns, catalog):
     if backend == 'skani':
         if not skani_backend_ready(filetype, run_ns, catalog):
             raise RuntimeError(
-                "Template backend 'skani' requires a skani executable and template genome FASTA files"
+                "Template backend 'skani' requires a skani executable, a populated template genome bank, "
+                "and GenBank or nucleotide FASTA input. On native Windows, use DIAMOND fallback or run skani "
+                "through Linux/WSL if no skani executable is available."
             )
         return backend
 
@@ -162,6 +164,11 @@ def skani_backend_ready(filetype, run_ns, catalog):
 def log_skani_fallback_reason(filetype, run_ns, catalog):
     if utils.locate_executable('skani') is None:
         logging.info("Automatic template recommendation is falling back to DIAMOND because 'skani' was not found")
+        if os.name == 'nt':
+            logging.info(
+                "Native Windows runs currently require DIAMOND fallback unless skani is installed separately; "
+                "Linux or WSL is recommended for skani-first recommendation"
+            )
         return
 
     if not any(entry.get('genome_fasta') for entry in catalog):

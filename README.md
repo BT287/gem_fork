@@ -57,6 +57,11 @@ pip install -r requirements.txt
 - Git LFS is required if your checkout stores large assets through LFS
 - Internet access is required for primary-model augmentation through KEGG
 
+Current platform note for `skani`:
+
+- The validated `skani`-first path is Linux or WSL.
+- On native Windows, `--auto-template` still works, but it typically falls back to DIAMOND unless you install a working `skani` executable yourself.
+
 Install DIAMOND after creating the Python environment:
 
 - Linux or macOS:
@@ -83,6 +88,8 @@ skani -V
 python scripts/check_template_genome_bank.py --allow-missing
 ```
 
+If `skani` is not available, `--auto-template` will still run with DIAMOND-based coarse ranking and BBH reranking.
+
 Install a template genome bank from a bundle when you are ready to use `skani`-first recommendation:
 
 ```bash
@@ -104,7 +111,7 @@ python scripts/fetch_template_genome_bank.py --from-manifest
 python scripts/check_template_genome_bank.py --allow-missing
 ```
 
-This currently installs the `NCBI-direct` templates automatically and reports any `manual-source` templates that still need a separate bundle.
+This currently installs the `NCBI-direct` templates automatically and reports any `manual-source` templates that still need a separate bundle. In the current manifest, `bsu`, `clj`, `cre`, `eco`, `hpy`, `mtu`, `ppu`, `sce`, and `sco` are direct-download templates, while `nsal` remains manual-source.
 
 Git LFS setup:
 
@@ -192,6 +199,11 @@ python run_gmsm.py \
 - a template genome bank, either under `gmsm/io/data/input1/genomes/` using the filenames in `gmsm/io/data/input1/template_catalog.json`, or via `--template-genome-bank <path>`
 
 If those assets are missing, GMSM falls back to a DIAMOND-based proteome ranking using the bundled template proteomes.
+
+Recommended usage by platform:
+
+- Linux or WSL: install `skani`, install the template genome bank, then use `--auto-template`
+- Native Windows: `--auto-template` is still useful, but expect DIAMOND fallback unless you have a working `skani` binary
 
 The current recommendation flow is intentionally staged for runtime safety:
 
