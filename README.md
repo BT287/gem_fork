@@ -53,6 +53,7 @@ pip install -r requirements.txt
 
 - `diamond` must be available on `PATH` or in the repo-local `bin/` directory
 - On Windows, the executable must be `diamond.exe`; a Unix `bin/diamond` file is not usable
+- `skani` is recommended if you want genome-level automatic template recommendation
 - Git LFS is required if your checkout stores large assets through LFS
 - Internet access is required for primary-model augmentation through KEGG
 
@@ -73,6 +74,12 @@ Verify DIAMOND before running `tox` or `run_gmsm.py`:
 
 ```bash
 diamond --version
+```
+
+If you want `--auto-template` to prefer `skani`, also verify:
+
+```bash
+skani -V
 ```
 
 Git LFS setup:
@@ -155,7 +162,12 @@ python run_gmsm.py \
   -o output_auto_template
 ```
 
-`--auto-template` prefers `skani` when a template genome bank and `skani` executable are available. Otherwise it falls back to a DIAMOND-based proteome ranking using the bundled template proteomes.
+`--auto-template` now prefers `skani` by default when both of these are available:
+
+- a `skani` executable on `PATH`
+- a template genome bank, either under `gmsm/io/data/input1/genomes/` using the filenames in `gmsm/io/data/input1/template_catalog.json`, or via `--template-genome-bank <path>`
+
+If those assets are missing, GMSM falls back to a DIAMOND-based proteome ranking using the bundled template proteomes.
 
 The current recommendation flow is intentionally staged for runtime safety:
 
@@ -225,6 +237,12 @@ When `--auto-template` is enabled, `0_template_recommendation/` contains:
 - `template_candidates.tsv`: ranked template candidates with coarse metrics, optional BBH rerank metrics, and the final score
 - `template_recommendation.json`: selected template, confidence, and the top-k candidate list
 
+Template genome assets for `skani` are configured through:
+
+- `gmsm/io/data/input1/template_catalog.json`
+- `gmsm/io/data/input1/genomes/` by default
+- or `--template-genome-bank <path>` for an external genome bank
+
 Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
 
 ## Canonical Output Files
@@ -265,6 +283,7 @@ Source: `gmsm/config/gmsm.cfg`
 | `--auto-template` | automatically rank and select a starting template before primary modeling |
 | `--template-backend` | template-ranking backend: `auto`, `skani`, or `diamond` |
 | `--template-topk` | number of ranked template candidates to keep in the recommendation output |
+| `--template-genome-bank` | external directory containing template genome FASTA files for skani |
 | `--template-rerank-topn` | rerank only the top N coarse candidates with reciprocal hits; set `0` to disable reranking |
 | `-e` | EC prediction file |
 | `-p` | primary modeling |

@@ -108,6 +108,7 @@ def check_input_options(run_ns):
     smr_generation = getattr(run_ns, 'smr_generation', False)
     comp = getattr(run_ns, 'comp', None)
     template_topk = getattr(run_ns, 'template_topk', 3)
+    template_genome_bank = getattr(run_ns, 'template_genome_bank', None)
     template_rerank_topn = getattr(run_ns, 'template_rerank_topn', 3)
 
     if not input_file:
@@ -142,6 +143,10 @@ def check_input_options(run_ns):
 
     if template_topk is not None and int(template_topk) < 1:
         logging.warning("Template recommendation requires '--template-topk' to be at least 1")
+        sys.exit(1)
+
+    if template_genome_bank and not os.path.isdir(template_genome_bank):
+        logging.warning("Template genome bank directory not found: %s", template_genome_bank)
         sys.exit(1)
 
     if template_rerank_topn is not None and int(template_rerank_topn) < 0:

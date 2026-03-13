@@ -29,7 +29,7 @@ _NUCLEOTIDE_CHARS = set("ACGTUNWSMKRYBDHV-")
 
 
 def recommend_template(filetype, run_ns, io_ns):
-    catalog = discover_template_catalog()
+    catalog = discover_template_catalog(run_ns=run_ns)
     if not catalog:
         raise RuntimeError("No template catalog entries were discovered under gmsm/io/data/input1")
 
@@ -92,10 +92,12 @@ def recommend_template(filetype, run_ns, io_ns):
     return result
 
 
-def discover_template_catalog(input1_root=None):
+def discover_template_catalog(input1_root=None, run_ns=None):
     if input1_root is None:
         repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
         input1_root = os.path.join(repo_root, 'gmsm', 'io', 'data', 'input1')
+    genome_bank_root = resolve_template_genome_bank(input1_root, run_ns)
+    catalog_metadata = load_template_catalog_metadata(input1_root)
 
     catalog = []
     if not os.path.isdir(input1_root):
@@ -110,27 +112,16 @@ def discover_template_catalog(input1_root=None):
         if not os.path.isfile(proteome_fasta):
             continue
 
-        genome_fasta = None
-        for candidate_name in (
-            'template_genome.fna',
-            'template_genome.fa',
-            'template_genome.fasta',
-            'genome.fna',
-            'genome.fa',
-            'genome.fasta',
-        ):
-            candidate_path = os.path.join(template_dir, candidate_name)
-            if os.path.isfile(candidate_path):
-                genome_fasta = candidate_path
-                break
-
-        metadata = _TEMPLATE_METADATA.get(template_id, {})
+        metadata = dict(_TEMPLATE_METADATA.get(template_id, {}))
+        metadata.update(catalog_metadata.get(template_id, {}))
+        genome_fasta = resolve_template_genome_path(template_dir, metadata, input1_root, genome_bank_root)
         catalog.append(
             {
                 'template_id': template_id,
                 'template_dir': template_dir,
                 'proteome_fasta': proteome_fasta,
                 'genome_fasta': genome_fasta,
+                'genome_bank_root': genome_bank_root,
                 'organism': metadata.get('organism', template_id),
                 'model': metadata.get('model', template_id),
             }
@@ -154,6 +145,7 @@ def resolve_template_backend(filetype, run_ns, catalog):
     if skani_backend_ready(filetype, run_ns, catalog):
         return 'skani'
 
+    log_skani_fallback_reason(filetype, run_ns, catalog)
     return 'diamond'
 
 
@@ -165,6 +157,92 @@ def skani_backend_ready(filetype, run_ns, catalog):
         return False
 
     return target_input_supports_skani(filetype, run_ns)
+
+
+def log_skani_fallback_reason(filetype, run_ns, catalog):
+    if utils.locate_executable('skani') is None:
+        logging.info("Automatic template recommendation is falling back to DIAMOND because 'skani' was not found")
+        return
+
+    if not any(entry.get('genome_fasta') for entry in catalog):
+        genome_bank = resolve_template_genome_bank(run_ns=run_ns)
+        logging.info(
+            "Automatic template recommendation is falling back to DIAMOND because no template genome FASTA files were found"
+        )
+        logging.info(
+            "Install template genomes under '%s' or pass '--template-genome-bank <path>' to enable skani-first ranking",
+            genome_bank,
+        )
+        return
+
+    if not target_input_supports_skani(filetype, run_ns):
+        logging.info(
+            "Automatic template recommendation is falling back to DIAMOND because skani requires GenBank input or nucleotide FASTA input"
+        )
+
+
+def resolve_template_genome_bank(input1_root=None, run_ns=None):
+    requested = getattr(run_ns, 'template_genome_bank', None) or os.environ.get('GMSM_TEMPLATE_GENOME_BANK')
+    if input1_root is None:
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+        input1_root = os.path.join(repo_root, 'gmsm', 'io', 'data', 'input1')
+
+    if requested:
+        return os.path.abspath(requested)
+
+    return os.path.join(input1_root, 'genomes')
+
+
+def load_template_catalog_metadata(input1_root):
+    metadata_path = os.path.join(input1_root, 'template_catalog.json')
+    if not os.path.isfile(metadata_path):
+        return {}
+
+    with open(metadata_path, 'r') as handle:
+        payload = json.load(handle)
+    return payload.get('templates', {})
+
+
+def resolve_template_genome_path(template_dir, metadata, input1_root, genome_bank_root):
+    configured = metadata.get('genome_fasta')
+    if configured:
+        configured_candidates = []
+        if os.path.isabs(configured):
+            configured_candidates.append(configured)
+        else:
+            configured_candidates.extend(
+                [
+                    os.path.join(input1_root, configured),
+                    os.path.join(genome_bank_root, configured),
+                    os.path.join(template_dir, configured),
+                ]
+            )
+        for candidate_path in configured_candidates:
+            if os.path.isfile(candidate_path):
+                return candidate_path
+
+    for candidate_name in (
+        'template_genome.fna',
+        'template_genome.fa',
+        'template_genome.fasta',
+        'genome.fna',
+        'genome.fa',
+        'genome.fasta',
+    ):
+        candidate_path = os.path.join(template_dir, candidate_name)
+        if os.path.isfile(candidate_path):
+            return candidate_path
+
+    for candidate_name in (
+        '%s.fna' % os.path.basename(template_dir),
+        '%s.fa' % os.path.basename(template_dir),
+        '%s.fasta' % os.path.basename(template_dir),
+    ):
+        candidate_path = os.path.join(genome_bank_root, candidate_name)
+        if os.path.isfile(candidate_path):
+            return candidate_path
+
+    return None
 
 
 def target_input_supports_skani(filetype, run_ns):

@@ -38,6 +38,11 @@ Key columns in `template_candidates.tsv`:
 - `bbh_target_coverage`: fraction of target genes participating in reciprocal best hits
 - `selection_stage`: `coarse` or `coarse+bbh`
 
+Runtime interpretation:
+
+- if `coarse_backend=skani`, the first pass was genome-level ANI/AF ranking
+- if `coarse_backend=diamond`, GMSM fell back to proteome-level coarse ranking because skani assets were not available
+
 ## Canonical Tables
 
 | File | Meaning |

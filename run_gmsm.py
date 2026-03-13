@@ -106,6 +106,10 @@ def main():
                         default=3,
                         type=int,
                         help="How many template candidates to keep in the recommendation output (default: %(default)s)")
+    group.add_argument('--template-genome-bank',
+                        dest='template_genome_bank',
+                        default=False,
+                        help="Directory containing template genome FASTA files for skani-based recommendation")
     group.add_argument('--template-rerank-topn',
                         dest='template_rerank_topn',
                         default=3,

@@ -16,6 +16,34 @@ class TestTemplateRecommendation:
         assert 'sco' in template_ids
         assert 'mtu' in template_ids
 
+    def test_discover_template_catalog_reads_template_genome_bank(self, tmp_path):
+        input1_root = tmp_path / 'input1'
+        template_dir = input1_root / 'sco'
+        genome_bank = input1_root / 'genomes'
+        template_dir.mkdir(parents=True)
+        genome_bank.mkdir(parents=True)
+        (template_dir / 'tempModel_locusTag_aaSeq.fa').write_text('>gene1\nMPEPTIDE\n')
+        (genome_bank / 'sco.fna').write_text('>chr1\nATGC\n')
+        (input1_root / 'template_catalog.json').write_text(
+            json.dumps(
+                {
+                    'templates': {
+                        'sco': {
+                            'organism': 'Streptomyces coelicolor A3(2)',
+                            'model': 'iKS1317',
+                            'genome_fasta': 'genomes/sco.fna',
+                        }
+                    }
+                }
+            )
+        )
+
+        catalog = template_recommendation.discover_template_catalog(str(input1_root))
+
+        assert len(catalog) == 1
+        assert catalog[0]['template_id'] == 'sco'
+        assert catalog[0]['genome_fasta'] == str(genome_bank / 'sco.fna')
+
     def test_resolve_template_backend_falls_back_to_diamond_without_skani_assets(self, options, monkeypatch):
         options.template_backend = 'auto'
         options.input = 'input.gbk'
@@ -39,6 +67,30 @@ class TestTemplateRecommendation:
         )
 
         assert backend == 'diamond'
+
+    def test_resolve_template_backend_prefers_skani_when_assets_exist(self, options, monkeypatch):
+        options.template_backend = 'auto'
+        options.input = 'input.gbk'
+
+        monkeypatch.setattr(
+            template_recommendation.utils,
+            'locate_executable',
+            lambda name: 'skani' if name == 'skani' else None,
+        )
+
+        backend = template_recommendation.resolve_template_backend(
+            'genbank',
+            options,
+            [
+                {
+                    'template_id': 'sco',
+                    'proteome_fasta': 'sco.fa',
+                    'genome_fasta': 'sco.fna',
+                }
+            ],
+        )
+
+        assert backend == 'skani'
 
     def test_resolve_template_backend_requires_genome_bank_for_skani(self, options, monkeypatch):
         options.template_backend = 'skani'
@@ -64,6 +116,7 @@ class TestTemplateRecommendation:
         options.auto_template = True
         options.template_backend = 'auto'
         options.template_topk = 2
+        options.template_genome_bank = False
         options.template_rerank_topn = 3
         options.orgName = 'sco'
         options.input = 'input.gbk'
