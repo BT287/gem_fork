@@ -1,8 +1,9 @@
 # GMSM (`gem_fork`)
 
-GMSM builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
+***G***enome-scale metabolic ***M***odeling with ***S***econdary ***M***etabolism (GMSM) builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
 
-This repository is self-contained. A first-time user should be able to create the environment, run GMSM end-to-end, and inspect outputs from this repo alone.
+## Development
+This project was initiated as a research collaboration between [Metabolic & Biomolecular Eng. Nat’l Research Laboratory (MBEL) & BioInformatics Research Center](http://mbel.kaist.ac.kr/) at KAIST and [Novo Nordisk Foundation Center for Biosustainability](http://www.biosustain.dtu.dk/english) at DTU.
 
 ## What This Repository Does
 
@@ -25,6 +26,12 @@ Validated on 2026-03-11:
 - `python-libsbml==5.21.1`
 - `swiglpk==5.0.13`
 - `tox -e py311`
+
+Clone the repository:
+
+```bash
+git clone https://github.com/kaist-sbml/gem.git
+```
 
 Create the recommended environment:
 
@@ -50,6 +57,7 @@ pip install -r requirements.txt
 
 ## External Requirements
 
+### DIAMOND
 - `diamond` must be available on `PATH` or in the repo-local `bin/` directory
 - On Windows, the executable must be `diamond.exe`; a Unix `bin/diamond` file is not usable
 - Git LFS is required if your checkout stores large assets through LFS
@@ -74,12 +82,22 @@ Verify DIAMOND before running `tox` or `run_gmsm.py`:
 diamond --version
 ```
 
-Git LFS setup:
+### Git LFS setup:
 
 ```bash
 git lfs install
 git lfs pull
 ```
+
+###Gurobi (optional)
+
+1. install Gurobi Optimizer for Python (via Anaconda)
+
+  ```bash
+  conda install -c gurobi gurobi
+  ```
+
+2. Get a *Free Academic* license. [license](https://www.gurobi.com/academia/academic-program-and-licenses/)
 
 Basic verification:
 
@@ -107,8 +125,6 @@ tox -e py311
 
 - EC prediction file via `-e`
 - compartment annotation file via `-C`
-
-Automatic EFICAz execution via `-E` is retired in the current supported workflow. Use a precomputed external EC prediction file with `-e` instead.
 
 ## First Run
 
@@ -263,12 +279,6 @@ Source: `gmsm/config/gmsm.cfg`
   - read [OUTPUTS.md](OUTPUTS.md)
 - User who is using an external tutorial workspace:
   - read that workspace's README after finishing the setup in this repo
-
-## Release Positioning
-
-- `gem_fork` should remain the clean source repo to release under the final SBML account
-- beginner walkthroughs, rendered examples, and teaching material should not dominate this repo
-- this repo should keep a concise quickstart and output reference, not a large tutorial corpus
 
 ## Troubleshooting
 
