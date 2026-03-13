@@ -97,6 +97,21 @@ python scripts/fetch_template_genome_bank.py --bundle /path/to/template_genome_b
 python scripts/check_template_genome_bank.py
 ```
 
+The curated release bundle is intended to contain the full template panel as a single reproducible asset. In the current design that panel contains `10` genomes:
+
+- `bsu`
+- `clj`
+- `cre`
+- `eco`
+- `hpy`
+- `mtu`
+- `nsal`
+- `ppu`
+- `sce`
+- `sco`
+
+See the bundle spec in [`gmsm/io/data/input1/template_genome_bundle_spec.md`](gmsm/io/data/input1/template_genome_bundle_spec.md) if you need the exact archive layout.
+
 See the curated source manifest for the reference genomes behind the template bank:
 
 ```bash
@@ -112,6 +127,12 @@ python scripts/check_template_genome_bank.py --allow-missing
 ```
 
 This currently installs the `NCBI-direct` templates automatically and reports any `manual-source` templates that still need a separate bundle. In the current manifest, `bsu`, `clj`, `cre`, `eco`, `hpy`, `mtu`, `ppu`, `sce`, and `sco` are direct-download templates, while `nsal` remains manual-source.
+
+Maintainers can build a curated release bundle from a complete local bank with:
+
+```bash
+python scripts/build_template_genome_bank_bundle.py --output dist/template_genome_bank_v1.zip
+```
 
 Git LFS setup:
 
