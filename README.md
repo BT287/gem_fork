@@ -34,21 +34,21 @@ Validated on 2026-03-11:
 2. Create the recommended environment:
 
     2-A) From scratch:
-
-        conda env create -f environment.yml
-        conda activate gmsm
+       
+       conda env create -f environment.yml
+       conda activate gmsm
         
 
     2-B) If you already created `gmsm` before this refresh, update it in place:
     
-        conda env update -n gmsm -f environment.yml --prune
-        conda activate gmsm
+       conda env update -n gmsm -f environment.yml --prune
+       conda activate gmsm
 
     2-C) Fallback without `environment.yml`:
 
-        conda create -n gmsm python=3.11
-        conda activate gmsm
-        pip install -r requirements.txt
+       conda create -n gmsm python=3.11
+       conda activate gmsm
+       pip install -r requirements.txt
 
 
 ## External Requirements
