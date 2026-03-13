@@ -75,6 +75,7 @@ class TestInput_file_manager:
     def test_get_target_genome_from_input(self, input_fasta, input_genbank, options):
 
         options.eficaz = False
+        options.ec_file = False
         options.eficaz_file = False
         options.input = input_fasta
         input_file_manager.get_target_genome_from_input('fasta', options, options)
@@ -88,6 +89,20 @@ class TestInput_file_manager:
         assert options.seq_record_BGC_num_lists[0][0].id == 'NC_021985.1'
         assert options.total_cluster == 32
         assert options.targetGenome_locusTag_ec_dict['B446_RS01045'] == ['3.5.1.54']
+
+
+    def test_get_target_genome_from_input_ignores_gbk_ec_when_ec_file_is_given(self, input_genbank, options):
+
+        options.eficaz = False
+        options.ec_file = 'external_ec.tsv'
+        options.eficaz_file = False
+        options.input = input_genbank
+
+        input_file_manager.get_target_genome_from_input('genbank', options, options)
+
+        assert options.seq_record_BGC_num_lists[0][0].id == 'NC_021985.1'
+        assert options.total_cluster == 32
+        assert options.targetGenome_locusTag_ec_dict == {}
 
 
     def test_get_eficaz_file(self, eficaz_file, options):

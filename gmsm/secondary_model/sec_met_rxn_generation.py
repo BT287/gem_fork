@@ -8,13 +8,67 @@ from cobra.util.solver import linear_reaction_coefficients
 from gmsm import utils
 
 
+def _is_bgc_feature(feature):
+    return feature.type in ('region', 'cluster')
+
+
+def _feature_in_bounds(feature, loc1, loc2):
+    return feature.location.start >= loc1 and feature.location.end <= loc2
+
+
+def _get_domain_labels(feature):
+    return feature.qualifiers.get('aSDomain') or feature.qualifiers.get('domain') or []
+
+
+def _is_sec_met_product(metab_id):
+    return str(metab_id).startswith(('Region', 'Cluster'))
+
+
+def _get_gene_info_dict(secondary_model_ns):
+    return getattr(
+            secondary_model_ns,
+            'region_info_dict',
+            getattr(secondary_model_ns, 'cluster_info_dict', {}))
+
+
+def _parse_antismash4_specificity(sec_met_info):
+    if sec_met_info.startswith('Stachelhaus code: '):
+        return sec_met_info.split(': ', 1)[1]
+    if sec_met_info.startswith('NRPSpredictor3 SVM: '):
+        return sec_met_info.split(': ', 1)[1]
+    if sec_met_info.startswith('pHMM: '):
+        return sec_met_info.split(': ', 1)[1]
+    if sec_met_info.startswith('PrediCAT '):
+        return sec_met_info.split(' ', 1)[1].replace('N/A-N/A', 'NA-n/a')
+    if sec_met_info.startswith('SANDPUMA ensemble: '):
+        return sec_met_info.split(': ', 1)[1]
+    if sec_met_info.startswith('PKS signature: '):
+        return sec_met_info.split(': ', 1)[1]
+    if sec_met_info.startswith('Minowa: '):
+        return sec_met_info.split(': ', 1)[1]
+    if sec_met_info.startswith('consensus: '):
+        return sec_met_info.split(': ', 1)[1]
+    return None
+
+
 def get_region_location(seq_record, secondary_model_ns):
 
     for feature in seq_record.features:
-        if feature.type == 'region':
+        if _is_bgc_feature(feature):
             if feature.location.start > secondary_model_ns.temp_loc1:
                 secondary_model_ns.region_loc1 = feature.location.start
                 secondary_model_ns.region_loc2 = feature.location.end
+                secondary_model_ns.temp_loc1 = feature.location.start
+                break
+
+
+def get_cluster_location(seq_record, secondary_model_ns):
+
+    for feature in seq_record.features:
+        if feature.type == 'cluster':
+            if feature.location.start > secondary_model_ns.temp_loc1:
+                secondary_model_ns.cluster_loc1 = feature.location.start
+                secondary_model_ns.cluster_loc2 = feature.location.end
                 secondary_model_ns.temp_loc1 = feature.location.start
                 break
 
@@ -26,8 +80,10 @@ def get_region_info_from_seq_record(seq_record, secondary_model_ns):
 
     for feature in seq_record.features:
         if feature.type == 'CDS':
-            if feature.location.start >= secondary_model_ns.region_loc1 \
-                    and feature.location.end <= secondary_model_ns.region_loc2:
+            if _feature_in_bounds(
+                    feature,
+                    secondary_model_ns.region_loc1,
+                    secondary_model_ns.region_loc2):
                 qualifier_locus_tag = feature.qualifiers.get('locus_tag')[0]
                 if feature.qualifiers.get('sec_met_domain'):
                     region_info_dict[qualifier_locus_tag] = \
@@ -36,11 +92,31 @@ def get_region_info_from_seq_record(seq_record, secondary_model_ns):
     secondary_model_ns.region_info_dict = region_info_dict
 
 
+def get_cluster_info_from_seq_record(seq_record, secondary_model_ns):
+
+    cluster_info_dict = {}
+
+    for feature in seq_record.features:
+        if feature.type == 'CDS':
+            if _feature_in_bounds(
+                    feature,
+                    secondary_model_ns.cluster_loc1,
+                    secondary_model_ns.cluster_loc2):
+                qualifier_locus_tag = feature.qualifiers.get('locus_tag')[0]
+                if feature.qualifiers.get('sec_met'):
+                    cluster_info_dict[qualifier_locus_tag] = \
+                            feature.qualifiers.get('sec_met')
+
+    secondary_model_ns.cluster_seq_record = seq_record
+    secondary_model_ns.cluster_info_dict = cluster_info_dict
+
+
 def get_region_product(seq_record, order, region_nr, io_ns, secondary_model_ns):
+    product3 = None
 
     for feature in seq_record.features:
         
-        if feature.type == 'region':
+        if _is_bgc_feature(feature):
             if feature.location.start == secondary_model_ns.region_loc1 and \
             feature.location.end == secondary_model_ns.region_loc2:
                 product_list = feature.qualifiers.get('product')
@@ -54,6 +130,25 @@ def get_region_product(seq_record, order, region_nr, io_ns, secondary_model_ns):
                     product3 = "Region"+str(region_nr)+"_"+product2.lower()
                 else:
                     product3 = "Region"+str(order)+"."+str(region_nr)+"_"+product2.lower()
+
+    secondary_model_ns.product = product3
+
+
+def get_cluster_product(seq_record, cluster_nr, secondary_model_ns, order=None, io_ns=None):
+    product3 = None
+
+    for feature in seq_record.features:
+        if feature.type == 'cluster':
+            if feature.location.start == secondary_model_ns.cluster_loc1 and \
+            feature.location.end == secondary_model_ns.cluster_loc2:
+                product_list = feature.qualifiers.get('product')
+                product = '_'.join(product_list)
+                product2 = product.replace('-', '_')
+
+                if io_ns is not None and len(io_ns.seq_record_BGC_num_lists) > 1:
+                    product3 = "Cluster"+str(order)+"."+str(cluster_nr)+"_"+product2.lower()
+                else:
+                    product3 = "Cluster"+str(cluster_nr)+"_"+product2.lower()
 
     secondary_model_ns.product = product3
 
@@ -73,14 +168,18 @@ def get_region_monomers(seq_record, secondary_model_ns):
 
         # find antiSMASH domain in range of CDS
         if feature.type == 'aSDomain':
-            if 'PKS_AT' in feature.qualifiers.get('aSDomain') or \
-            'AMP-binding' in feature.qualifiers.get('aSDomain'):
+            domain_labels = _get_domain_labels(feature)
+            if 'PKS_AT' in domain_labels or 'AMP-binding' in domain_labels:
                 
-                if feature.location.start >= secondary_model_ns.cds_loc1 \
-                and feature.location.end <= secondary_model_ns.cds_loc2:
+                if _feature_in_bounds(
+                        feature,
+                        secondary_model_ns.cds_loc1,
+                        secondary_model_ns.cds_loc2):
                     # collect monomer information in one region
-                    if feature.location.start >= secondary_model_ns.region_loc1 and \
-                    feature.location.end <= secondary_model_ns.region_loc2:
+                    if _feature_in_bounds(
+                            feature,
+                            secondary_model_ns.region_loc1,
+                            secondary_model_ns.region_loc2):
                         qualifier_locus_tag = feature.qualifiers.get('locus_tag')[0]
                         module_number = qualifier_locus_tag + '_M' + str(module_count)
 
@@ -105,7 +204,60 @@ def get_region_monomers(seq_record, secondary_model_ns):
         secondary_model_ns.locustag_monomer_dict[each_module] = monomer_list
 
 
+def get_cluster_monomers(secondary_model_ns):
+
+    seq_record = secondary_model_ns.cluster_seq_record
+    locus_domain_features = {}
+    locus_tag_strand = {}
+    locustag_monomer_dict = {}
+
+    for feature in seq_record.features:
+        if feature.type == 'CDS' and _feature_in_bounds(
+                feature,
+                secondary_model_ns.cluster_loc1,
+                secondary_model_ns.cluster_loc2):
+            qualifier_locus_tag = feature.qualifiers.get('locus_tag')[0]
+            locus_tag_strand[qualifier_locus_tag] = feature.location.strand
+
+    for feature in seq_record.features:
+        if feature.type != 'aSDomain':
+            continue
+        if not _feature_in_bounds(
+                feature,
+                secondary_model_ns.cluster_loc1,
+                secondary_model_ns.cluster_loc2):
+            continue
+
+        domain_labels = _get_domain_labels(feature)
+        if 'PKS_AT' not in domain_labels and 'AMP-binding' not in domain_labels:
+            continue
+
+        qualifier_locus_tag = feature.qualifiers.get('locus_tag')[0]
+        locus_domain_features.setdefault(qualifier_locus_tag, []).append(feature)
+
+    for qualifier_locus_tag, domain_features in locus_domain_features.items():
+        reverse = locus_tag_strand.get(qualifier_locus_tag) == -1
+        domain_features = sorted(
+                domain_features,
+                key=lambda feature: int(feature.location.start),
+                reverse=reverse)
+
+        for module_count, feature in enumerate(domain_features):
+            module_number = qualifier_locus_tag + '_M' + str(module_count)
+            monomer_list = []
+            for sec_met_info in feature.qualifiers.get('specificity', []):
+                monomer = _parse_antismash4_specificity(sec_met_info)
+                if monomer is not None:
+                    monomer_list.append(monomer)
+
+            if monomer_list:
+                locustag_monomer_dict[module_number] = monomer_list
+
+    secondary_model_ns.locustag_monomer_dict = locustag_monomer_dict
+
+
 def get_biggid(priority_list, each_module, secondary_model_ns):
+    biggid_met = None
     for i in priority_list:
         aSid_met = secondary_model_ns.locustag_monomer_dict[each_module][i]
         biggid_met = get_std_id_from_antismash_id(aSid_met)
@@ -126,6 +278,7 @@ def get_biggid(priority_list, each_module, secondary_model_ns):
 # Output: e.g., {'mmalcoa': -4, 'malcoa': -7}
 def get_all_metab_coeff(io_ns, secondary_model_ns):
     metab_coeff_dict = {}
+    anti_version = getattr(secondary_model_ns, 'anti_version', None)
     for each_module in secondary_model_ns.locustag_monomer_dict:
         logging.debug("Module: %s; monomers: %s", each_module, secondary_model_ns.locustag_monomer_dict[each_module])
 
@@ -142,7 +295,16 @@ def get_all_metab_coeff(io_ns, secondary_model_ns):
             # Index [1]: PKS signature
             # Index [2]: Minowa
             # Priority: consensus > PKS signature > Minowa
-            priority_list = [0, 2, 1]
+            if anti_version == 4:
+                # antiSMASH4 stores PKS_AT predictions as signature/minowa/consensus
+                priority_list = [2, 1, 0]
+            else:
+                priority_list = [0, 2, 1]
+            biggid_met = get_biggid(priority_list, each_module, secondary_model_ns)
+
+        elif len(secondary_model_ns.locustag_monomer_dict[each_module]) == 5:
+            # antiSMASH4 stores five NRPS predictors per AMP-binding domain.
+            priority_list = [4, 2, 1, 0, 3]
             biggid_met = get_biggid(priority_list, each_module, secondary_model_ns)
 
         else:
@@ -166,12 +328,12 @@ def get_all_metab_coeff(io_ns, secondary_model_ns):
 def get_pickles(io_ns):
 
     if not hasattr(io_ns, 'mnxref'):
-        mnxref = pickle.load(open('./gmsm/io/data/input2/MNXref.p','rb'))
+        mnxref = utils.load_legacy_cobra_pickle('./gmsm/io/data/input2/MNXref.p')
         io_ns.mnxref = mnxref
 
     if not hasattr(io_ns, 'mnxm_compoundInfo_dict'):
-        mnxm_compoundInfo_dict = pickle.load(
-                open('./gmsm/io/data/input2/mnxm_compoundInfo_dict.p','rb'))
+        mnxm_compoundInfo_dict = utils.load_legacy_pickle(
+                './gmsm/io/data/input2/mnxm_compoundInfo_dict.p')
         io_ns.mnxm_compoundInfo_dict = mnxm_compoundInfo_dict
 
 
@@ -204,8 +366,8 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
                 metab_compt = io_ns.mnxref.metabolites.get_by_id(metab_compt)
                 rxn.add_metabolites({metab_compt:secondary_model_ns.metab_coeff_dict[metab]})
 
-            elif 'Region' in metab:
-                logging.debug("Secondary metabolite ('Region') %s: To be added" %metab)
+            elif _is_sec_met_product(metab):
+                logging.debug("Secondary metabolite %s: To be added" %metab)
                 metab_compt = Metabolite(metab_compt, compartment='c')
                 rxn.add_metabolites({metab_compt:secondary_model_ns.metab_coeff_dict[metab]})
 
@@ -217,7 +379,8 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
 
     #GPR association
     gpr_count = 0
-    for each_gene in secondary_model_ns.region_info_dict.keys():
+    gene_info_dict = _get_gene_info_dict(secondary_model_ns)
+    for each_gene in gene_info_dict.keys():
         if gpr_count == 0:
             gpr = each_gene
             gpr_count += 1
@@ -229,7 +392,7 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
     rxn.gene_reaction_rule = gpr
 
     #Add a new reaction to the model
-    target_model.add_reaction(rxn)
+    target_model.add_reactions([rxn])
 
     logging.debug("%s: %s", rxn, rxn.reaction)
 
@@ -252,7 +415,7 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
     rxn.add_metabolites({product_e:1})
 
     #Add the new reaction to the model
-    target_model.add_reaction(rxn)
+    target_model.add_reactions([rxn])
 
     logging.debug("%s: %s", rxn, rxn.reaction)
 
@@ -271,7 +434,7 @@ def add_sec_met_rxn(target_model, io_ns, secondary_model_ns):
     rxn.add_metabolites({target_model.metabolites.get_by_id(str(product_e)):-1})
 
     #Add a new reaction to the model
-    target_model.add_reaction(rxn)
+    target_model.add_reactions([rxn])
 
     logging.debug("%s: %s", rxn, rxn.reaction)
 

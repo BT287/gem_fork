@@ -1,6 +1,6 @@
 # GMSM I/O
 input/
-output/
+output*/
 kegg_cache/
 gmsm/tests/data/model.xml
 scripts/bigg/model.xml
@@ -26,12 +26,20 @@ EFICAz2.5.1.tar.gz
 .cache/
 .coverage
 .tox/
+/.tmp_pytest*/
 tmp
+gmsm/tests/_tmp/
+pytest-cache-files-*
 
 # System
 *.log
 *.pyc
 *.swp
+__pycache__/
+bin/diamond
+bin/diamond.exe
+bin/diamond-win/
+bin/diamond-windows.zip
 
 # virtualenv
 venv/

@@ -1,10 +1,13 @@
 
 import pickle
 import pytest
+import shutil
 from argparse import Namespace
 from Bio import SeqIO
 from cobra.io import read_sbml_model, write_sbml_model
 from os.path import join, abspath, dirname
+from pathlib import Path
+from gmsm import utils
 
 data_model_dir = join(dirname(abspath(__file__)), 'data')
 data_antismash_dir = join(dirname(abspath(__file__)), 'data_antismash')
@@ -43,7 +46,7 @@ def sci_secondary_model():
 def mnxref():
 
     # MNXref SBML model
-    model = pickle.load(open(join(data_model_dir, 'MNXref.p'), 'rb'))
+    model = utils.load_legacy_cobra_pickle(join(data_model_dir, 'MNXref.p'))
 
     return model
 
@@ -52,7 +55,7 @@ def mnxref():
 def precursor_model():
 
     # MNXref SBML model
-    model = pickle.load(open(join(data_model_dir, 'precursor_model.p'), 'rb'))
+    model = utils.load_legacy_cobra_pickle(join(data_model_dir, 'precursor_model.p'))
 
     return model
 
@@ -64,23 +67,36 @@ def options():
 
 
 @pytest.fixture(scope="function")
+def tmp_test_dir(request):
+    base_tmp_dir = Path(__file__).resolve().parents[2] / 'tmp'
+    base_tmp_dir.mkdir(parents=True, exist_ok=True)
+    test_tmp_dir = base_tmp_dir / request.node.name
+    shutil.rmtree(test_tmp_dir, ignore_errors=True)
+    test_tmp_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        yield str(test_tmp_dir)
+    finally:
+        shutil.rmtree(test_tmp_dir, ignore_errors=True)
+
+
+@pytest.fixture(scope="function")
 def bbh_dict():
-    temp_target_BBH_dict = pickle.load(
-            open(join(data_model_dir, 'sco_sci_temp_target_BBH_dict.p'),'rb'))
+    temp_target_BBH_dict = utils.load_legacy_pickle(
+            join(data_model_dir, 'sco_sci_temp_target_BBH_dict.p'))
     return temp_target_BBH_dict
 
 
 @pytest.fixture(scope="function")
 def mnxr_kegg_dict():
-    mnxr_kegg_dict = pickle.load(
-            open(join(data_model_dir, 'mnxr_kegg_dict.p'),'rb'))
+    mnxr_kegg_dict = utils.load_legacy_pickle(
+            join(data_model_dir, 'mnxr_kegg_dict.p'))
     return mnxr_kegg_dict
 
 
 @pytest.fixture(scope="function")
 def sco_tmp_model_flux():
-    template_exrxnid_flux_dict = pickle.load(
-            open(join(data_model_dir, 'sco_tempModel_exrxnid_flux_dict.p'),'rb'))
+    template_exrxnid_flux_dict = utils.load_legacy_pickle(
+            join(data_model_dir, 'sco_tempModel_exrxnid_flux_dict.p'))
     return template_exrxnid_flux_dict
 
 
@@ -133,8 +149,8 @@ def inputFile_parseBlaspResults():
 
 
 @pytest.fixture(scope="function")
-def outputFile_parseBlaspResults():
-    outputFile_parseBlaspResults = join(data_model_dir, 'blastp_targetGenome_against_tempGenome_parsed.txt')
+def outputFile_parseBlaspResults(tmp_test_dir):
+    outputFile_parseBlaspResults = join(tmp_test_dir, 'blastp_targetGenome_against_tempGenome_parsed.txt')
     return outputFile_parseBlaspResults
 
 
@@ -146,15 +162,15 @@ def inputFile_makeBestHits_dict():
 
 @pytest.fixture(scope="function")
 def bestHits_dict1():
-    bestHits_dict1 = pickle.load(
-            open(join(data_model_dir, 'bestHits_dict_blastp_targetGenome_against_tempGenome_parsed.p'), 'rb'))
+    bestHits_dict1 = utils.load_legacy_pickle(
+            join(data_model_dir, 'bestHits_dict_blastp_targetGenome_against_tempGenome_parsed.p'))
     return bestHits_dict1
 
 
 @pytest.fixture(scope="function")
 def bestHits_dict2():
-    bestHits_dict2 = pickle.load(
-            open(join(data_model_dir, 'bestHits_dict_blastp_tempGenome_against_targetGenome_parsed.p'), 'rb'))
+    bestHits_dict2 = utils.load_legacy_pickle(
+            join(data_model_dir, 'bestHits_dict_blastp_tempGenome_against_targetGenome_parsed.p'))
     return bestHits_dict2
 
 

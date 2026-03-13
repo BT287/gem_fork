@@ -44,7 +44,7 @@ def add_transport_exchange_rxn_nonprod_monomer(target_model, nonprod_monomer, io
     rxn.add_metabolites({product_e:1})
 
     #Add the new reaction to the model
-    target_model_temp.add_reaction(rxn)
+    target_model_temp.add_reactions([rxn])
 
     #Creat an exchange reaction
     #Creat reaction ID
@@ -58,7 +58,7 @@ def add_transport_exchange_rxn_nonprod_monomer(target_model, nonprod_monomer, io
     rxn.add_metabolites({target_model_temp.metabolites.get_by_id(str(product_e)):-1})
 
     #Add the new reaction to the model
-    target_model_temp.add_reaction(rxn)
+    target_model_temp.add_reactions([rxn])
 
     #Model reloading and overwrtting are necessary for model stability
     utils.stabilize_model(target_model_temp, io_ns.outputfolder5, nonprod_monomer)
@@ -90,8 +90,8 @@ def check_gapfill_rxn_biomass_effects(target_model, universal_model,
     target_model_gapFilled = copy.deepcopy(target_model)
 
     for gapfill_rxn in gapfill_rxns:
-        target_model_gapFilled.add_reaction(
-                universal_model.reactions.get_by_id(gapfill_rxn))
+        target_model_gapFilled.add_reactions(
+                [copy.deepcopy(universal_model.reactions.get_by_id(gapfill_rxn))])
 
         utils.stabilize_model(target_model_gapFilled, io_ns.outputfolder5, '')
 
@@ -106,8 +106,7 @@ def check_gapfill_rxn_biomass_effects(target_model, universal_model,
         #producibility of corresponding secondary metabolites,
         #and even generates more realistic flux values
         if 'F' in exrxn_flux_change_list:
-            target_model_gapFilled.remove_reactions(
-                    universal_model.reactions.get_by_id(gapfill_rxn))
+            target_model_gapFilled.remove_reactions([gapfill_rxn])
 
             utils.stabilize_model(target_model_gapFilled, io_ns.outputfolder5, '')
 
@@ -122,7 +121,7 @@ def check_gapfill_rxn_biomass_effects(target_model, universal_model,
 def add_gapfill_rxn_target_model(target_model, universal_model, gapfill_rxns2):
 
     for gapfill_rxn in gapfill_rxns2:
-        target_model.add_reaction(universal_model.reactions.get_by_id(gapfill_rxn))
+        target_model.add_reactions([copy.deepcopy(universal_model.reactions.get_by_id(gapfill_rxn))])
 
         logging.debug("Reaction added to the target_model: %s" %gapfill_rxn)
 

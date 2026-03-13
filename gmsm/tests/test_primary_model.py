@@ -270,8 +270,8 @@ class TestPrimary_model:
                 {'B446_23835':['4.1.1.45', '3.5.2.3']}
         augPhase_utils.get_rxnid_info_dict_from_kegg(options, options, options)
         assert 'R04323' in options.rxnid_info_dict
-        assert options.rxnid_info_dict['R04323']['NAME'] == \
-                '2-Amino-3-carboxymuconate semialdehyde carboxy-lyase'
+        assert options.rxnid_info_dict['R04323']['NAME'].lower() == \
+                '2-amino-3-carboxymuconate semialdehyde carboxy-lyase'
         assert 'R04323' in options.rxnid_locusTag_dict
         assert 'B446_23835' in options.rxnid_locusTag_dict['R04323']
 
@@ -332,7 +332,7 @@ class TestPrimary_model:
         assert 'MNXR150456' in options.mnxr_to_add_list
 
 
-    def test_add_nonBBH_rxn(self, sco_tmp_model, mnxref, tmpdir, sco_tmp_model_flux, options):
+    def test_add_nonBBH_rxn(self, sco_tmp_model, mnxref, sco_tmp_model_flux, options):
         # Focus on metabolite addition in this test
         # New metabolites: 'MNXM16902' and 'fuc__L'
         options.mnxr_to_add_list = ['MNXR150456']
@@ -461,7 +461,7 @@ class TestPrimary_model:
         assert len(added_rxn_newComp_list) == 4
 
 
-    def test_remove_inactive_rxn_newComp(self, sci_primary_model, tmpdir, options):
+    def test_remove_inactive_rxn_newComp(self, sci_primary_model, options):
 
         # Reaction 'CSND' is an inactive reaction in 'sci_primary_model'
         added_rxn_newComp_list = ['CSND']

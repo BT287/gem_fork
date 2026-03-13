@@ -3,9 +3,10 @@ import cobra
 import datetime
 import logging
 import os
+import pickle
 import sys
 import subprocess
-from os.path import getmtime, isfile, join, split
+from os.path import abspath, dirname, getmtime, isfile, join, split
 
 
 def setup_logging(run_ns):
@@ -19,6 +20,7 @@ def setup_logging(run_ns):
     logging.basicConfig(format='%(levelname)s: %(message)s', level=log_level)
 
     if run_ns.verbose or run_ns.debug:
+        os.makedirs(run_ns.outputfolder, exist_ok=True)
         logger = logging.getLogger('')
         fomatter = logging.Formatter(
                 '[%(levelname)s|%(filename)s:%(lineno)s] > %(message)s')
@@ -40,38 +42,98 @@ def get_git_log():
     args = ['git', 'rev-parse', '--short', 'HEAD']
     try:
         out, err, retcode = execute(args)
+        if isinstance(out, bytes):
+            return out.decode('utf-8', errors='replace').strip()
         return out.strip()
     except OSError:
         pass
     return""
 
 
+def load_legacy_pickle(path):
+    """Load old Python pickles shipped with GMSM across Python 3 versions."""
+    with open(path, 'rb') as handle:
+        raw = handle.read()
+
+    try:
+        return pickle.loads(raw)
+    except (UnicodeDecodeError, pickle.UnpicklingError):
+        normalized = raw.replace(b'\r\n', b'\n')
+        return pickle.loads(normalized, encoding='latin1')
+
+
+def load_legacy_cobra_pickle(path):
+    """Load legacy COBRA pickles whose optlang solver state predates current fields."""
+    try:
+        import optlang.glpk_interface as glpk_interface
+    except ImportError:
+        return load_legacy_pickle(path)
+
+    original_setstate = glpk_interface.Configuration.__setstate__
+
+    def _patched_setstate(self, state):
+        if "tolerances" not in state:
+            state = dict(state)
+            state["tolerances"] = {}
+        return original_setstate(self, state)
+
+    glpk_interface.Configuration.__setstate__ = _patched_setstate
+    try:
+        loaded = load_legacy_pickle(path)
+    finally:
+        glpk_interface.Configuration.__setstate__ = original_setstate
+
+    if isinstance(loaded, cobra.Model):
+        ensure_modern_cobra_attrs(loaded)
+    return loaded
+
+
+def ensure_modern_cobra_attrs(model):
+    """Backfill attributes expected by current COBRApy on legacy pickled objects."""
+    objects = [model]
+    objects.extend(model.reactions)
+    objects.extend(model.metabolites)
+    objects.extend(model.genes)
+
+    for obj in objects:
+        if not hasattr(obj, "_annotation"):
+            obj._annotation = {}
+
+
 def check_input_options(run_ns):
-    if not run_ns.input:
+    input_file = getattr(run_ns, 'input', None)
+    ec_file = getattr(run_ns, 'ec_file', getattr(run_ns, 'eficaz_file', None))
+    eficaz = getattr(run_ns, 'eficaz', False)
+    pmr_generation = getattr(run_ns, 'pmr_generation', False)
+    smr_generation = getattr(run_ns, 'smr_generation', False)
+    comp = getattr(run_ns, 'comp', None)
+
+    if not input_file:
         logging.warning("Provide input file via ('-i')")
         sys.exit(1)
 
-    if not run_ns.ec_file and \
-            not run_ns.eficaz and \
-            not run_ns.pmr_generation and \
-            not run_ns.smr_generation and \
-            not run_ns.comp:
-                logging.warning("Select one of the options: '-E', '-p' or '-s'")
+    if eficaz:
+        logging.warning(
+                "The EFICAz auto-run option ('-E'/'--EFICAz') has been removed from the supported workflow")
+        logging.warning(
+                "Provide an external EC prediction file via ('-e') and run primary modeling with ('-p')")
+        sys.exit(1)
+
+    if not ec_file and \
+            not pmr_generation and \
+            not smr_generation and \
+            not comp:
+                logging.warning("Select one of the options: '-p' or '-s'")
                 sys.exit(1)
 
-    if run_ns.comp:
-        if not run_ns.pmr_generation:
+    if comp:
+        if not pmr_generation:
             logging.warning(
                     "Primary metabolic modeling option ('-p') should also be selected")
             sys.exit(1)
 
-    if run_ns.ec_file:
-        if run_ns.eficaz:
-            logging.warning(
-                    "EC number file option ('-e') or the EFICAz run option ('-E') should be removed")
-            sys.exit(1)
-
-        if not run_ns.pmr_generation:
+    if ec_file:
+        if not pmr_generation:
             logging.warning(
                     "Primary metabolic modeling option ('-p') should also be selected")
             sys.exit(1)
@@ -80,19 +142,37 @@ def check_input_options(run_ns):
 # Adopted from antismash.utils
 def locate_executable(name):
     "Find an executable in the path and return the full path"
-    # In windows, executables tend to end on .exe
-    if sys.platform == 'win32':
-        name += ".exe"
-    file_path, _ = split(name)
-    if file_path != "":
-        if isfile(name) and os.access(name, os.X_OK):
-            logging.debug("Found executable %r", name)
-            return name
-    for p in os.environ["PATH"].split(os.pathsep):
-        full_name = join(p, name)
-        if isfile(full_name) and os.access(full_name, os.X_OK):
-            logging.debug("Found executable %r", full_name)
-            return full_name
+    valid_windows_suffixes = {".exe", ".bat", ".cmd"}
+
+    def _is_executable(candidate):
+        if not isfile(candidate):
+            return False
+        if sys.platform == 'win32':
+            return os.path.splitext(candidate)[1].lower() in valid_windows_suffixes
+        return os.access(candidate, os.X_OK)
+
+    candidate_names = [name]
+    if sys.platform == 'win32' and os.path.splitext(name)[1] == "":
+        candidate_names = [name + ".exe", name + ".bat", name + ".cmd"]
+
+    repo_root = abspath(join(dirname(__file__), os.pardir))
+    search_paths = [join(repo_root, "bin"), join(os.getcwd(), "bin")]
+    search_paths.extend(os.environ.get("PATH", "").split(os.pathsep))
+
+    for candidate_name in candidate_names:
+        file_path, _ = split(candidate_name)
+        if file_path != "":
+            if _is_executable(candidate_name):
+                logging.debug("Found executable %r", candidate_name)
+                return candidate_name
+
+        for p in search_paths:
+            if not p:
+                continue
+            full_name = join(p, candidate_name)
+            if _is_executable(full_name):
+                logging.debug("Found executable %r", full_name)
+                return full_name
 
     return None
 
@@ -245,7 +325,9 @@ def stabilize_model(model, folder, label, diff_name=False):
     for rxn in model.reactions:
         if rxn.gene_reaction_rule == "()":
             rxn.gene_reaction_rule = ""
-                
+
+    ensure_modern_cobra_attrs(model)
+
     cobra.io.write_sbml_model(model, join('%s' %folder, model_name))
     model = cobra.io.read_sbml_model(join('%s' %folder, model_name))
 

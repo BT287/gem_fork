@@ -46,6 +46,10 @@ class TestOutput_file_manager:
         runtime = time.strftime("Elapsed time %H:%M:%S", time.gmtime(time.time() - start))
         
         output_file_manager.generate_outputs(options.outputfolder3, runtime, options, options, options, options, options, cobra_model = sci_primary_model)
+        assert isfile(join(options.outputfolder3, 'summary_report.json')) == True
+        assert isfile(join(options.outputfolder3, 'report.md')) == True
+        assert isfile(join(options.outputfolder3, 'manifest.json')) == True
+        assert isfile(join(options.outputfolder3, 'reactions.tsv')) == True
         
     
     def test_get_model_reactions(self, sci_secondary_model, options):
@@ -76,7 +80,7 @@ class TestOutput_file_manager:
         assert isfile(join(folder,'rmc_metabolites_gapfilling_needed.txt')) == True
     
     
-    def test_get_model_genes(self, tmpdir, sci_primary_model, options):
+    def test_get_model_genes(self, sci_primary_model, options):
 
         options.orgName = 'sco'
         folder = './tmp'
@@ -119,6 +123,12 @@ class TestOutput_file_manager:
                                                num_bgc_rxn, template_model_gene_list, duplicate_gene_list, options, options)
         
         assert isfile(join(folder,'summary_report.txt')) == True
+        output_file_manager.write_structured_outputs(folder, output_file_manager.get_summary_report(
+            folder, sci_secondary_model, runtime, num_essen_rxn, num_kegg_rxn,
+            num_bgc_rxn, template_model_gene_list, duplicate_gene_list, options, options))
+        assert isfile(join(folder,'summary_report.json')) == True
+        assert isfile(join(folder,'report.md')) == True
+        assert isfile(join(folder,'manifest.json')) == True
         
 
     def test_write_data_for_debug(self, options):

@@ -7,23 +7,34 @@ import os
 import subprocess
 import multiprocessing
 from collections import defaultdict
+from gmsm import utils
+
+
+def _get_diamond_executable():
+    diamond = utils.locate_executable("diamond")
+    if diamond is None:
+        raise FileNotFoundError(
+            "diamond executable not found. On Windows, install diamond.exe on PATH or in bin/."
+        )
+    return diamond
 
 #Make database files using fasta files
 def make_blastDB(io_ns):
-    db_dir = './%s/targetBlastDB' %io_ns.outputfolder2
-    subprocess.call("./bin/diamond makedb --in %s -d %s"%(io_ns.target_fasta, db_dir), shell=True, stderr=subprocess.STDOUT)
+    diamond = _get_diamond_executable()
+    db_dir = os.path.join(io_ns.outputfolder2, "targetBlastDB")
+    subprocess.call([diamond, "makedb", "--in", io_ns.target_fasta, "-d", db_dir], stderr=subprocess.STDOUT)
     
     #Checks if DB is properly created; otherwise shutdown
-    if os.path.isfile('./%s/targetBlastDB.dmnd' %io_ns.outputfolder2) == False:
+    if os.path.isfile(os.path.join(io_ns.outputfolder2, "targetBlastDB.dmnd")) == False:
         logging.debug("Error in make_blastDB: blast DB not created")
     else:
         logging.debug("targetBlastDB.dmnd created")
         
-    db_dir = './%s/tempBlastDB' %io_ns.outputfolder2
-    subprocess.call("./bin/diamond makedb --in %s -d %s"%(io_ns.temp_fasta, db_dir), shell=True, stderr=subprocess.STDOUT)
+    db_dir = os.path.join(io_ns.outputfolder2, "tempBlastDB")
+    subprocess.call([diamond, "makedb", "--in", io_ns.temp_fasta, "-d", db_dir], stderr=subprocess.STDOUT)
     
     #Checks if DB is properly created; otherwise shutdown
-    if os.path.isfile('./%s/tempBlastDB.dmnd' %io_ns.outputfolder2) == False:
+    if os.path.isfile(os.path.join(io_ns.outputfolder2, "tempBlastDB.dmnd")) == False:
         logging.debug("Error in make_blastDB: blast DB not created")
     else:
         logging.debug("tempBlastDB.dmnd created")
@@ -32,7 +43,32 @@ def make_blastDB(io_ns):
 #Output: b0002,ASPK|b0002,0.0,100.00,820
 #"1e-30" is set as a threshold for bidirectional best hits
 def run_blastp(target_fasta, blastp_result, db_dir):
-    subprocess.call("./bin/diamond blastp -d %s -q %s -o %s --evalue 1e-30 --id 30 --outfmt 6 qseqid sseqid evalue score length pident"%(db_dir, target_fasta, blastp_result), shell=True, stderr=subprocess.STDOUT)
+    diamond = _get_diamond_executable()
+    subprocess.call(
+        [
+            diamond,
+            "blastp",
+            "-d",
+            db_dir,
+            "-q",
+            target_fasta,
+            "-o",
+            blastp_result,
+            "--evalue",
+            "1e-30",
+            "--id",
+            "30",
+            "--outfmt",
+            "6",
+            "qseqid",
+            "sseqid",
+            "evalue",
+            "score",
+            "length",
+            "pident",
+        ],
+        stderr=subprocess.STDOUT,
+    )
 
 #Input: Results file from "run_blastp"
 #Output: '\t' inserted between each element of the input

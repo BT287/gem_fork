@@ -24,7 +24,6 @@ import sys
 import tempfile
 import time
 from Bio import SeqIO
-from Bio.Alphabet import generic_protein
 from Bio.Seq import Seq
 from gmsm import utils
 
@@ -70,9 +69,9 @@ class EFICAzECPrediction:
     def _getMultiFastaList(self, io_ns):
         allFastaList = []
 
-        for gene_id, fasta_seq in io_ns.targetGenome_locusTag_aaSeq_dict.iteritems():
+        for gene_id, fasta_seq in io_ns.targetGenome_locusTag_aaSeq_dict.items():
             if "-" in str(fasta_seq):
-                fasta_seq = Seq(str(fasta_seq).replace("-",""), generic_protein)
+                fasta_seq = Seq(str(fasta_seq).replace("-", ""))
 
             # Never write empty fasta entries
             elif len(fasta_seq) == 0:
@@ -101,7 +100,7 @@ class EFICAzECPrediction:
             maxChunks = len(allFastaList)
 
         if maxChunks == 0:
-            logging.warn('No input files for %s', self.inputfile)
+            logging.warning('No input files for %s', self.inputfile)
             return []
         equalpartsizes = int(len(allFastaList) / maxChunks)
 
@@ -241,7 +240,7 @@ class EFICAzECPrediction:
                     if r:
                         EC = r.group(1) + ".-"
                         ECDesc = r.group(2)
-                        if not EC3Pred.has_key(antiSMASH_ID):
+                        if antiSMASH_ID not in EC3Pred:
                             EC3Pred[antiSMASH_ID] = []
                             EC3Info[antiSMASH_ID] = []
                         EC3Pred[antiSMASH_ID].append(EC)
@@ -253,14 +252,14 @@ class EFICAzECPrediction:
                     if r:
                         EC = r.group(1)
                         ECDesc = r.group(2)
-                        if not EC4Pred.has_key(antiSMASH_ID):
+                        if antiSMASH_ID not in EC4Pred:
                             EC4Pred[antiSMASH_ID] = []
                             EC4Info[antiSMASH_ID] = []
                         EC4Pred[antiSMASH_ID].append(EC)
                         EC4Info[antiSMASH_ID].append(ECDesc)
                         continue
 
-                logging.warn("Could not parse line %s:" % line)
+                logging.warning("Could not parse line %s:" % line)
             f.close()
 
             self.EC4Dict.update(EC4Pred)
@@ -305,12 +304,12 @@ class EFICAzECPrediction:
             self._parseEFICAzResults(chunkDirs)
             self._copyFiles(chunkDirs)
         else:
-            logging.warn("ECpredictor: No protein coding sequences found for in record: %s" % self.inputfile)
+            logging.warning("ECpredictor: No protein coding sequences found for in record: %s" % self.inputfile)
 
     def getEC3(self, antiSMASH_ID):
         """Return list of EC3 numbers for antiSMASH_ID"""
 
-        if self.EC3Dict.has_key(antiSMASH_ID):
+        if antiSMASH_ID in self.EC3Dict:
             return self.EC3Dict[antiSMASH_ID]
         else:
             return None
@@ -318,7 +317,7 @@ class EFICAzECPrediction:
     def getEC3Info(self, antiSMASH_ID):
         """Return list of infos for EC3 number prediction for antiSMASH_ID"""
 
-        if self.EC3InfoDict.has_key(antiSMASH_ID):
+        if antiSMASH_ID in self.EC3InfoDict:
             return self.EC3InfoDict[antiSMASH_ID]
         else:
             return None
@@ -326,7 +325,7 @@ class EFICAzECPrediction:
     def getEC4(self, antiSMASH_ID):
         """Return list of EC4 numbers for antiSMASH_ID"""
 
-        if self.EC4Dict.has_key(antiSMASH_ID):
+        if antiSMASH_ID in self.EC4Dict:
             return self.EC4Dict[antiSMASH_ID]
         else:
             return None
@@ -334,7 +333,7 @@ class EFICAzECPrediction:
     def getEC4Info(self, antiSMASH_ID):
         """Return list of infos for EC4 number prediction for antiSMASH_ID"""
 
-        if self.EC4InfoDict.has_key(antiSMASH_ID):
+        if antiSMASH_ID in self.EC4InfoDict:
             return self.EC4InfoDict[antiSMASH_ID]
         else:
             return None
@@ -384,7 +383,7 @@ class EFICAzECPrediction:
 def getECs1(run_ns, io_ns, seq_record):
     logging.debug("Predicting EC numbers with EFICAz (getECs1)")
 
-    if not 'cpus' in run_ns:
+    if not hasattr(run_ns, 'cpus'):
         run_ns.cpus = 1
 
     inputfile = os.path.basename(run_ns.input).split('.')[0]
@@ -399,13 +398,13 @@ def getECs1(run_ns, io_ns, seq_record):
 
         notes = []
 
-        if feature.qualifiers.has_key("note"):
+        if "note" in feature.qualifiers:
             notes = feature.qualifiers['note']
 
         if EFICAzECs.getEC4(featureID):
             logging.debug("Annotating %s" % featureID)
-            if feature.qualifiers.has_key('EC_number'):
-                logging.warn(
+            if 'EC_number' in feature.qualifiers:
+                logging.warning(
                     'ECpredictor[eficaz]: Overwriting existing EC annotation: %s with %s'
                     %(", ".join(feature.qualifiers['EC_number']),
                     ", ".join(EFICAzECs.getEC4(featureID)))
@@ -419,10 +418,10 @@ def getECs1(run_ns, io_ns, seq_record):
 
         # Only annotate 3 digit EC if no 4 digit EC is available
         if (EFICAzECs.getEC3(featureID) and not EFICAzECs.getEC4(featureID)):
-            if feature.qualifiers.has_key('EC_number'):
+            if 'EC_number' in feature.qualifiers:
                 if not re.search(
                         "\d+\.\d+\.\d+\.\d+", " ".join(feature.qualifiers['EC_number'])):
-                    logging.warn(
+                    logging.warning(
                         'ECpredictor[eficaz]: Overwriting existing EC annotation: %s  with %s'
                         %(", ".join(feature.qualifiers['EC_number']),
                         ", ".join(EFICAzECs.getEC3(featureID)))
@@ -435,7 +434,7 @@ def getECs1(run_ns, io_ns, seq_record):
                 EFICAzECs.getEC3(featureID)),
                 "; ".join(EFICAzECs.getEC3Info(featureID)))
                 )
-            if not feature.qualifiers.has_key('EC_number'):
+            if 'EC_number' not in feature.qualifiers:
                 feature.qualifiers['EC_number'] = EFICAzECs.getEC3(featureID)
 
         feature.qualifiers['note'] = notes
@@ -449,7 +448,7 @@ def getECs1(run_ns, io_ns, seq_record):
 def getECs2(run_ns, io_ns):
     logging.debug("Predicting EC numbers with EFICAz (getECs2)")
 
-    if not 'cpus' in run_ns:
+    if not hasattr(run_ns, 'cpus'):
         run_ns.cpus = 1
 
     inputfile = os.path.basename(run_ns.input).split('.')[0]

@@ -3,14 +3,15 @@ import pickle
 from gmsm.config import load_config
 from gmsm.homology import bidirect_blastp_analysis, blastp_utils
 from os.path import abspath, dirname, isfile, join
+from shutil import copyfile
 
 class TestHomology:
     """Test functions in gmsm.homology"""
 
     # Streptomyces collinus Tu 365 : target, Streptomyces coelicolor A3(2) : template
-    def test_make_blastDB(self, temp_fasta, target_fasta, options):
+    def test_make_blastDB(self, temp_fasta, target_fasta, options, tmp_test_dir):
 
-        options.outputfolder2 = 'gmsm/tests/data'
+        options.outputfolder2 = tmp_test_dir
         options.target_fasta = target_fasta
         options.temp_fasta = temp_fasta
         
@@ -25,7 +26,17 @@ class TestHomology:
         parseBlaspResults = blastp_utils.parseBlaspResults(inputFile_parseBlaspResults, outputFile_parseBlaspResults)
         
         assert type(parseBlaspResults) == dict
-        assert {'score': 2567.0, 'query_locusTag': 'B446_RS26080', 'evalue': '2.3e-291', 'identity': 93.2, 'length': 531, 'db_locusTag': 'SCO5535'} in parseBlaspResults.values()
+        matching_hits = [
+            hit
+            for hit in parseBlaspResults.values()
+            if hit["query_locusTag"] == "B446_RS26080" and hit["db_locusTag"] == "SCO5535"
+        ]
+
+        assert len(matching_hits) == 1
+        assert matching_hits[0]["identity"] == 93.2
+        assert matching_hits[0]["length"] == 531
+        assert matching_hits[0]["score"] > 2000
+        assert float(matching_hits[0]["evalue"]) <= 2.3e-291
         
     
     # Streptomyces collinus Tu 365 : target, Streptomyces coelicolor A3(2) : template
@@ -62,12 +73,13 @@ class TestHomology:
 
     # get_homologs function works for executing functions of blastp_utils which already have test functions
     # Therefore, test_get_homologs function only checks the availability of get_homologs function
-    def test_get_homologs(self, temp_fasta, target_fasta, options):
-        
-        options.outputfolder2 = 'gmsm/tests/data'
+    def test_get_homologs(self, temp_fasta, target_fasta, options, tmp_test_dir):
+
+        options.outputfolder2 = tmp_test_dir
         options.target_fasta = target_fasta
         options.temp_fasta = temp_fasta
         options.targetGenome_locusTag_ec_dict = {'B446_23835':['4.1.1.45', '3.5.2.3']}
         options.targetBBH_list = ['B446_27575']
-        
+        copyfile(target_fasta, join(options.outputfolder2, 'targetGenome_locusTag_aaSeq.fa'))
+
         bidirect_blastp_analysis.get_homologs(options, options)

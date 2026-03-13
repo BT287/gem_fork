@@ -29,8 +29,7 @@ class ParseMNXref(object):
         pickle_dir = join(input2_tmp_dir, 'bigg_old_new_dict.p')
 
         if os.path.isfile(pickle_dir):
-            with open(pickle_dir, 'rb') as f:
-                bigg_old_new_dict = pickle.load(f)
+            bigg_old_new_dict = gmsm.utils.load_legacy_pickle(pickle_dir)
 
         elif not os.path.isfile(pickle_dir):
             bigg_old_new_dict = {}
@@ -446,7 +445,7 @@ class ParseMNXref(object):
         for each_cobra_reaction in self.cobra_reactions:
             logging.debug("Adding reaction %s to 'mnxref_model'"
                           %each_cobra_reaction.id)
-            cobra_model.add_reaction(each_cobra_reaction)
+            cobra_model.add_reactions([each_cobra_reaction])
 
         for metabolite in cobra_model.metabolites:
             old_metab = metabolite.id
