@@ -446,6 +446,8 @@ def write_template_candidates_tsv(folder, result):
         'model',
         'backend',
         'score',
+        'primary_metric',
+        'secondary_metric',
         'ani',
         'aligned_fraction',
         'aligned_fraction_ref',
@@ -477,4 +479,3 @@ def run_command(command, failure_message):
         stdout = out.decode('utf-8', errors='replace') if isinstance(out, bytes) else str(out)
         stderr = err.decode('utf-8', errors='replace') if isinstance(err, bytes) else str(err)
         raise RuntimeError("%s\nSTDOUT:\n%s\nSTDERR:\n%s" % (failure_message, stdout, stderr))
-

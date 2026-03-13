@@ -1,3 +1,4 @@
+import csv
 import json
 from os.path import isfile, join
 
@@ -150,3 +151,12 @@ class TestTemplateRecommendation:
 
         assert saved['recommended_template'] == 'mtu'
         assert saved['candidates'][0]['template_id'] == 'mtu'
+
+        with open(join(options.outputfolder0, 'template_candidates.tsv'), newline='') as handle:
+            reader = csv.DictReader(handle, delimiter='\t')
+            rows = list(reader)
+
+        assert reader.fieldnames is not None
+        assert 'primary_metric' in reader.fieldnames
+        assert 'secondary_metric' in reader.fieldnames
+        assert rows[0]['template_id'] == 'mtu'
