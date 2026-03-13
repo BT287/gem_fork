@@ -80,6 +80,7 @@ If you want `--auto-template` to prefer `skani`, also verify:
 
 ```bash
 skani -V
+python scripts/check_template_genome_bank.py --allow-missing
 ```
 
 Git LFS setup:
@@ -243,6 +244,13 @@ Template genome assets for `skani` are configured through:
 - `gmsm/io/data/input1/genomes/` by default
 - or `--template-genome-bank <path>` for an external genome bank
 
+To validate that a genome bank is complete before running GMSM:
+
+```bash
+python scripts/check_template_genome_bank.py
+python scripts/check_template_genome_bank.py --bank /path/to/template_genomes
+```
+
 Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
 
 ## Canonical Output Files
@@ -302,6 +310,7 @@ Source: `gmsm/config/gmsm.cfg`
 | `gmsm/tests/` | pytest suite |
 | `input/` | sample inputs |
 | `bin/` | local executables such as DIAMOND |
+| `scripts/` | helper scripts such as genome-bank validation |
 | `environment.yml` | validated conda environment |
 | `requirements.txt` | pip fallback dependency list |
 
