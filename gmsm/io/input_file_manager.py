@@ -21,7 +21,7 @@ def make_folder(folder):
 
 
 def setup_outputfolders(run_ns, io_ns):
-    folders = ['1_EFICAz_results', '2_blastp_results',
+    folders = ['0_template_recommendation', '1_EFICAz_results', '2_blastp_results',
             '3_primary_metabolic_model', '4_complete_model',
             'tmp_model_files', 'tmp_data_files']
 
@@ -29,31 +29,36 @@ def setup_outputfolders(run_ns, io_ns):
     if run_ns.outputfolder.endswith(('/', '\\')):
         run_ns.outputfolder = run_ns.outputfolder[:-1]
 
+    if getattr(run_ns, 'auto_template', False):
+        #'0_template_recommendation'
+        io_ns.outputfolder0 = os.path.join(run_ns.outputfolder, folders[0])
+        make_folder(io_ns.outputfolder0)
+
     if run_ns.eficaz:
         #'1_EFICAz_results'
-        io_ns.outputfolder1 = os.path.join(run_ns.outputfolder, folders[0])
+        io_ns.outputfolder1 = os.path.join(run_ns.outputfolder, folders[1])
         make_folder(io_ns.outputfolder1)
     if run_ns.pmr_generation:
         #'2_blastp_results'
-        io_ns.outputfolder2 = os.path.join(run_ns.outputfolder, folders[1])
+        io_ns.outputfolder2 = os.path.join(run_ns.outputfolder, folders[2])
         make_folder(io_ns.outputfolder2)
         #'3_primary_metabolic_model'
-        io_ns.outputfolder3 = os.path.join(run_ns.outputfolder, folders[2])
+        io_ns.outputfolder3 = os.path.join(run_ns.outputfolder, folders[3])
         make_folder(io_ns.outputfolder3)
     if run_ns.smr_generation:
         #'3_primary_metabolic_model'
-        io_ns.outputfolder3 = os.path.join(run_ns.outputfolder, folders[2])
+        io_ns.outputfolder3 = os.path.join(run_ns.outputfolder, folders[3])
         make_folder(io_ns.outputfolder3)
         #'4_complete_model'
-        io_ns.outputfolder4 = os.path.join(run_ns.outputfolder, folders[3])
+        io_ns.outputfolder4 = os.path.join(run_ns.outputfolder, folders[4])
         make_folder(io_ns.outputfolder4)
 
     #'tmp_model_files'
-    io_ns.outputfolder5 = os.path.join(run_ns.outputfolder, folders[4])
+    io_ns.outputfolder5 = os.path.join(run_ns.outputfolder, folders[5])
     make_folder(io_ns.outputfolder5)
 
     #'tmp_data_files'
-    io_ns.outputfolder6 = os.path.join(run_ns.outputfolder, folders[5])
+    io_ns.outputfolder6 = os.path.join(run_ns.outputfolder, folders[6])
     make_folder(io_ns.outputfolder6)
 
 
@@ -62,6 +67,9 @@ def show_input_options(run_ns):
     logging.debug("input_file: %s", getattr(run_ns, 'input', None))
     logging.debug("outputfolder: %s", getattr(run_ns, 'outputfolder', None))
     logging.debug("template_model_organism: %s", getattr(run_ns, 'orgName', None))
+    logging.debug("automatic_template_recommendation: %s", getattr(run_ns, 'auto_template', None))
+    logging.debug("template_recommendation_backend: %s", getattr(run_ns, 'template_backend', None))
+    logging.debug("template_recommendation_topk: %s", getattr(run_ns, 'template_topk', None))
     logging.debug("eficaz: %s", getattr(run_ns, 'eficaz', None))
     logging.debug("primary_metabolic_modeling: %s", getattr(run_ns, 'pmr_generation', None))
     logging.debug("secondary_metabolic_modeling: %s", getattr(run_ns, 'smr_generation', None))

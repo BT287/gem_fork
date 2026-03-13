@@ -9,11 +9,12 @@ This repository is self-contained. A first-time user should be able to create th
 Given a genome input, GMSM can:
 
 1. parse genome features and amino-acid sequences
-2. find homologs against a template GEM using DIAMOND
-3. prune unsupported template reactions
-4. add primary-metabolism reactions from EC annotations and KEGG
-5. add secondary-metabolism reactions from antiSMASH BGC annotations
-6. export SBML and review tables for downstream analysis
+2. optionally recommend a template GEM automatically before reconstruction
+3. find homologs against a template GEM using DIAMOND
+4. prune unsupported template reactions
+5. add primary-metabolism reactions from EC annotations and KEGG
+6. add secondary-metabolism reactions from antiSMASH BGC annotations
+7. export SBML and review tables for downstream analysis
 
 ## Recommended Runtime
 
@@ -143,26 +144,41 @@ python run_gmsm.py \
 
 Use a fresh `-o` directory name when you want a clean comparison. Reusing an existing output directory overwrites files for the stages you rerun, and an older `4_complete_model/` can remain if you later rerun only `-p`.
 
+Automatic template recommendation before primary modeling:
+
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  -e input/NC_021985.1_deepec.txt \
+  --auto-template \
+  -p -s -d -c 4 \
+  -o output_auto_template
+```
+
+`--auto-template` prefers `skani` when a template genome bank and `skani` executable are available. Otherwise it falls back to a DIAMOND-based proteome ranking using the bundled template proteomes.
+
 ## At-a-Glance Workflow
 
 Use this mental model when reading the repo:
 
 1. prepare genome input and optional EC annotations
-2. parse CDS and antiSMASH features
-3. run DIAMOND homology against the template GEM
-4. prune unsupported template reactions
-5. add primary-metabolism reactions from EC and KEGG
-6. optionally add secondary-metabolism reactions from BGC annotations
-7. export SBML, summaries, and canonical tables
+2. optionally rank bundled template GEMs and pick the best starting template
+3. parse CDS and antiSMASH features
+4. run DIAMOND homology against the selected template GEM
+5. prune unsupported template reactions
+6. add primary-metabolism reactions from EC and KEGG
+7. optionally add secondary-metabolism reactions from BGC annotations
+8. export SBML, summaries, and canonical tables
 
 Short form:
 
-`input -> homology -> prune -> primary augmentation -> secondary augmentation -> SBML and reports`
+`input -> optional template recommendation -> homology -> prune -> primary augmentation -> secondary augmentation -> SBML and reports`
 
 ## Pipeline Architecture
 
 | Stage | Main module | Purpose |
 |---|---|---|
+| Template recommendation | `gmsm/template_recommendation.py` | rank template GEM candidates before primary modeling |
 | Input parsing | `gmsm/io/input_file_manager.py` | load genome records, CDS, EC annotations, BGC counts |
 | Homology | `gmsm/homology/` | build DIAMOND databases and reciprocal best hits |
 | Primary pruning | `gmsm/primary_model/prunPhase_utils.py` | remove unsupported template reactions and swap GPRs |
@@ -184,6 +200,7 @@ Short form:
 
 GMSM writes:
 
+- `0_template_recommendation/` for optional automatic template ranking
 - `3_primary_metabolic_model/` for the primary-model stage
 - `4_complete_model/` for the final model with secondary metabolism
 
@@ -197,12 +214,19 @@ Each output folder now contains:
 - canonical TSV tables such as `reactions.tsv` and `metabolites.tsv`
 - legacy `rmc_*.txt` review files for backward compatibility
 
+When `--auto-template` is enabled, `0_template_recommendation/` contains:
+
+- `template_candidates.tsv`: ranked template candidates with backend-specific metrics
+- `template_recommendation.json`: selected template, confidence, and the top-k candidate list
+
 Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
 
 ## Canonical Output Files
 
 | File | Purpose |
 |---|---|
+| `0_template_recommendation/template_candidates.tsv` | ranking evidence for the selected template |
+| `0_template_recommendation/template_recommendation.json` | machine-readable template recommendation result |
 | `summary_report.json` | compact metadata for pipelines and UI layers |
 | `report.md` | quick human-readable run report |
 | `reactions.tsv` | all reactions |
@@ -232,6 +256,9 @@ Source: `gmsm/config/gmsm.cfg`
 | `-i` | input GenBank or FASTA |
 | `-o` | output directory |
 | `-m` | template GEM organism |
+| `--auto-template` | automatically rank and select a starting template before primary modeling |
+| `--template-backend` | template-ranking backend: `auto`, `skani`, or `diamond` |
+| `--template-topk` | number of ranked template candidates to keep in the recommendation output |
 | `-e` | EC prediction file |
 | `-p` | primary modeling |
 | `-s` | secondary modeling |

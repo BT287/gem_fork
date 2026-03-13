@@ -107,6 +107,7 @@ def check_input_options(run_ns):
     pmr_generation = getattr(run_ns, 'pmr_generation', False)
     smr_generation = getattr(run_ns, 'smr_generation', False)
     comp = getattr(run_ns, 'comp', None)
+    template_topk = getattr(run_ns, 'template_topk', 3)
 
     if not input_file:
         logging.warning("Provide input file via ('-i')")
@@ -137,6 +138,10 @@ def check_input_options(run_ns):
             logging.warning(
                     "Primary metabolic modeling option ('-p') should also be selected")
             sys.exit(1)
+
+    if template_topk is not None and int(template_topk) < 1:
+        logging.warning("Template recommendation requires '--template-topk' to be at least 1")
+        sys.exit(1)
 
 
 # Adopted from antismash.utils

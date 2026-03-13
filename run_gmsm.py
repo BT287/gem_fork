@@ -37,6 +37,7 @@ from gmsm.secondary_model.run_secondary_modeling import (
     get_target_nonprod_monomers_for_gapfilling,
     run_gapfilling
     )
+from gmsm.template_recommendation import recommend_template
 
 
 def main():
@@ -90,6 +91,21 @@ def main():
                         "'sce': iMM904 (19321003); Saccharomyces cerevisiae S288C\n"
                         "'sco': iKS1317 (30525286); Streptomyces coelicolor A3(2)"
                         )
+    group.add_argument('--auto-template',
+                        dest='auto_template',
+                        default=False,
+                        action='store_true',
+                        help="Automatically recommend a template before primary modeling")
+    group.add_argument('--template-backend',
+                        dest='template_backend',
+                        default='auto',
+                        choices=['auto', 'skani', 'diamond'],
+                        help="Backend to use for automatic template recommendation (default: %(default)s)")
+    group.add_argument('--template-topk',
+                        dest='template_topk',
+                        default=3,
+                        type=int,
+                        help="How many template candidates to keep in the recommendation output (default: %(default)s)")
 
     group = parser.add_argument_group('GMSM modeling options',
                         "At least one of the two options should be selected:"
@@ -188,6 +204,11 @@ def main():
     # Primary metabolic modeling
     if run_ns.pmr_generation:
         get_target_genome_from_input(filetype, run_ns, io_ns)
+
+        if run_ns.auto_template and io_ns.targetGenome_locusTag_aaSeq_dict:
+            recommend_template(filetype, run_ns, io_ns)
+        elif run_ns.auto_template:
+            logging.warning("Automatic template recommendation skipped; no amino acid sequences found in input genome data")
 
         if run_ns.ec_file:
             get_ec_file(run_ns, io_ns)

@@ -22,12 +22,14 @@ class TestInput_file_manager:
     def test_setup_outputfolders(self, options):
         
         options.outputfolder = './tmp'
+        options.auto_template = True
         options.eficaz = True
         options.pmr_generation = True
         options.smr_generation= True
         
         input_file_manager.setup_outputfolders(options, options)
         
+        assert isdir(options.outputfolder0) == True
         assert isdir(options.outputfolder1) == True
         assert isdir(options.outputfolder2) == True
         assert isdir(options.outputfolder3) == True
@@ -35,6 +37,7 @@ class TestInput_file_manager:
         assert isdir(options.outputfolder5) == True
         assert isdir(options.outputfolder6) == True
         
+        shutil.rmtree(options.outputfolder0)
         shutil.rmtree(options.outputfolder1)
         shutil.rmtree(options.outputfolder2)
         shutil.rmtree(options.outputfolder3)

@@ -2,6 +2,8 @@
 
 GMSM keeps legacy text outputs for backward compatibility and now also writes canonical files for UI layers and downstream pipelines.
 
+When automatic template recommendation is enabled, GMSM also writes a `0_template_recommendation/` stage before the primary-model output directories.
+
 ## Design Rules
 
 - legacy files are preserved
@@ -17,6 +19,15 @@ GMSM keeps legacy text outputs for backward compatibility and now also writes ca
 | `summary_report.json` | JSON | machine-readable summary |
 | `report.md` | Markdown | human-readable output report |
 | `manifest.json` | JSON | inventory of generated files |
+
+## Template Recommendation Stage
+
+These files appear in `0_template_recommendation/` when `--auto-template` is enabled.
+
+| File | Format | Meaning |
+|---|---|---|
+| `template_candidates.tsv` | TSV | ranked template candidates with backend-specific metrics |
+| `template_recommendation.json` | JSON | selected template, confidence, backend, and the retained top-k candidates |
 
 ## Canonical Tables
 
