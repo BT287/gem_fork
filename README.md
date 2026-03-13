@@ -112,6 +112,8 @@ The curated release bundle is intended to contain the full template panel as a s
 
 See the bundle spec in [`gmsm/io/data/input1/template_genome_bundle_spec.md`](gmsm/io/data/input1/template_genome_bundle_spec.md) if you need the exact archive layout.
 
+`10` is the current curated template panel, not a hard limit. A larger panel only makes sense when each added organism has a complete template package in GMSM: a template GEM, the matching template proteome, and the metadata needed for template recommendation and downstream reconstruction. Adding arbitrary reference genomes without those matching template assets does not improve the actual reconstruction pipeline.
+
 See the curated source manifest for the reference genomes behind the template bank:
 
 ```bash
@@ -126,7 +128,7 @@ python scripts/fetch_template_genome_bank.py --from-manifest
 python scripts/check_template_genome_bank.py --allow-missing
 ```
 
-This currently installs the `NCBI-direct` templates automatically and reports any `manual-source` templates that still need a separate bundle. In the current manifest, `bsu`, `clj`, `cre`, `eco`, `hpy`, `mtu`, `ppu`, `sce`, and `sco` are direct-download templates, while `nsal` remains manual-source.
+This currently installs all `10` curated templates directly from the manifest. The current direct-download set is `bsu`, `clj`, `cre`, `eco`, `hpy`, `mtu`, `nsal`, `ppu`, `sce`, and `sco`.
 
 Maintainers can build a curated release bundle from a complete local bank with:
 

@@ -1,6 +1,8 @@
 # GMSM I/O
 input/
 output*/
+output*.zip
+dist/
 kegg_cache/
 gmsm/tests/data/model.xml
 scripts/bigg/model.xml

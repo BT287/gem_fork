@@ -6,7 +6,6 @@ import json
 import os
 import shutil
 import sys
-import tempfile
 import zipfile
 
 from check_template_genome_bank import (
@@ -138,9 +137,15 @@ def main():
     source_manifest = load_source_manifest(os.path.abspath(args.manifest))
     templates, checksums = build_bundle_payload(catalog, source_manifest, input1_root, bank_root)
 
-    with tempfile.TemporaryDirectory(prefix='gmsm-template-bundle-') as temp_dir:
-        staging_root = os.path.join(temp_dir, 'bundle')
-        genomes_root = os.path.join(staging_root, 'genomes')
+    staging_parent = os.path.dirname(output_path) or os.getcwd()
+    bundle_stem = os.path.splitext(os.path.basename(output_path))[0]
+    staging_root = os.path.join(staging_parent, '.%s_staging' % bundle_stem)
+    genomes_root = os.path.join(staging_root, 'genomes')
+
+    if os.path.isdir(staging_root):
+        shutil.rmtree(staging_root)
+
+    try:
         os.makedirs(genomes_root, exist_ok=True)
 
         for template_id in sorted(catalog):
@@ -164,6 +169,9 @@ def main():
 
         with zipfile.ZipFile(output_path, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
             add_tree_to_zip(archive, staging_root)
+    finally:
+        if os.path.isdir(staging_root):
+            shutil.rmtree(staging_root, ignore_errors=True)
 
     print('Bundle written to: %s' % output_path)
     print('Templates included: %d' % len(templates))

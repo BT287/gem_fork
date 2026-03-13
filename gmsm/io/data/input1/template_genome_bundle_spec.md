@@ -46,6 +46,7 @@ Rules:
 - all `10` template genomes are included in the curated release bundle
 - `checksums.tsv` records the SHA-256 checksum for each FASTA
 - `bundle_manifest.json` records the bundle version, template count, per-template relative path, and source metadata snapshot
+- `10` is the current curated panel size, not a hard ceiling; the panel should only grow when a new organism has a full template package in GMSM, meaning a template GEM plus the template proteome and metadata needed for pruning and augmentation
 - users install the bundle from inside `gem_fork` with:
 
 ```bash

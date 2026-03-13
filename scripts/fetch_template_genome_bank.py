@@ -82,6 +82,11 @@ def extract_bundle(bundle_path, extract_dir):
     raise RuntimeError('Unsupported bundle format: %s' % bundle_path)
 
 
+def is_fasta_file(path):
+    lower_name = path.lower()
+    return lower_name.endswith(('.fna', '.fa', '.fasta'))
+
+
 def find_candidate_file(extract_dir, relative_path):
     normalized_relative = os.path.normpath(relative_path)
     direct_candidate = os.path.join(extract_dir, normalized_relative)
@@ -233,15 +238,18 @@ def install_from_manifest(entries, dest_root, input1_root, force=False):
                 temp_dir,
                 default_name='%s_download.bundle' % template_id,
             )
-            extract_dir = os.path.join(temp_dir, template_id)
-            os.makedirs(extract_dir, exist_ok=True)
-            extract_bundle(bundle_path, extract_dir)
+            if is_fasta_file(bundle_path):
+                source_path = bundle_path
+            else:
+                extract_dir = os.path.join(temp_dir, template_id)
+                os.makedirs(extract_dir, exist_ok=True)
+                extract_bundle(bundle_path, extract_dir)
 
-            source_path = find_single_genome_fasta(extract_dir, accession=entry.get('accession'))
-            if source_path is None:
-                raise RuntimeError(
-                    'Could not locate a unique genome FASTA inside the downloaded bundle for template %s' % template_id
-                )
+                source_path = find_single_genome_fasta(extract_dir, accession=entry.get('accession'))
+                if source_path is None:
+                    raise RuntimeError(
+                        'Could not locate a unique genome FASTA inside the downloaded bundle for template %s' % template_id
+                    )
 
             relative_path = normalize_relative_path(entry['expected_relative_path'])
             destination_path = os.path.join(dest_root, relative_path)
