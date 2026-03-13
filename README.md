@@ -90,6 +90,13 @@ python scripts/fetch_template_genome_bank.py --bundle /path/to/template_genome_b
 python scripts/check_template_genome_bank.py
 ```
 
+See the curated source manifest for the reference genomes behind the template bank:
+
+```bash
+python scripts/show_template_genome_sources.py
+python scripts/show_template_genome_sources.py --template sco
+```
+
 Git LFS setup:
 
 ```bash
@@ -182,6 +189,13 @@ The current recommendation flow is intentionally staged for runtime safety:
 1. coarse template ranking with `skani` when a genome bank is available, otherwise DIAMOND proteome coverage
 2. optional reciprocal-hit reranking on only the top `--template-rerank-topn` candidates
 3. handoff of the selected template into the existing homology, pruning, augmentation, and secondary-modeling pipeline
+
+Biological intuition:
+
+- the template genome bank is the set of reference organisms that GMSM is allowed to compare against
+- `skani` asks which reference genome is closest to the target genome at the whole-genome level
+- BBH reranking then asks which of the top candidates best preserves the template model genes at the protein level
+- the selected template becomes the starting metabolic scaffold for pruning and augmentation
 
 ## At-a-Glance Workflow
 
