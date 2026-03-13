@@ -97,6 +97,15 @@ python scripts/show_template_genome_sources.py
 python scripts/show_template_genome_sources.py --template sco
 ```
 
+If you want GMSM to download every directly available reference genome from the manifest:
+
+```bash
+python scripts/fetch_template_genome_bank.py --from-manifest
+python scripts/check_template_genome_bank.py --allow-missing
+```
+
+This currently installs the `NCBI-direct` templates automatically and reports any `manual-source` templates that still need a separate bundle.
+
 Git LFS setup:
 
 ```bash
@@ -279,6 +288,12 @@ python scripts/fetch_template_genome_bank.py --bundle /path/to/template_genome_b
 ```
 
 The bundle may be a local `.zip`/`.tar.gz` file or an HTTP(S) URL.
+
+To preview which templates are direct-downloadable versus manual-only:
+
+```bash
+python scripts/fetch_template_genome_bank.py --from-manifest --plan
+```
 
 Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
 
