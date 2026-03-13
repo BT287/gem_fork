@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
 import argparse
+import http.client
 import json
 import os
 import shutil
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.parse
 import urllib.request
 import zipfile
+from urllib.error import HTTPError, URLError
 
 from check_template_genome_bank import (
     collect_bank_status,
@@ -31,13 +34,37 @@ def fetch_bundle(source, workdir, default_name='template_genome_bank.bundle'):
     if is_url(source):
         filename = os.path.basename(urllib.parse.urlparse(source).path) or default_name
         destination = os.path.join(workdir, filename)
-        urllib.request.urlretrieve(source, destination)
+        download_url(source, destination)
         return destination
 
     source = os.path.abspath(source)
     if not os.path.isfile(source):
         raise FileNotFoundError('Bundle not found: %s' % source)
     return source
+
+
+def download_url(source, destination, max_attempts=4, chunk_size=1024 * 1024):
+    last_error = None
+    request = urllib.request.Request(source, headers={'User-Agent': 'gem_fork-template-bank/1.0'})
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with urllib.request.urlopen(request) as response, open(destination, 'wb') as handle:
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    handle.write(chunk)
+            return
+        except (HTTPError, URLError, http.client.IncompleteRead, ConnectionError, TimeoutError, OSError) as exc:
+            last_error = exc
+            if os.path.exists(destination):
+                os.remove(destination)
+            if attempt == max_attempts:
+                break
+            time.sleep(min(5 * attempt, 20))
+
+    raise RuntimeError('Failed to download %s after %d attempts: %s' % (source, max_attempts, last_error))
 
 
 def extract_bundle(bundle_path, extract_dir):
@@ -200,6 +227,7 @@ def install_from_manifest(entries, dest_root, input1_root, force=False):
     with tempfile.TemporaryDirectory(prefix='gmsm-template-manifest-') as temp_dir:
         for template_id in sorted(direct_entries):
             entry = direct_entries[template_id]
+            print('Downloading template genome: %s (%s)' % (template_id, entry.get('accession')))
             bundle_path = fetch_bundle(
                 entry['download_url'],
                 temp_dir,
