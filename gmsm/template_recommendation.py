@@ -1,4 +1,5 @@
 import csv
+from dataclasses import asdict, dataclass
 import json
 import logging
 import os
@@ -28,7 +29,42 @@ _TEMPLATE_METADATA = {
 _NUCLEOTIDE_CHARS = set("ACGTUNWSMKRYBDHV-")
 
 
+@dataclass(frozen=True)
+class TemplateScoreConfig:
+    ani_weight: float = 0.7
+    af_weight: float = 0.3
+    diamond_hit_weight: float = 0.85
+    diamond_identity_weight: float = 0.15
+    bbh_template_cov_weight: float = 0.7
+    bbh_target_cov_weight: float = 0.3
+    coarse_weight: float = 0.6
+    rerank_weight: float = 0.4
+
+    @classmethod
+    def from_namespace(cls, run_ns):
+        return cls(
+            ani_weight=float(getattr(run_ns, 'template_ani_weight', cls.ani_weight)),
+            af_weight=float(getattr(run_ns, 'template_af_weight', cls.af_weight)),
+            diamond_hit_weight=float(getattr(run_ns, 'template_diamond_hit_weight', cls.diamond_hit_weight)),
+            diamond_identity_weight=float(
+                getattr(run_ns, 'template_diamond_identity_weight', cls.diamond_identity_weight)
+            ),
+            bbh_template_cov_weight=float(
+                getattr(run_ns, 'template_bbh_template_weight', cls.bbh_template_cov_weight)
+            ),
+            bbh_target_cov_weight=float(
+                getattr(run_ns, 'template_bbh_target_weight', cls.bbh_target_cov_weight)
+            ),
+            coarse_weight=float(getattr(run_ns, 'template_coarse_weight', cls.coarse_weight)),
+            rerank_weight=float(getattr(run_ns, 'template_rerank_weight', cls.rerank_weight)),
+        )
+
+    def to_dict(self):
+        return asdict(self)
+
+
 def recommend_template(filetype, run_ns, io_ns):
+    score_config = TemplateScoreConfig.from_namespace(run_ns)
     catalog = discover_template_catalog(run_ns=run_ns)
     if not catalog:
         raise RuntimeError("No template catalog entries were discovered under gmsm/io/data/input1")
@@ -37,16 +73,16 @@ def recommend_template(filetype, run_ns, io_ns):
     logging.info("Running automatic template recommendation via '%s'", backend)
 
     if backend == 'skani':
-        candidates = score_templates_with_skani(filetype, run_ns, io_ns, catalog)
+        candidates = score_templates_with_skani(filetype, run_ns, io_ns, catalog, score_config)
     elif backend == 'diamond':
-        candidates = score_templates_with_diamond(run_ns, io_ns, catalog)
+        candidates = score_templates_with_diamond(run_ns, io_ns, catalog, score_config)
     else:
         raise RuntimeError("Unsupported template recommendation backend: %s" % backend)
 
     if not candidates:
         raise RuntimeError("Automatic template recommendation did not produce any candidates")
 
-    candidates = rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog)
+    candidates = rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog, score_config)
     sorted_candidates = sorted(
         candidates,
         key=lambda item: (
@@ -71,6 +107,7 @@ def recommend_template(filetype, run_ns, io_ns):
         'recommended_template': selected_template,
         'previous_template': getattr(run_ns, 'orgName', None),
         'confidence': confidence,
+        'score_config': score_config.to_dict(),
         'candidates': selected_candidates,
     }
 
@@ -80,6 +117,7 @@ def recommend_template(filetype, run_ns, io_ns):
     run_ns.template_selection_confidence = confidence
     run_ns.template_selection_strategy = result['selection_strategy']
     run_ns.template_selection_topk = topk
+    run_ns.template_score_config = score_config
     run_ns.template_selection_result = result
 
     write_template_recommendation_outputs(io_ns.outputfolder0, result)
@@ -301,7 +339,40 @@ def prepare_target_genome_fasta(filetype, run_ns, output_dir):
     )
 
 
-def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
+def compute_skani_coarse_score(ani, aligned_fraction, score_config):
+    normalized_ani = normalize_ani(ani)
+    return round(
+        (score_config.ani_weight * normalized_ani) + (score_config.af_weight * (aligned_fraction or 0.0)),
+        6,
+    )
+
+
+def compute_diamond_coarse_score(hit_coverage, mean_identity, score_config):
+    identity_fraction = (mean_identity or 0.0) / 100.0
+    return round(
+        (score_config.diamond_hit_weight * hit_coverage)
+        + (score_config.diamond_identity_weight * identity_fraction),
+        6,
+    )
+
+
+def compute_bbh_rerank_score(bbh_template_coverage, bbh_target_coverage, score_config):
+    return round(
+        (score_config.bbh_template_cov_weight * bbh_template_coverage)
+        + (score_config.bbh_target_cov_weight * bbh_target_coverage),
+        6,
+    )
+
+
+def combine_template_scores(coarse_score, rerank_score, score_config):
+    return round(
+        (score_config.coarse_weight * coarse_score) + (score_config.rerank_weight * rerank_score),
+        6,
+    )
+
+
+def score_templates_with_skani(filetype, run_ns, io_ns, catalog, score_config=None):
+    score_config = score_config or TemplateScoreConfig.from_namespace(run_ns)
     skani = utils.locate_executable('skani')
     if skani is None:
         raise RuntimeError("skani executable not found")
@@ -329,7 +400,7 @@ def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
         af_mean = mean([value for value in (af_ref, af_query) if value is not None]) if any(
             value is not None for value in (af_ref, af_query)
         ) else 0.0
-        score = round((0.7 * normalize_ani(ani)) + (0.3 * af_mean), 6)
+        score = compute_skani_coarse_score(ani, af_mean, score_config)
         rows_by_template[template_id] = {
             'template_id': template_id,
             'organism': get_template_metadata(template_id, catalog).get('organism', template_id),
@@ -402,7 +473,8 @@ def score_templates_with_skani(filetype, run_ns, io_ns, catalog):
     return candidates
 
 
-def score_templates_with_diamond(run_ns, io_ns, catalog):
+def score_templates_with_diamond(run_ns, io_ns, catalog, score_config=None):
+    score_config = score_config or TemplateScoreConfig.from_namespace(run_ns)
     diamond = utils.locate_executable('diamond')
     if diamond is None:
         raise RuntimeError("diamond executable not found")
@@ -447,7 +519,7 @@ def score_templates_with_diamond(run_ns, io_ns, catalog):
 
         matched_queries, mean_bitscore, mean_identity = parse_diamond_template_hits(blast_output)
         hit_coverage = matched_queries / float(total_queries)
-        score = round((0.85 * hit_coverage) + (0.15 * ((mean_identity or 0.0) / 100.0)), 6)
+        score = compute_diamond_coarse_score(hit_coverage, mean_identity, score_config)
         candidates.append(
             {
                 'template_id': entry['template_id'],
@@ -485,7 +557,8 @@ def score_templates_with_diamond(run_ns, io_ns, catalog):
     return candidates
 
 
-def rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog):
+def rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog, score_config=None):
+    score_config = score_config or TemplateScoreConfig.from_namespace(run_ns)
     topn = max(0, int(getattr(run_ns, 'template_rerank_topn', 3)))
     if topn == 0 or not io_ns.targetGenome_locusTag_aaSeq_dict:
         return candidates
@@ -513,7 +586,7 @@ def rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog):
         template_entry = catalog_by_id.get(candidate['template_id'])
         if template_entry is None:
             continue
-        metrics = compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry)
+        metrics = compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry, score_config)
         candidate['rerank_applied'] = True
         candidate['selection_stage'] = 'coarse+bbh'
         candidate['bbh_pairs'] = metrics['bbh_pairs']
@@ -524,12 +597,13 @@ def rerank_templates_with_bbh(run_ns, io_ns, candidates, catalog):
         candidate['rerank_score'] = metrics['rerank_score']
         candidate['primary_metric'] = metrics['bbh_template_coverage']
         candidate['secondary_metric'] = metrics['bbh_target_coverage']
-        candidate['score'] = round((0.6 * candidate['coarse_score']) + (0.4 * metrics['rerank_score']), 6)
+        candidate['score'] = combine_template_scores(candidate['coarse_score'], metrics['rerank_score'], score_config)
 
     return ranked
 
 
-def compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry):
+def compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry, score_config=None):
+    score_config = score_config or TemplateScoreConfig()
     tmp_dir = ensure_tmp_template_dir(io_ns)
     diamond = utils.locate_executable('diamond')
     if diamond is None:
@@ -617,7 +691,7 @@ def compute_bbh_rerank_metrics(io_ns, target_fasta, template_entry):
     bbh_target_hits = len(getattr(homology_ns, 'targetBBH_list', []))
     bbh_template_coverage = round(bbh_pairs / float(max(1, template_gene_count)), 6)
     bbh_target_coverage = round(bbh_target_hits / float(target_gene_count), 6)
-    rerank_score = round((0.7 * bbh_template_coverage) + (0.3 * bbh_target_coverage), 6)
+    rerank_score = compute_bbh_rerank_score(bbh_template_coverage, bbh_target_coverage, score_config)
 
     return {
         'bbh_pairs': bbh_pairs,

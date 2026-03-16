@@ -66,6 +66,35 @@ class TestUtils:
 
         with pytest.raises(SystemExit):
             utils.check_input_options(options)
+
+
+    def test_check_input_options_rejects_template_weight_out_of_range(self, options):
+
+        options.input = 'input.gbk'
+        options.eficaz = False
+        options.ec_file = False
+        options.pmr_generation = True
+        options.smr_generation = False
+        options.comp = False
+        options.template_ani_weight = 1.2
+
+        with pytest.raises(SystemExit):
+            utils.check_input_options(options)
+
+
+    def test_check_input_options_rejects_template_weight_pairs_that_do_not_sum_to_one(self, options):
+
+        options.input = 'input.gbk'
+        options.eficaz = False
+        options.ec_file = False
+        options.pmr_generation = True
+        options.smr_generation = False
+        options.comp = False
+        options.template_coarse_weight = 0.8
+        options.template_rerank_weight = 0.3
+
+        with pytest.raises(SystemExit):
+            utils.check_input_options(options)
         
         
     def test_locate_executable(self):

@@ -9,6 +9,31 @@ from gmsm import template_recommendation
 
 class TestTemplateRecommendation:
 
+    def test_template_score_config_uses_defaults_when_namespace_is_missing_fields(self, options):
+        score_config = template_recommendation.TemplateScoreConfig.from_namespace(options)
+
+        assert score_config.ani_weight == 0.7
+        assert score_config.af_weight == 0.3
+        assert score_config.coarse_weight == 0.6
+        assert score_config.rerank_weight == 0.4
+
+    def test_template_score_helpers_use_custom_weights(self):
+        score_config = template_recommendation.TemplateScoreConfig(
+            ani_weight=0.2,
+            af_weight=0.8,
+            diamond_hit_weight=0.1,
+            diamond_identity_weight=0.9,
+            bbh_template_cov_weight=0.25,
+            bbh_target_cov_weight=0.75,
+            coarse_weight=0.3,
+            rerank_weight=0.7,
+        )
+
+        assert template_recommendation.compute_skani_coarse_score(95.0, 0.25, score_config) == 0.4
+        assert template_recommendation.compute_diamond_coarse_score(0.8, 50.0, score_config) == 0.53
+        assert template_recommendation.compute_bbh_rerank_score(0.9, 0.5, score_config) == 0.6
+        assert template_recommendation.combine_template_scores(0.4, 0.6, score_config) == 0.54
+
     def test_discover_template_catalog_includes_known_templates(self):
         catalog = template_recommendation.discover_template_catalog()
         template_ids = {entry['template_id'] for entry in catalog}
@@ -118,6 +143,14 @@ class TestTemplateRecommendation:
         options.template_topk = 2
         options.template_genome_bank = False
         options.template_rerank_topn = 3
+        options.template_ani_weight = 0.55
+        options.template_af_weight = 0.45
+        options.template_diamond_hit_weight = 0.9
+        options.template_diamond_identity_weight = 0.1
+        options.template_bbh_template_weight = 0.65
+        options.template_bbh_target_weight = 0.35
+        options.template_coarse_weight = 0.2
+        options.template_rerank_weight = 0.8
         options.orgName = 'sco'
         options.input = 'input.gbk'
 
@@ -141,7 +174,7 @@ class TestTemplateRecommendation:
         monkeypatch.setattr(
             template_recommendation,
             'discover_template_catalog',
-            lambda input1_root=None: catalog,
+            lambda input1_root=None, run_ns=None: catalog,
         )
         monkeypatch.setattr(
             template_recommendation,
@@ -210,6 +243,8 @@ class TestTemplateRecommendation:
             saved = json.load(handle)
 
         assert saved['recommended_template'] == 'mtu'
+        assert saved['score_config']['ani_weight'] == 0.55
+        assert saved['score_config']['coarse_weight'] == 0.2
         assert saved['candidates'][0]['template_id'] == 'mtu'
 
         with open(join(options.outputfolder0, 'template_candidates.tsv'), newline='') as handle:
@@ -327,6 +362,76 @@ class TestTemplateRecommendation:
         assert reranked[0]['bbh_template_coverage'] == 0.9
         assert reranked[0]['score'] > reranked[1]['score']
         assert reranked[1]['rerank_applied'] is False
+
+    def test_rerank_templates_with_bbh_uses_custom_final_weights(self, options, monkeypatch):
+        options.template_rerank_topn = 1
+        options.template_coarse_weight = 0.2
+        options.template_rerank_weight = 0.8
+        options.targetGenome_locusTag_aaSeq_dict = {'gene1': 'MPEPTIDE', 'gene2': 'MPEPTIDE'}
+        options.outputfolder6 = 'tmp'
+
+        candidates = [
+            {
+                'template_id': 'sco',
+                'organism': 'Streptomyces coelicolor A3(2)',
+                'model': 'iKS1317',
+                'backend': 'diamond',
+                'coarse_backend': 'diamond',
+                'score': 0.80,
+                'coarse_score': 0.80,
+                'primary_metric': 0.80,
+                'secondary_metric': 85.0,
+                'coarse_primary_metric': 0.80,
+                'coarse_secondary_metric': 85.0,
+                'ani': None,
+                'aligned_fraction': None,
+                'aligned_fraction_ref': None,
+                'aligned_fraction_query': None,
+                'matched_queries': 8,
+                'total_queries': 10,
+                'hit_coverage': 0.8,
+                'mean_identity': 85.0,
+                'mean_bitscore': 200.0,
+                'rerank_score': None,
+                'rerank_applied': False,
+                'coarse_rank': None,
+                'bbh_pairs': None,
+                'bbh_target_hits': None,
+                'bbh_template_gene_count': None,
+                'bbh_target_coverage': None,
+                'bbh_template_coverage': None,
+                'selection_stage': 'coarse',
+            }
+        ]
+        catalog = [{'template_id': 'sco', 'proteome_fasta': 'sco.fa'}]
+
+        monkeypatch.setattr(
+            template_recommendation,
+            'prepare_target_proteome_fasta',
+            lambda io_ns, output_dir: 'target.faa',
+        )
+        monkeypatch.setattr(
+            template_recommendation,
+            'ensure_tmp_template_dir',
+            lambda io_ns: 'tmp',
+        )
+        monkeypatch.setattr(
+            template_recommendation,
+            'compute_bbh_rerank_metrics',
+            lambda io_ns, target_fasta, template_entry, score_config=None: {
+                'bbh_pairs': 9,
+                'bbh_target_hits': 8,
+                'bbh_template_gene_count': 10,
+                'bbh_template_coverage': 0.9,
+                'bbh_target_coverage': 0.8,
+                'rerank_score': 0.87,
+            },
+        )
+
+        reranked = template_recommendation.rerank_templates_with_bbh(options, options, candidates, catalog)
+
+        assert reranked[0]['score'] == 0.856
+        assert reranked[0]['rerank_score'] == 0.87
 
     def test_recommendation_confidence_does_not_depend_on_topk(self):
         candidates = [

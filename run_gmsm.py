@@ -120,6 +120,46 @@ def main():
                         default=False,
                         action='store_true',
                         help="Run only the template recommendation stage and stop before homology/pruning")
+    group.add_argument('--template-ani-weight',
+                        dest='template_ani_weight',
+                        default=0.7,
+                        type=float,
+                        help="Weight for normalized ANI in skani coarse ranking (default: %(default)s)")
+    group.add_argument('--template-af-weight',
+                        dest='template_af_weight',
+                        default=0.3,
+                        type=float,
+                        help="Weight for aligned fraction in skani coarse ranking (default: %(default)s)")
+    group.add_argument('--template-diamond-hit-weight',
+                        dest='template_diamond_hit_weight',
+                        default=0.85,
+                        type=float,
+                        help="Weight for hit coverage in DIAMOND coarse ranking (default: %(default)s)")
+    group.add_argument('--template-diamond-identity-weight',
+                        dest='template_diamond_identity_weight',
+                        default=0.15,
+                        type=float,
+                        help="Weight for mean identity in DIAMOND coarse ranking (default: %(default)s)")
+    group.add_argument('--template-bbh-template-weight',
+                        dest='template_bbh_template_weight',
+                        default=0.7,
+                        type=float,
+                        help="Weight for template coverage in BBH reranking (default: %(default)s)")
+    group.add_argument('--template-bbh-target-weight',
+                        dest='template_bbh_target_weight',
+                        default=0.3,
+                        type=float,
+                        help="Weight for target coverage in BBH reranking (default: %(default)s)")
+    group.add_argument('--template-coarse-weight',
+                        dest='template_coarse_weight',
+                        default=0.6,
+                        type=float,
+                        help="Weight for coarse ranking in final template score (default: %(default)s)")
+    group.add_argument('--template-rerank-weight',
+                        dest='template_rerank_weight',
+                        default=0.4,
+                        type=float,
+                        help="Weight for BBH rerank score in final template score (default: %(default)s)")
 
     group = parser.add_argument_group('GMSM modeling options',
                         "At least one of the two options should be selected:"

@@ -4,6 +4,8 @@
 
 This document is the hand-off plan for the next Codex session.
 
+For a concise lab-briefing version of the parameter strategy, see [parameter_plan.md](parameter_plan.md).
+
 Current branch:
 
 - `codex/auto-template-phase1`
@@ -469,4 +471,3 @@ As of the end of the current session:
 - auto-template implementation is complete for the current scope
 - platform validation is complete for the current scope
 - biological calibration is the main remaining research-engineering task
-

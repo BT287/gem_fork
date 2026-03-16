@@ -258,13 +258,3 @@ Metrics:
 ### After that
 
 - decide whether the current 10-template panel should remain the curated core panel
-- define whether an additional extended panel is worth maintaining
-- consider taxonomy guardrails and multi-template mode in later phases
-
-## 10. Practical Conclusion
-
-This branch does not replace the GMSM reconstruction engine.
-It upgrades the template-selection step into a reproducible, explainable, and installable system.
-
-The main remaining technical validation is not the template-bank code.
-It is the Linux/WSL benchmark that confirms whether `skani + BBH rerank` improves template choice and runtime enough to become the preferred production path.

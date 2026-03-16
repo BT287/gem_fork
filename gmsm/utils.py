@@ -2,6 +2,7 @@
 import cobra
 import datetime
 import logging
+import math
 import os
 import pickle
 import sys
@@ -17,6 +18,24 @@ _MACHO_MAGICS = {
     b"\xca\xfe\xba\xbe",
     b"\xbe\xba\xfe\xca",
 }
+
+_TEMPLATE_SCORE_DEFAULTS = {
+    'template_ani_weight': 0.7,
+    'template_af_weight': 0.3,
+    'template_diamond_hit_weight': 0.85,
+    'template_diamond_identity_weight': 0.15,
+    'template_bbh_template_weight': 0.7,
+    'template_bbh_target_weight': 0.3,
+    'template_coarse_weight': 0.6,
+    'template_rerank_weight': 0.4,
+}
+
+_TEMPLATE_SCORE_PAIRS = (
+    ('template_ani_weight', 'template_af_weight'),
+    ('template_diamond_hit_weight', 'template_diamond_identity_weight'),
+    ('template_bbh_template_weight', 'template_bbh_target_weight'),
+    ('template_coarse_weight', 'template_rerank_weight'),
+)
 
 
 def setup_logging(run_ns):
@@ -164,6 +183,8 @@ def check_input_options(run_ns):
         logging.warning("Template recommendation requires '--template-rerank-topn' to be 0 or greater")
         sys.exit(1)
 
+    validate_template_score_options(run_ns)
+
     if template_recommendation_only:
         if not getattr(run_ns, 'auto_template', False):
             logging.warning("Template recommendation-only mode requires '--auto-template'")
@@ -174,6 +195,32 @@ def check_input_options(run_ns):
         if smr_generation:
             logging.warning("Template recommendation-only mode cannot be combined with secondary modeling ('-s')")
             sys.exit(1)
+
+
+def validate_template_score_options(run_ns):
+    for field_name, default in _TEMPLATE_SCORE_DEFAULTS.items():
+        value = float(getattr(run_ns, field_name, default))
+        if value < 0.0 or value > 1.0:
+            logging.warning(
+                "Template recommendation weight '%s' must be within [0, 1]",
+                _format_cli_option(field_name),
+            )
+            sys.exit(1)
+
+    for left_field, right_field in _TEMPLATE_SCORE_PAIRS:
+        left_value = float(getattr(run_ns, left_field, _TEMPLATE_SCORE_DEFAULTS[left_field]))
+        right_value = float(getattr(run_ns, right_field, _TEMPLATE_SCORE_DEFAULTS[right_field]))
+        if not math.isclose(left_value + right_value, 1.0, abs_tol=1e-9):
+            logging.warning(
+                "Template recommendation weights '%s' and '%s' must sum to 1.0",
+                _format_cli_option(left_field),
+                _format_cli_option(right_field),
+            )
+            sys.exit(1)
+
+
+def _format_cli_option(field_name):
+    return '--' + field_name.replace('_', '-')
 
 
 def _read_executable_magic(candidate):
