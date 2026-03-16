@@ -1,0 +1,9 @@
+name: gmsm
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - optlang=1.8.3
+  - python-libsbml=5.21.1
+  - swiglpk=5.0.13

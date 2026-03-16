@@ -1,0 +1,104 @@
+name: Template Recommendation Smoke
+
+on:
+  push:
+    branches:
+      - codex/auto-template-phase1
+  pull_request:
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform_file: envs/environment.linux-64.yml
+            skani_install: conda
+          - os: macos-14
+            platform_file: envs/environment.osx-arm64.yml
+            skani_install: brew
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          miniconda-version: "latest"
+
+      - name: Create base environment
+        run: |
+          conda env create -n gmsm -f environment.base.yml
+          conda env update -n gmsm -f ${{ matrix.platform_file }}
+
+      - name: Install DIAMOND
+        run: |
+          conda install -n gmsm -c bioconda -c conda-forge diamond -y
+
+      - name: Install skani via conda
+        if: matrix.skani_install == 'conda'
+        run: |
+          conda install -n gmsm -c bioconda skani -y
+
+      - name: Install skani via Homebrew
+        if: matrix.skani_install == 'brew'
+        run: |
+          brew install skani
+
+      - name: Runtime stack sanity check
+        run: |
+          conda activate gmsm
+          python scripts/check_runtime_stack.py --require-executable diamond --require-executable skani --require-module cobra --require-module optlang --json
+
+      - name: Install template genome bank
+        run: |
+          conda activate gmsm
+          python scripts/fetch_template_genome_bank.py --from-manifest --force
+          python scripts/check_template_genome_bank.py
+
+      - name: Recommendation-only smoke without rerank
+        run: |
+          conda activate gmsm
+          python run_gmsm.py \
+            -i input/NC_021985.1_antismash8.gbk \
+            --auto-template \
+            --template-recommendation-only \
+            --template-rerank-topn 0 \
+            -p -d \
+            -o output_auto_template_smoke
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("output_auto_template_smoke/0_template_recommendation/template_recommendation.json").read_text())
+          assert report["backend"] == "skani", report
+          assert report["selection_strategy"] == "coarse_only", report
+          assert report["recommended_template"], report
+          PY
+
+      - name: Recommendation-only smoke with rerank
+        run: |
+          conda activate gmsm
+          python run_gmsm.py \
+            -i input/NC_021985.1_antismash8.gbk \
+            --auto-template \
+            --template-recommendation-only \
+            --template-rerank-topn 3 \
+            -p -d \
+            -o output_auto_template_rerank
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("output_auto_template_rerank/0_template_recommendation/template_recommendation.json").read_text())
+          assert report["backend"] == "skani", report
+          assert report["selection_strategy"] == "coarse_plus_bbh", report
+          assert report["rerank_topn"] == 3, report
+          assert report["recommended_template"], report
+          PY

@@ -1,0 +1,8 @@
+name: gmsm
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - optlang>=1.8,<2
+  - python-libsbml>=5.20,<6
+  - swiglpk>=5.0.13,<6

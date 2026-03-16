@@ -34,6 +34,19 @@ conda env create -f environment.yml
 conda activate gmsm
 ```
 
+For cross-platform reproducibility work, the environment is now also split into a common base file plus per-platform overlays:
+
+```bash
+conda env create -n gmsm -f environment.base.yml
+conda env update -n gmsm -f envs/environment.linux-64.yml
+```
+
+Swap the second file for your platform:
+
+- `envs/environment.linux-64.yml`
+- `envs/environment.osx-arm64.yml`
+- `envs/environment.win-64.yml`
+
 If you already created `gmsm` before this refresh, update it in place:
 
 ```bash
@@ -151,6 +164,13 @@ python run_gmsm.py -h
 tox -e py311
 ```
 
+Runtime stack diagnostics:
+
+```bash
+python scripts/check_runtime_stack.py
+python scripts/check_runtime_stack.py --require-executable diamond --require-module cobra
+```
+
 ## Supported Inputs
 
 ### antiSMASH versions
@@ -241,6 +261,12 @@ Recommended usage by platform:
 
 - Linux or WSL: install `skani`, install the template genome bank, then use `--auto-template`
 - Native Windows: `--auto-template` is still useful, but expect DIAMOND fallback unless you have a working `skani` binary
+
+Current support strategy:
+
+- recommendation-only smoke is the minimum release gate
+- `skani`-first recommendation is currently targeted at Linux/WSL and macOS
+- Windows remains a supported runtime for DIAMOND-based recommendation and local full runs, but cross-platform CI is being added incrementally
 
 The current recommendation flow is intentionally staged for runtime safety:
 
