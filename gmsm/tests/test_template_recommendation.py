@@ -184,7 +184,7 @@ class TestTemplateRecommendation:
         monkeypatch.setattr(
             template_recommendation,
             'score_templates_with_diamond',
-            lambda run_ns, io_ns, entries: [
+            lambda run_ns, io_ns, entries, score_config=None: [
                 {
                     'template_id': 'mtu',
                     'organism': 'Mycobacterium tuberculosis H37Rv',
@@ -226,7 +226,7 @@ class TestTemplateRecommendation:
         monkeypatch.setattr(
             template_recommendation,
             'rerank_templates_with_bbh',
-            lambda run_ns, io_ns, candidates, catalog: candidates,
+            lambda run_ns, io_ns, candidates, catalog, score_config=None: candidates,
         )
 
         result = template_recommendation.recommend_template('genbank', options, options)
@@ -345,7 +345,7 @@ class TestTemplateRecommendation:
         monkeypatch.setattr(
             template_recommendation,
             'compute_bbh_rerank_metrics',
-            lambda io_ns, target_fasta, template_entry: {
+            lambda io_ns, target_fasta, template_entry, score_config=None: {
                 'bbh_pairs': 9 if template_entry['template_id'] == 'sco' else 5,
                 'bbh_target_hits': 8 if template_entry['template_id'] == 'sco' else 4,
                 'bbh_template_gene_count': 10,
