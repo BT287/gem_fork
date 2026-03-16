@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - cobra=0.30.0
   - optlang=1.8.3
   - python-libsbml=5.21.1
   - swiglpk=5.0.13

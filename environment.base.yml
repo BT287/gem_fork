@@ -5,7 +5,6 @@ channels:
 dependencies:
   - python=3.11
   - biopython=1.86
-  - cobra=0.30.0
   - pyparsing=3.3.2
   - pytest-cov=7.0.0
   - tox>=4,<5

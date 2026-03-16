@@ -123,6 +123,10 @@ def main():
     )
     parser.add_argument("--json", action="store_true", help="Print the report as JSON")
     parser.add_argument(
+        "--output",
+        help="Write the runtime report as JSON to this path before applying required-component checks",
+    )
+    parser.add_argument(
         "--require-executable",
         action="append",
         default=[],
@@ -150,8 +154,14 @@ def main():
         },
     }
 
+    json_report = json.dumps(report, indent=2, sort_keys=True)
+    if args.output:
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json_report + "\n")
+
     if args.json:
-        print(json.dumps(report, indent=2, sort_keys=True))
+        print(json_report)
     else:
         print("Platform")
         print("  system: %s" % report["platform"]["system"])

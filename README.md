@@ -47,6 +47,12 @@ Swap the second file for your platform:
 - `envs/environment.osx-arm64.yml`
 - `envs/environment.win-64.yml`
 
+Platform note for the split environment overlays:
+
+- Linux and Windows keep `cobra`, `python-libsbml`, `optlang`, and `swiglpk` in conda
+- `osx-arm64` keeps `optlang` and `swiglpk` in conda, then installs `cobra` and `python-libsbml` through `pip`
+- this split exists because `python-libsbml` is not currently available as a conda package for `osx-arm64`
+
 If you already created `gmsm` before this refresh, update it in place:
 
 ```bash
@@ -169,7 +175,59 @@ Runtime stack diagnostics:
 ```bash
 python scripts/check_runtime_stack.py
 python scripts/check_runtime_stack.py --require-executable diamond --require-module cobra
+python scripts/check_runtime_stack.py --json --output runtime-stack.json
 ```
+
+Cross-platform recommendation smoke validator:
+
+```bash
+python scripts/run_template_recommendation_smoke.py --expected-backend skani --report-dir smoke-artifacts
+```
+
+The validator runs recommendation-only cases for `--template-rerank-topn 0` and `3`, stores logs and outputs under the report directory, and writes a summary JSON file at `template_recommendation_smoke_summary.json`.
+
+Windows local fallback validation:
+
+```bash
+python scripts/check_runtime_stack.py --require-module cobra --require-module optlang --require-module libsbml --require-module swiglpk
+python scripts/run_template_recommendation_smoke.py --expected-backend diamond --template-backend diamond --report-dir smoke-artifacts-windows
+```
+
+Before running the Windows fallback validator, install the official `diamond.exe` and place it on `PATH` or in `bin/diamond.exe`.
+
+## Platform Support
+
+The current divide-and-conquer support plan separates recommendation smoke from full reconstruction:
+
+| Capability | Linux | macOS arm64 | Windows |
+| --- | --- | --- | --- |
+| Split-environment scaffold | `envs/environment.linux-64.yml` | `envs/environment.osx-arm64.yml` | `envs/environment.win-64.yml` |
+| Runtime stack validation | yes | yes | yes |
+| `skani`-first recommendation smoke CI | yes | yes | no |
+| `--auto-template` fallback without `skani` | yes | yes | local/manual |
+| Full reconstruction CI | planned | planned | not yet |
+
+Interpretation:
+
+- Linux and macOS are the default platforms for `skani`-first template recommendation.
+- Native Windows is supported first for environment creation, local `diamond.exe` onboarding, and manual fallback validation.
+- Full reconstruction compatibility is still tracked separately from template recommendation smoke because solver and package compatibility can fail after the recommendation stage.
+
+## Maintainer Workflow
+
+Recommended development workflow for maintainers:
+
+1. implement features and quick smoke checks on macOS or Linux
+2. validate onboarding and executable resolution on native Windows
+3. use Linux CI as the merge gate for reproducible recommendation smoke
+
+This split keeps platform-specific installation failures separate from recommendation logic failures:
+
+- `template-recommendation-smoke.yml` verifies the `skani` path on Linux and macOS
+- `scripts/run_template_recommendation_smoke.py` provides a shared local validator for recommendation-only smoke checks
+- `scripts/check_runtime_stack.py` provides a shared local validator for the runtime stack across Linux, macOS, and Windows
+- native Windows DIAMOND-backed fallback remains a local/manual validation target until a stable CI installation path for `diamond.exe` is added
+- full reconstruction remains a later integration target after the platform environment pins are finalized
 
 ## Supported Inputs
 
