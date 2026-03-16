@@ -155,7 +155,7 @@ python run_gmsm.py \
   -o output_e2e
 ```
 
-Use a fresh `-o` directory name when you want a clean comparison. Reusing an existing output directory overwrites files for the stages you rerun, and an older `4_complete_model/` can remain if you later rerun only `-p`.
+Use a fresh `-o` directory name when you want a clean comparison. Reusing an existing output directory overwrites files for the stages you rerun, and an older `3_complete_model/` can remain if you later rerun only `-p`.
 
 ## At-a-Glance Workflow
 
@@ -198,8 +198,8 @@ Short form:
 
 GMSM writes:
 
-- `3_primary_metabolic_model/` for the primary-model stage
-- `4_complete_model/` for the final model with secondary metabolism
+- `2_primary_metabolic_model/` for the primary-model stage
+- `3_complete_model/` for the final model with secondary metabolism
 
 Each output folder now contains:
 
