@@ -1,6 +1,19 @@
 name: Full Reconstruction Integration
 
 on:
+  push:
+    branches:
+      - codex/auto-template-phase1
+    paths:
+      - .github/workflows/full-reconstruction-integration.yml
+      - environment.base.yml
+      - envs/**
+      - run_gmsm.py
+      - gmsm/**
+      - scripts/run_full_integration_check.py
+      - scripts/check_runtime_stack.py
+      - scripts/fetch_template_genome_bank.py
+      - scripts/check_template_genome_bank.py
   workflow_dispatch:
 
 jobs:
