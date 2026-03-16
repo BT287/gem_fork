@@ -178,6 +178,14 @@ python scripts/check_runtime_stack.py --require-executable diamond --require-mod
 python scripts/check_runtime_stack.py --json --output runtime-stack.json
 ```
 
+GitHub workflow push auth helper:
+
+```bash
+python scripts/check_github_push_auth.py
+```
+
+Use this helper when a push that changes `.github/workflows/*` is rejected. For the full maintainer note, see [`docs/github_workflow_push_auth.md`](docs/github_workflow_push_auth.md).
+
 Cross-platform recommendation smoke validator:
 
 ```bash
