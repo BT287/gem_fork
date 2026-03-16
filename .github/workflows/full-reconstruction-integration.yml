@@ -1,14 +1,10 @@
-name: Template Recommendation Smoke
+name: Full Reconstruction Integration
 
 on:
-  push:
-    branches:
-      - codex/auto-template-phase1
-  pull_request:
   workflow_dispatch:
 
 jobs:
-  smoke:
+  full-integration:
     strategy:
       fail-fast: false
       matrix:
@@ -16,16 +12,11 @@ jobs:
           - os: ubuntu-latest
             platform_file: envs/environment.linux-64.yml
             skani_install: conda
-            require_skani: true
-            install_template_bank: true
-            expected_backend: skani
           - os: macos-14
             platform_file: envs/environment.osx-arm64.yml
             skani_install: brew
-            require_skani: true
-            install_template_bank: true
-            expected_backend: skani
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
     defaults:
       run:
         shell: bash -el {0}
@@ -63,46 +54,42 @@ jobs:
       - name: Runtime stack sanity check
         run: |
           conda activate gmsm
-          args=(
-            --json
-            --output runtime-stack-smoke.json
-            --require-executable diamond
-            --require-module cobra
-            --require-module optlang
-            --require-module libsbml
+          python scripts/check_runtime_stack.py \
+            --json \
+            --output runtime-stack-full.json \
+            --require-executable diamond \
+            --require-executable skani \
+            --require-module cobra \
+            --require-module optlang \
+            --require-module libsbml \
             --require-module swiglpk
-          )
-          if [ "${{ matrix.require_skani }}" = "true" ]; then
-            args+=(--require-executable skani)
-          fi
-          python scripts/check_runtime_stack.py "${args[@]}"
-
-      - name: Upload runtime stack report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: runtime-stack-smoke-${{ matrix.os }}
-          path: runtime-stack-smoke.json
-          if-no-files-found: warn
 
       - name: Install template genome bank
-        if: matrix.install_template_bank
         run: |
           conda activate gmsm
           python scripts/fetch_template_genome_bank.py --from-manifest --force
           python scripts/check_template_genome_bank.py
 
-      - name: Recommendation-only smoke
+      - name: Run full reconstruction integration validator
         run: |
           conda activate gmsm
-          python scripts/run_template_recommendation_smoke.py \
-            --expected-backend "${{ matrix.expected_backend }}" \
-            --report-dir smoke-artifacts
+          python scripts/run_full_integration_check.py \
+            --expected-backend skani \
+            --report-dir full-integration-artifacts \
+            --output-dir full-integration-output
 
-      - name: Upload smoke artifacts
+      - name: Upload runtime stack report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: template-recommendation-smoke-${{ matrix.os }}
-          path: smoke-artifacts
+          name: runtime-stack-full-${{ matrix.os }}
+          path: runtime-stack-full.json
+          if-no-files-found: warn
+
+      - name: Upload full integration artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-reconstruction-integration-${{ matrix.os }}
+          path: full-integration-artifacts
           if-no-files-found: warn

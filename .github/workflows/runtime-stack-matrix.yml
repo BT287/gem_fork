@@ -1,4 +1,4 @@
-name: Template Recommendation Smoke
+name: Runtime Stack Matrix
 
 on:
   push:
@@ -8,23 +8,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke:
+  runtime-stack:
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             platform_file: envs/environment.linux-64.yml
+            diamond_install: conda
             skani_install: conda
+            require_diamond: true
             require_skani: true
-            install_template_bank: true
-            expected_backend: skani
           - os: macos-14
             platform_file: envs/environment.osx-arm64.yml
+            diamond_install: conda
             skani_install: brew
+            require_diamond: true
             require_skani: true
-            install_template_bank: true
-            expected_backend: skani
+          - os: windows-latest
+            platform_file: envs/environment.win-64.yml
+            diamond_install: none
+            skani_install: none
+            require_diamond: false
+            require_skani: false
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -47,6 +53,7 @@ jobs:
           conda env update -n gmsm -f ${{ matrix.platform_file }}
 
       - name: Install DIAMOND
+        if: matrix.diamond_install == 'conda'
         run: |
           conda install -n gmsm -c bioconda -c conda-forge diamond -y
 
@@ -65,13 +72,15 @@ jobs:
           conda activate gmsm
           args=(
             --json
-            --output runtime-stack-smoke.json
-            --require-executable diamond
+            --output runtime-stack.json
             --require-module cobra
             --require-module optlang
             --require-module libsbml
             --require-module swiglpk
           )
+          if [ "${{ matrix.require_diamond }}" = "true" ]; then
+            args+=(--require-executable diamond)
+          fi
           if [ "${{ matrix.require_skani }}" = "true" ]; then
             args+=(--require-executable skani)
           fi
@@ -81,28 +90,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: runtime-stack-smoke-${{ matrix.os }}
-          path: runtime-stack-smoke.json
-          if-no-files-found: warn
-
-      - name: Install template genome bank
-        if: matrix.install_template_bank
-        run: |
-          conda activate gmsm
-          python scripts/fetch_template_genome_bank.py --from-manifest --force
-          python scripts/check_template_genome_bank.py
-
-      - name: Recommendation-only smoke
-        run: |
-          conda activate gmsm
-          python scripts/run_template_recommendation_smoke.py \
-            --expected-backend "${{ matrix.expected_backend }}" \
-            --report-dir smoke-artifacts
-
-      - name: Upload smoke artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: template-recommendation-smoke-${{ matrix.os }}
-          path: smoke-artifacts
+          name: runtime-stack-${{ matrix.os }}
+          path: runtime-stack.json
           if-no-files-found: warn

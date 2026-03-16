@@ -203,6 +203,18 @@ python scripts/run_template_recommendation_smoke.py --expected-backend diamond -
 
 Before running the Windows fallback validator, install the official `diamond.exe` and place it on `PATH` or in `bin/diamond.exe`.
 
+Manual full-integration validator:
+
+```bash
+python scripts/run_full_integration_check.py --expected-backend skani --report-dir full-integration-artifacts
+```
+
+This validator runs `run_gmsm.py` through the full `-p -s --auto-template` path, captures the log, and validates the key outputs in:
+
+- `0_template_recommendation`
+- `3_primary_metabolic_model`
+- `4_complete_model`
+
 ## Platform Support
 
 The current divide-and-conquer support plan separates recommendation smoke from full reconstruction:
@@ -213,7 +225,7 @@ The current divide-and-conquer support plan separates recommendation smoke from 
 | Runtime stack validation | yes | yes | yes |
 | `skani`-first recommendation smoke CI | yes | yes | no |
 | `--auto-template` fallback without `skani` | yes | yes | local/manual |
-| Full reconstruction CI | planned | planned | not yet |
+| Full reconstruction integration | manual workflow | manual workflow | not yet |
 
 Interpretation:
 
@@ -235,7 +247,7 @@ This split keeps platform-specific installation failures separate from recommend
 - `scripts/run_template_recommendation_smoke.py` provides a shared local validator for recommendation-only smoke checks
 - `scripts/check_runtime_stack.py` provides a shared local validator for the runtime stack across Linux, macOS, and Windows
 - native Windows DIAMOND-backed fallback remains a local/manual validation target until a stable CI installation path for `diamond.exe` is added
-- full reconstruction remains a later integration target after the platform environment pins are finalized
+- `full-reconstruction-integration.yml` is the manual P2 workflow for Linux and macOS full reconstruction validation
 
 ## Supported Inputs
 
