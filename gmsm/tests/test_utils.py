@@ -5,17 +5,18 @@ from gmsm import utils
 from gmsm.config import load_config
 from os import remove
 from os.path import isfile, join
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
 class TestUtils:
     """Test functions in gmsm.utils"""
     
-    def test_setup_logging(self, options):
+    def test_setup_logging(self, options, tmp_test_dir):
         
         options.verbose = False
         options.debug = True
-        options.outputfolder = './tmp'
+        options.outputfolder = join(tmp_test_dir, 'log-output')
         
         if isfile(join(options.outputfolder, 'gmsm.log')):
             remove(join(options.outputfolder, 'gmsm.log'))
@@ -41,8 +42,7 @@ class TestUtils:
     def test_check_input_options(self, options):
         
         options.input = ' '
-        options.eficaz = False
-        options.eficaz_file = ' '
+        options.ec_file = ' '
         options.pmr_generation = True
         options.smr_generation = True
         options.comp = ' '
@@ -57,6 +57,41 @@ class TestUtils:
         output = utils.locate_executable(name)
         
         assert output == None
+
+
+    def test_locate_executable_windows_skips_non_windows_binary(self, monkeypatch, tmp_test_dir):
+
+        tmp_path = Path(tmp_test_dir)
+        bin_dir = tmp_path / 'bin'
+        bin_dir.mkdir()
+        tool_name = 'codex_test_tool'
+        (bin_dir / tool_name).write_text('linux-binary-placeholder')
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv('PATH', '')
+        monkeypatch.setattr(utils.sys, 'platform', 'win32')
+
+        output = utils.locate_executable(tool_name)
+
+        assert output == None
+
+
+    def test_locate_executable_windows_finds_exe(self, monkeypatch, tmp_test_dir):
+
+        tmp_path = Path(tmp_test_dir)
+        bin_dir = tmp_path / 'bin'
+        bin_dir.mkdir()
+        tool_name = 'codex_test_tool'
+        expected = bin_dir / f'{tool_name}.exe'
+        expected.write_text('windows-binary-placeholder')
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv('PATH', '')
+        monkeypatch.setattr(utils.sys, 'platform', 'win32')
+
+        output = utils.locate_executable(tool_name)
+
+        assert output == str(expected)
         
         
     def test_execute(self):

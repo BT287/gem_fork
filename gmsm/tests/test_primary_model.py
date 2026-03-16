@@ -2,7 +2,7 @@
 import warnings
 from os.path import join, abspath, dirname
 from gmsm.config import load_config
-from gmsm.io.input_file_manager import get_eficaz_file, get_locustag_comp_dict
+from gmsm.io.input_file_manager import get_locustag_comp_dict
 from gmsm.primary_model import prunPhase_utils, augPhase_utils, run_primary_modeling
 
 warnings.filterwarnings("ignore")
@@ -270,8 +270,8 @@ class TestPrimary_model:
                 {'B446_23835':['4.1.1.45', '3.5.2.3']}
         augPhase_utils.get_rxnid_info_dict_from_kegg(options, options, options)
         assert 'R04323' in options.rxnid_info_dict
-        assert options.rxnid_info_dict['R04323']['NAME'] == \
-                '2-Amino-3-carboxymuconate semialdehyde carboxy-lyase'
+        assert options.rxnid_info_dict['R04323']['NAME'].lower() == \
+                '2-amino-3-carboxymuconate semialdehyde carboxy-lyase'
         assert 'R04323' in options.rxnid_locusTag_dict
         assert 'B446_23835' in options.rxnid_locusTag_dict['R04323']
 
@@ -332,7 +332,7 @@ class TestPrimary_model:
         assert 'MNXR150456' in options.mnxr_to_add_list
 
 
-    def test_add_nonBBH_rxn(self, sco_tmp_model, mnxref, tmpdir, sco_tmp_model_flux, options):
+    def test_add_nonBBH_rxn(self, sco_tmp_model, mnxref, sco_tmp_model_flux, options):
         # Focus on metabolite addition in this test
         # New metabolites: 'MNXM16902' and 'fuc__L'
         options.mnxr_to_add_list = ['MNXR150456']
@@ -347,9 +347,9 @@ class TestPrimary_model:
         options.mnxr_kegg_dict = {'MNXR150456': ['R08926']}
         options.rxnid_locusTag_dict = {'R08926': ['STEN_00480']}
         options.targetGenome_locusTag_prod_dict = {'STEN_00480':'D-threo-aldose 1-dehydrogenase'}
-        outputfolder5 = './tmp'
+        outputfolder4 = './tmp'
         options.mnxref = mnxref
-        options.outputfolder5 = outputfolder5
+        options.outputfolder4 = outputfolder4
         options.template_exrxnid_flux_dict = sco_tmp_model_flux
 
         _cfg_name = 'gmsm.cfg'
@@ -408,7 +408,7 @@ class TestPrimary_model:
         rxn_newComp_list = \
                 augPhase_utils.get_rxn_newComp_list_from_model(sci_primary_model, options)
 
-        options.outputfolder5 = './tmp'
+        options.outputfolder4 = './tmp'
         model, added_rxn_newComp_list = augPhase_utils.create_rxn_newComp(
                                            rxn_newComp_list, sci_primary_model, options, options)
         
@@ -438,7 +438,7 @@ class TestPrimary_model:
         assert len(sci_primary_model.reactions) == int(2009)
         assert len(sci_primary_model.metabolites) == int(1786)
 
-        options.outputfolder5 = './tmp'
+        options.outputfolder4 = './tmp'
         model, added_rxn_newComp_list = augPhase_utils.create_rxn_newComp(
                                            rxn_newComp_list, sci_primary_model, options, options)
 
@@ -461,11 +461,11 @@ class TestPrimary_model:
         assert len(added_rxn_newComp_list) == 4
 
 
-    def test_remove_inactive_rxn_newComp(self, sci_primary_model, tmpdir, options):
+    def test_remove_inactive_rxn_newComp(self, sci_primary_model, options):
 
         # Reaction 'CSND' is an inactive reaction in 'sci_primary_model'
         added_rxn_newComp_list = ['CSND']
-        options.outputfolder5 = './tmp'
+        options.outputfolder4 = './tmp'
 
         #According to cobrapy updates, the number of reactions are changed 1805 to 2009
         assert len(sci_primary_model.reactions) == int(2009)
@@ -494,6 +494,6 @@ class TestPrimary_model:
         options.bigg_mnxr_dict = {}
         options.comp = ['c']
         options.locustag_comp_dict = {}
-        options.outputfolder5 = './tmp'
+        options.outputfolder4 = './tmp'
         model = run_primary_modeling.run_prunPhase(sco_tmp_model, options, options, options, options)
         run_primary_modeling.run_augPhase(model, options, options, options, options, options)

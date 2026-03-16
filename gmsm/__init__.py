@@ -7,7 +7,7 @@ import logging
 from gmsm import utils
 #from os.path import join, abspath, dirname
 
-__version__ = '0.7.7'
+__version__ = '0.8.0'
 
 
 def check_prereqs(run_ns):
@@ -16,7 +16,6 @@ def check_prereqs(run_ns):
     # Tuple is ( binary_name, optional)
     _required_binaries = [
         ('diamond', False),
-        ('eficaz2.5', False)
     ]
 
     failure_messages = []
@@ -25,12 +24,9 @@ def check_prereqs(run_ns):
         binary_path = utils.locate_executable(binary_name)
 
         if binary_path:
-            if binary_name == 'eficaz2.5':
-                run_ns.eficaz_path = binary_path
+            pass
         elif binary_path is None and not optional:
             failure_messages.append("Failed to locate file: %r" % binary_name)
-            if binary_name == 'eficaz2.5':
-                run_ns.eficaz_path = binary_path
 
     try:
         import cobra
@@ -67,4 +63,3 @@ def check_prereqs(run_ns):
 
     for msg in failure_messages:
         logging.error(msg)
-

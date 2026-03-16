@@ -12,7 +12,7 @@ from scripts import input1_manager
 class TestInput1_manager:
     """Test functions in scripts/input1_manager.py"""
 
-    def test_fix_nonstd_model(self, tmpdir, sco_tmp_model, options):
+    def test_fix_nonstd_model(self, sco_tmp_model, options):
 
         model = sco_tmp_model
 

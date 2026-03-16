@@ -74,9 +74,7 @@ def load_cache(cache_dir, cache_data):
         #utils.time_bomb(cache_dir, config_ns)
 
         try:
-            with open(cache_dir, 'rb') as f:
-                cache_data = pickle.load(f)
-                return cache_data
+            return utils.load_legacy_pickle(cache_dir)
         except Exception as e:
             logging.warning("Error occured from '%s': %s", cache_dir, e)
             return cache_data
@@ -281,8 +279,8 @@ def add_nonBBH_rxn(modelPrunedGPR, io_ns, config_ns, primary_model_ns):
         logging.debug("--------------------")
         logging.debug("Reaction to be added: %s; %s", mnxr, kegg_id)
 
-        rxn = io_ns.mnxref.reactions.get_by_id(mnxr)
-        modelPrunedGPR.add_reaction(rxn)
+        rxn = copy.deepcopy(io_ns.mnxref.reactions.get_by_id(mnxr))
+        modelPrunedGPR.add_reactions([rxn])
 
         #Re-define ID
         # Assignment of the same reaction ID causes ValueError.
@@ -297,7 +295,7 @@ def add_nonBBH_rxn(modelPrunedGPR, io_ns, config_ns, primary_model_ns):
 
         #'add_reaction' requires writing/reloading of the model
         modelPrunedGPR = utils.stabilize_model(
-                modelPrunedGPR, io_ns.outputfolder5, kegg_id)
+                modelPrunedGPR, io_ns.outputfolder4, kegg_id)
 
         rxn = modelPrunedGPR.reactions.get_by_id(kegg_id)
 
@@ -333,7 +331,7 @@ def add_nonBBH_rxn(modelPrunedGPR, io_ns, config_ns, primary_model_ns):
         rxn.subsystem = primary_model_ns.rxnid_info_dict[kegg_id]['PATHWAY']
 
         modelPrunedGPR = utils.stabilize_model(
-                modelPrunedGPR, io_ns.outputfolder5, kegg_id)
+                modelPrunedGPR, io_ns.outputfolder4, kegg_id)
 
         logging.debug("Number of reactions in the model: %s",
                 len(modelPrunedGPR.reactions))
@@ -348,7 +346,7 @@ def add_nonBBH_rxn(modelPrunedGPR, io_ns, config_ns, primary_model_ns):
         if 'F' in exrxn_flux_change_list:
             #'remove_reactions' does not seem to require
             #writing/reloading of the model
-            modelPrunedGPR.remove_reactions(rxn.id)
+            modelPrunedGPR.remove_reactions([rxn.id])
 
     target_model = copy.deepcopy(modelPrunedGPR)
     return target_model
@@ -443,7 +441,7 @@ def create_rxn_newComp(rxn_newComp_list, model, io_ns, primary_model_ns):
                             #'add_reaction' requires writing/reloading of the model
                             model.add_reactions([rxn_newComp])
                             model = utils.stabilize_model(
-                                    model, io_ns.outputfolder5, rxn_newComp.id)
+                                    model, io_ns.outputfolder4, rxn_newComp.id)
                             added_rxn_newComp_list.append(rxn_newComp.id)
 
                             logging.debug(
@@ -476,7 +474,7 @@ def remove_inactive_rxn_newComp(added_rxn_newComp_list, model, io_ns, primary_mo
                                                         reaction_list=rxn_newComp_list2)
 
     model.remove_reactions(primary_model_ns.inactive_rxn_newComp_list)
-    model = utils.stabilize_model(model, io_ns.outputfolder5, '')
+    model = utils.stabilize_model(model, io_ns.outputfolder4, '')
 
     logging.debug("Following reactions with new compartments have been removed from the model as they carry no fluxes: %s", primary_model_ns.inactive_rxn_newComp_list)
 

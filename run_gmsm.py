@@ -17,7 +17,6 @@ import warnings
 from cobra.manipulation.delete import prune_unused_metabolites
 from gmsm import check_prereqs, utils
 from gmsm.config import load_config
-from gmsm.eficaz import getECs1, getECs2
 from gmsm.io.input_file_manager import (
     make_folder,
     setup_outputfolders,
@@ -93,12 +92,11 @@ def main():
                         )
 
     group = parser.add_argument_group('GMSM modeling options',
-                        "At least one of the three options should be selected:"
-                        " '-E', '-p' and '-s'\n"
+                        "At least one of the two options should be selected:"
+                        " '-p' and '-s'\n"
                         "Primary metabolic modeling option ('-p') should be selected "
                         "when using '-e' and/or '-C' options\n"
                         " - Examples:\n"
-                        "   '-e -E': NOT acceptable\n"
                         "   '-p -e': Acceptable\n"
                         "   '-s -p -e': Acceptable\n"
                         "   '-s -e': NOT acceptable"
@@ -117,11 +115,6 @@ def main():
                         default=False,
                         action=('store_true'),
                         help="Run secondary metabolic modeling")
-    group.add_argument('-E', '--EFICAz',
-                        dest='eficaz',
-                        action='store_true',
-                        default=False,
-                        help="Run EC number prediction using EFICAz")
     group.add_argument('-C', '--comp',
                         dest='comp',
                         default=False,
@@ -187,35 +180,9 @@ def main():
     # Check prerequisites of executables and libraries
     check_prereqs(run_ns)
 
-    # EC number prediction
-    if run_ns.eficaz:
-        seq_records = get_target_genome_from_input(filetype, run_ns, io_ns)
-
-        if run_ns.eficaz_path and \
-                io_ns.targetGenome_locusTag_aaSeq_dict and \
-                not run_ns.ec_file:
-
-            if filetype == 'fasta' or len(seq_records) > 1:
-                logging.info("Input file in FASTA format or with multiple records:")
-                logging.info("Raw EFICAz output (.txt)  will be generated, not GenBank")
-
-            if len(seq_records) == 1:
-                getECs1(run_ns, io_ns, seq_record = seq_records[0])
-            elif len(seq_records) > 1:
-                getECs2(run_ns, io_ns)
-        else:
-            logging.warning("EFICAz not implemented;")
-
-            if not run_ns.eficaz_path:
-                logging.warning("EFICAz not found")
-            elif not io_ns.targetGenome_locusTag_aaSeq_dict:
-                logging.warning(
-                        "No amino acid sequences found in input genome data")
-
     # Primary metabolic modeling
     if run_ns.pmr_generation:
-        if not run_ns.eficaz:
-            get_target_genome_from_input(filetype, run_ns, io_ns)
+        get_target_genome_from_input(filetype, run_ns, io_ns)
 
         if run_ns.ec_file:
             get_ec_file(run_ns, io_ns)
@@ -247,32 +214,32 @@ def main():
                     time.gmtime(time.time() - start))
 
             try:
-                generate_outputs(io_ns.outputfolder3, runtime1, run_ns, io_ns, homology_ns, primary_model_ns, secondary_model_ns, cobra_model = target_model)
+                generate_outputs(io_ns.outputfolder2, runtime1, run_ns, io_ns, homology_ns, primary_model_ns, secondary_model_ns, cobra_model = target_model)
             except:
-                generate_outputs(io_ns.outputfolder3, runtime1, run_ns, io_ns, homology_ns, primary_model_ns, secondary_model_ns, cobra_model = modelPrunedGPR)
+                generate_outputs(io_ns.outputfolder2, runtime1, run_ns, io_ns, homology_ns, primary_model_ns, secondary_model_ns, cobra_model = modelPrunedGPR)
         else:
             logging.warning("Primary metabolic modeling not implemented;")
             logging.warning("No amino acid sequences found in input genome data")
 
     # Secondary metabolic modeling
     if run_ns.smr_generation:
-        if not run_ns.eficaz:
-            get_target_genome_from_input(filetype, run_ns, io_ns)
+        get_target_genome_from_input(filetype, run_ns, io_ns)
 
         model_file = []
-        files = glob.glob(io_ns.outputfolder3 + os.sep + '*.xml')
+        files = glob.glob(io_ns.outputfolder2 + os.sep + '*.xml')
         model_file = [each_file for each_file in files if '.xml' in each_file]
+        total_bgc = max(getattr(io_ns, 'total_region', 0), getattr(io_ns, 'total_cluster', 0))
 
         if len(model_file) > 0 and '.xml' in model_file[0] \
-            and io_ns.total_region > 0:
+            and total_bgc > 0:
 
-            if io_ns.total_region > 0:
+            if total_bgc > 0:
                 logging.info("Generating secondary metabolite biosynthesizing reactions..")
-                logging.debug("Total number of regions: %s" %io_ns.total_region)
+                logging.debug("Total number of BGCs: %s" %total_bgc)
 
             model_file = os.path.basename(model_file[0])
             target_model = cobra.io.read_sbml_model(
-                           os.path.join(io_ns.outputfolder3, model_file))
+                           os.path.join(io_ns.outputfolder2, model_file))
 
             target_model = run_secondary_modeling(target_model, io_ns, config_ns, secondary_model_ns)
 
@@ -288,7 +255,7 @@ def main():
             runtime2 = time.strftime("Elapsed time %H:%M:%S",
                                      time.gmtime(time.time() - start))
 
-            generate_outputs(io_ns.outputfolder4,
+            generate_outputs(io_ns.outputfolder3,
                              runtime2, run_ns, io_ns, homology_ns, primary_model_ns, secondary_model_ns,
                              #cobra_model_no_gapFilled = target_model_no_gapsFilled,
                              cobra_model = target_model)
