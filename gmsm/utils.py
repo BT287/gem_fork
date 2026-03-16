@@ -8,6 +8,16 @@ import sys
 import subprocess
 from os.path import abspath, dirname, getmtime, isfile, join, split
 
+_ELF_MAGIC = b"\x7fELF"
+_MACHO_MAGICS = {
+    b"\xfe\xed\xfa\xce",
+    b"\xce\xfa\xed\xfe",
+    b"\xfe\xed\xfa\xcf",
+    b"\xcf\xfa\xed\xfe",
+    b"\xca\xfe\xba\xbe",
+    b"\xbe\xba\xfe\xca",
+}
+
 
 def setup_logging(run_ns):
     if run_ns.verbose:
@@ -110,6 +120,7 @@ def check_input_options(run_ns):
     template_topk = getattr(run_ns, 'template_topk', 3)
     template_genome_bank = getattr(run_ns, 'template_genome_bank', None)
     template_rerank_topn = getattr(run_ns, 'template_rerank_topn', 3)
+    template_recommendation_only = getattr(run_ns, 'template_recommendation_only', False)
 
     if not input_file:
         logging.warning("Provide input file via ('-i')")
@@ -153,6 +164,36 @@ def check_input_options(run_ns):
         logging.warning("Template recommendation requires '--template-rerank-topn' to be 0 or greater")
         sys.exit(1)
 
+    if template_recommendation_only:
+        if not getattr(run_ns, 'auto_template', False):
+            logging.warning("Template recommendation-only mode requires '--auto-template'")
+            sys.exit(1)
+        if not pmr_generation:
+            logging.warning("Template recommendation-only mode requires primary modeling option ('-p')")
+            sys.exit(1)
+        if smr_generation:
+            logging.warning("Template recommendation-only mode cannot be combined with secondary modeling ('-s')")
+            sys.exit(1)
+
+
+def _read_executable_magic(candidate):
+    try:
+        with open(candidate, "rb") as handle:
+            return handle.read(4)
+    except OSError:
+        return b""
+
+
+def _is_unix_binary_compatible(candidate):
+    magic = _read_executable_magic(candidate)
+    if magic.startswith(b"#!"):
+        return True
+    if sys.platform == "darwin":
+        return magic in _MACHO_MAGICS
+    if sys.platform.startswith("linux"):
+        return magic == _ELF_MAGIC
+    return True
+
 
 # Adopted from antismash.utils
 def locate_executable(name):
@@ -164,15 +205,15 @@ def locate_executable(name):
             return False
         if sys.platform == 'win32':
             return os.path.splitext(candidate)[1].lower() in valid_windows_suffixes
-        return os.access(candidate, os.X_OK)
+        return os.access(candidate, os.X_OK) and _is_unix_binary_compatible(candidate)
 
     candidate_names = [name]
     if sys.platform == 'win32' and os.path.splitext(name)[1] == "":
         candidate_names = [name + ".exe", name + ".bat", name + ".cmd"]
 
     repo_root = abspath(join(dirname(__file__), os.pardir))
-    search_paths = [join(repo_root, "bin"), join(os.getcwd(), "bin")]
-    search_paths.extend(os.environ.get("PATH", "").split(os.pathsep))
+    search_paths = list(os.environ.get("PATH", "").split(os.pathsep))
+    search_paths.extend([join(repo_root, "bin"), join(os.getcwd(), "bin")])
 
     for candidate_name in candidate_names:
         file_path, _ = split(candidate_name)

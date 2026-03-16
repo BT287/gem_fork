@@ -1,10 +1,12 @@
 
 import warnings
 import pytest
+import stat
 from cobra import Reaction, Metabolite
 from gmsm import utils
 from gmsm.config import load_config
 from os import remove
+from os import pathsep
 from os.path import isfile, join
 from pathlib import Path
 
@@ -108,6 +110,54 @@ class TestUtils:
         output = utils.locate_executable(tool_name)
 
         assert output == str(expected)
+
+
+    def test_locate_executable_prefers_path_over_repo_bin(self, monkeypatch, tmp_test_dir):
+
+        tmp_path = Path(tmp_test_dir)
+        path_dir = tmp_path / 'path_dir'
+        cwd_bin_dir = tmp_path / 'bin'
+        path_dir.mkdir()
+        cwd_bin_dir.mkdir()
+        tool_name = 'codex_test_tool'
+        expected = path_dir / tool_name
+        fallback = cwd_bin_dir / tool_name
+
+        expected.write_text('#!/bin/sh\necho path\n')
+        fallback.write_text('#!/bin/sh\necho cwd\n')
+        expected.chmod(expected.stat().st_mode | stat.S_IXUSR)
+        fallback.chmod(fallback.stat().st_mode | stat.S_IXUSR)
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv('PATH', str(path_dir))
+
+        output = utils.locate_executable(tool_name)
+
+        assert output == str(expected)
+
+
+    def test_locate_executable_darwin_skips_elf_binary(self, monkeypatch, tmp_test_dir):
+
+        tmp_path = Path(tmp_test_dir)
+        elf_dir = tmp_path / 'elf_dir'
+        macho_dir = tmp_path / 'macho_dir'
+        elf_dir.mkdir()
+        macho_dir.mkdir()
+        tool_name = 'codex_test_tool'
+        elf_candidate = elf_dir / tool_name
+        macho_candidate = macho_dir / tool_name
+
+        elf_candidate.write_bytes(b'\x7fELFplaceholder')
+        macho_candidate.write_bytes(b'\xcf\xfa\xed\xfetool')
+        elf_candidate.chmod(elf_candidate.stat().st_mode | stat.S_IXUSR)
+        macho_candidate.chmod(macho_candidate.stat().st_mode | stat.S_IXUSR)
+
+        monkeypatch.setenv('PATH', pathsep.join([str(elf_dir), str(macho_dir)]))
+        monkeypatch.setattr(utils.sys, 'platform', 'darwin')
+
+        output = utils.locate_executable(tool_name)
+
+        assert output == str(macho_candidate)
         
         
     def test_execute(self):

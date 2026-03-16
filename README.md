@@ -216,6 +216,20 @@ python run_gmsm.py \
   -o output_auto_template
 ```
 
+Template recommendation-only smoke test:
+
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  --auto-template \
+  --template-recommendation-only \
+  --template-rerank-topn 0 \
+  -p -d \
+  -o output_auto_template_smoke
+```
+
+Use this mode when you want to verify only the recommendation stage without continuing into homology, pruning, or augmentation.
+
 `--auto-template` now prefers `skani` by default when both of these are available:
 
 - a `skani` executable on `PATH`

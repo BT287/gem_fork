@@ -115,6 +115,11 @@ def main():
                         default=3,
                         type=int,
                         help="How many top template candidates to rerank with reciprocal hits (default: %(default)s)")
+    group.add_argument('--template-recommendation-only',
+                        dest='template_recommendation_only',
+                        default=False,
+                        action='store_true',
+                        help="Run only the template recommendation stage and stop before homology/pruning")
 
     group = parser.add_argument_group('GMSM modeling options',
                         "At least one of the two options should be selected:"
@@ -216,6 +221,12 @@ def main():
 
         if run_ns.auto_template and io_ns.targetGenome_locusTag_aaSeq_dict:
             recommend_template(filetype, run_ns, io_ns)
+            if run_ns.template_recommendation_only:
+                runtime0 = time.strftime("Elapsed time %H:%M:%S",
+                        time.gmtime(time.time() - start))
+                logging.info("Template recommendation-only mode completed")
+                logging.info(runtime0)
+                return
         elif run_ns.auto_template:
             logging.warning("Automatic template recommendation skipped; no amino acid sequences found in input genome data")
 
