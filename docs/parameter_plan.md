@@ -22,11 +22,12 @@ Already done:
 - `skani` coarse ranking, DIAMOND fallback, and BBH reranking are implemented
 - score weights are now configurable from the CLI
 - the effective score weights are recorded in the recommendation JSON output
+- an initial benchmark manifest and recommendation benchmark runner scaffold are implemented
 
 Not done yet:
 
 - there is no benchmark-calibrated evidence that the current default weights are optimal
-- there is no reconstruction-quality benchmark yet
+- there is no downstream reconstruction-quality benchmark yet
 - confidence labels are still heuristic
 
 ## Final Objective
@@ -76,6 +77,27 @@ Not recommended for the first implementation:
 - jumping directly to a learned regression/classification model for the weights
 - optimizing only for template identity accuracy
 
+## Benchmark Design Principle
+
+Do not confuse these two:
+
+- expanding the **template panel**
+- expanding the **benchmark query set**
+
+For the next stage, the priority is to expand the **query benchmark set**, not the template panel.
+
+That means:
+
+- keep the current 10 curated templates fixed
+- add more biologically meaningful query genomes that should map onto one of those 10 templates
+
+Example:
+
+- non-template *E. coli* strains should usually still be recommended to the `eco` template
+- non-template *Streptomyces* query strains may reasonably map to `sco`
+
+This tests whether auto-template recommendation generalizes beyond trivial self-retrieval.
+
 ## Divide And Conquer Plan
 
 ### Phase 0. Parameterization Prerequisite
@@ -93,6 +115,8 @@ Why this matters:
 - without this step, no reproducible tuning experiment is possible
 
 ### Phase 1. Benchmark Scaffold
+
+Status: initial scaffold implemented; biological benchmark set still incomplete
 
 Goal:
 
@@ -125,6 +149,108 @@ Acceptance:
 - all listed cases run through recommendation mode
 - one failed case does not destroy the whole batch
 - results are saved in a machine-readable summary
+
+### Phase 1A. Self-Retrieval Sanity Cases
+
+Purpose:
+
+- verify that the recommendation system can recover an exact known template when the query is effectively the template itself
+
+Current status:
+
+- implemented as the current scaffold baseline
+
+What this gives:
+
+- a strong sanity check for DIAMOND ranking and score wiring
+- a fast failure detector for regressions in recommendation logic
+
+Limitation:
+
+- this is necessary but not sufficient
+- success here does **not** prove useful biological generalization
+
+### Phase 1B. Same-Species / Same-Clade Non-Template Query Cases
+
+Purpose:
+
+- test whether biologically close but non-identical query strains are still mapped to the correct curated template
+
+This is the next highest-value benchmark upgrade.
+
+Examples:
+
+- non-template *E. coli* strains expected to map to `eco`
+- non-template *Bacillus subtilis* strains expected to map to `bsu`
+- non-template *Streptomyces* strains expected to map to `sco`
+
+Why this matters:
+
+- this is much closer to the real use case than self-retrieval
+- it tests generalization while keeping the template panel fixed
+
+### Phase 1C. Harder Generalization Cases
+
+Purpose:
+
+- test recommendation behavior on more ambiguous or boundary cases
+
+Examples:
+
+- same-genus but more distant species
+- organisms near a taxonomic boundary between two plausible templates
+- cases where top-1 and top-2 templates are both biologically plausible
+
+Use:
+
+- stress-test score margins
+- prepare for later confidence calibration
+
+## Query Benchmark Admission Criteria
+
+A query strain should not be added casually.
+
+Minimum criteria:
+
+- genome file is clearly identified and reproducible
+- proteome file matches the same strain / assembly
+- taxonomic rationale for the expected template is explicit
+- the case is not a near-duplicate already present in the benchmark
+- file provenance is documented
+
+Preferred criteria:
+
+- complete or high-quality reference genome
+- stable RefSeq / GenBank identifiers
+- optional EC annotations available
+- optional downstream reference model available for later E2E evaluation
+
+Do **not** add a case only because the organism is famous.
+
+Add it when:
+
+- the files are internally consistent
+- the expected template assignment is biologically defensible
+- the case increases benchmark coverage
+
+## Benchmark Labels To Track
+
+Each benchmark query case should ideally define:
+
+- `expected_template`: the most plausible curated template if known
+- `expected_taxonomic_neighbors`: acceptable close templates if ambiguity exists
+- `tags`: e.g. `self-retrieval`, `same-species`, `same-genus`, `boundary-case`
+- `notes`: brief biological rationale
+
+Interpretation:
+
+- `expected_template` is the strict label
+- `expected_taxonomic_neighbors` is the soft biological label
+
+This lets us measure both:
+
+- strict top-1 recovery
+- biologically acceptable top-k recovery
 
 ### Phase 2. E2E Evaluation Layer
 

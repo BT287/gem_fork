@@ -1,0 +1,240 @@
+{
+  "manifest_version": 1,
+  "description": "Seed auto-template benchmark cases using repo-resident sample inputs. Replace or expand with curated biologically validated cases before downstream metric tuning.",
+  "cases": [
+    {
+      "case_id": "self_bsu_proteome",
+      "query_input": "gmsm/io/data/input1/bsu/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "bsu"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Bacillus subtilis template proteome as the query input."
+    },
+    {
+      "case_id": "self_clj_proteome",
+      "query_input": "gmsm/io/data/input1/clj/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": [
+        "clj"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "clj"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Clostridium ljungdahlii template proteome as the query input."
+    },
+    {
+      "case_id": "self_cre_proteome",
+      "query_input": "gmsm/io/data/input1/cre/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "cre",
+      "expected_taxonomic_neighbors": [
+        "cre"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "cre"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Chlamydomonas reinhardtii template proteome as the query input."
+    },
+    {
+      "case_id": "self_eco_proteome",
+      "query_input": "gmsm/io/data/input1/eco/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "eco"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Escherichia coli template proteome as the query input."
+    },
+    {
+      "case_id": "self_hpy_proteome",
+      "query_input": "gmsm/io/data/input1/hpy/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "hpy",
+      "expected_taxonomic_neighbors": [
+        "hpy"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "hpy"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Helicobacter pylori template proteome as the query input."
+    },
+    {
+      "case_id": "self_mtu_proteome",
+      "query_input": "gmsm/io/data/input1/mtu/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "mtu"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Mycobacterium tuberculosis template proteome as the query input."
+    },
+    {
+      "case_id": "self_nsal_proteome",
+      "query_input": "gmsm/io/data/input1/nsal/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "nsal",
+      "expected_taxonomic_neighbors": [
+        "nsal"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "nsal"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Nannochloropsis salina template proteome as the query input."
+    },
+    {
+      "case_id": "self_ppu_proteome",
+      "query_input": "gmsm/io/data/input1/ppu/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "ppu",
+      "expected_taxonomic_neighbors": [
+        "ppu"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "ppu"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Pseudomonas putida template proteome as the query input."
+    },
+    {
+      "case_id": "self_sce_proteome",
+      "query_input": "gmsm/io/data/input1/sce/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sce",
+      "expected_taxonomic_neighbors": [
+        "sce"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "sce"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Saccharomyces cerevisiae template proteome as the query input."
+    },
+    {
+      "case_id": "self_sco_proteome",
+      "query_input": "gmsm/io/data/input1/sco/tempModel_locusTag_aaSeq.fa",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "template_backend": "diamond",
+      "template_rerank_topn": 0,
+      "tags": [
+        "self-retrieval",
+        "template-proteome",
+        "sanity-check",
+        "sco"
+      ],
+      "notes": "Self-retrieval sanity case using the curated Streptomyces coelicolor template proteome as the query input."
+    },
+    {
+      "case_id": "streptomyces_collinus_antismash8",
+      "query_input": "input/NC_021985.1_antismash8.gbk",
+      "ec_file": "input/NC_021985.1_deepec.txt",
+      "reference_model": null,
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "seed",
+        "streptomyces",
+        "antismash8"
+      ],
+      "notes": "Repo-resident Streptomyces collinus antiSMASH 8 sample used to bootstrap the recommendation benchmark scaffold."
+    },
+    {
+      "case_id": "streptomyces_collinus_refseq_genbank",
+      "query_input": "input/sample_input_two_CDS.gb",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": null,
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "seed",
+        "streptomyces",
+        "legacy-genbank",
+        "same-organism-variant"
+      ],
+      "notes": "Legacy GenBank variant of the same organism kept as a temporary scaffold case until more curated benchmark organisms are added."
+    }
+  ]
+}

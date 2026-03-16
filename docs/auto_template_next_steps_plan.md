@@ -5,6 +5,13 @@
 This document is the hand-off plan for the next Codex session.
 
 For a concise lab-briefing version of the parameter strategy, see [parameter_plan.md](parameter_plan.md).
+For the immediate next-session implementation plan, see [phase1b_query_benchmark_plan.md](phase1b_query_benchmark_plan.md).
+
+Implementation update on 2026-03-16:
+
+- score-weight parameterization is implemented
+- an initial benchmark manifest and recommendation benchmark runner scaffold are implemented
+- the next work is to expand query benchmark cases beyond self-retrieval, then connect downstream evaluation
 
 Current branch:
 
