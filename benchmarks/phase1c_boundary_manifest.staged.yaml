@@ -1,0 +1,69 @@
+{
+  "manifest_version": 1,
+  "notes": "Runnable subset of Phase 1C boundary candidates that have already been staged locally.",
+  "cases": [
+    {
+      "case_id": "actino_cglu_atcc13032",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/actino_cglu_atcc13032/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "actinobacteria",
+        "screening-only",
+        "staged"
+      ],
+      "notes": "Staged Corynebacterium glutamicum ATCC 13032 boundary case."
+    },
+    {
+      "case_id": "clj_cauto_dsm10061",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/clj_cauto_dsm10061/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": [
+        "clj",
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "firmicutes",
+        "screening-only",
+        "staged"
+      ],
+      "notes": "Staged Clostridium autoethanogenum DSM 10061 boundary case."
+    },
+    {
+      "case_id": "firmi_blich_dsm13",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/firmi_blich_dsm13/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu",
+        "clj"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "firmicutes",
+        "screening-only",
+        "staged"
+      ],
+      "notes": "Staged Bacillus licheniformis DSM 13 boundary case."
+    }
+  ]
+}

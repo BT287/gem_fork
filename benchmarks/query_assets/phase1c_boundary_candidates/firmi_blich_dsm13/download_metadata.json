@@ -1,0 +1,27 @@
+{
+  "assembly_accession": "GCA_000008425",
+  "case_id": "firmi_blich_dsm13",
+  "nucleotide_accession": null,
+  "organism_name": "Bacillus licheniformis DSM 13",
+  "soft_neighbors": [
+    "bsu",
+    "clj"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000008425",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1c-firmi_blich_dsm13-wko4_cci/firmi_blich_dsm13.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1c-firmi_blich_dsm13-wko4_cci/extract/ncbi_dataset/data/GCA_000008425.1/genomic.gbff"
+  },
+  "strict_label": "bsu"
+}

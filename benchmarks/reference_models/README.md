@@ -17,6 +17,12 @@ Admission rule:
 - do not add a reference model until its provenance and organism-to-query
   mapping are documented
 
+Current interpretation split:
+
+- `admitted-exact` models may be used in the primary tuning objective
+- `candidate-approximate` models may be staged locally for secondary evidence,
+  but should not silently replace exact-reference anchors
+
 These reference models are intended for:
 
 - reaction precision / recall / F1

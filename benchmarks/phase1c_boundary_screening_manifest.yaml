@@ -1,0 +1,117 @@
+{
+  "manifest_version": 1,
+  "notes": "Phase 1C pilot manifest that combines one exact anchor, two approximate secondary-evidence cases, and recommendation-only boundary screening cases.",
+  "cases": [
+    {
+      "case_id": "eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": "benchmarks/reference_models/eco_w3110/model.xml",
+      "evaluation_tier": "primary_exact",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "primary-exact",
+        "ecoli"
+      ],
+      "notes": "Primary exact anchor retained from the first Phase 3 pilot."
+    },
+    {
+      "case_id": "eco_bw25113",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_bw25113/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/eco_bw25113/model.xml",
+      "evaluation_tier": "secondary_approximate",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "secondary-approximate",
+        "ecoli"
+      ],
+      "notes": "Approximate same-lineage evidence case retained as secondary evidence only."
+    },
+    {
+      "case_id": "bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/bsu_py79/model.xml",
+      "evaluation_tier": "secondary_approximate",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "secondary-approximate",
+        "bacillus"
+      ],
+      "notes": "Approximate same-species evidence case retained as secondary evidence only."
+    },
+    {
+      "case_id": "sco_sliv_tk24",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/sco_sliv_tk24/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-screening",
+        "same-clade",
+        "streptomyces"
+      ],
+      "notes": "Validated same-clade Streptomyces case used as the first recommendation-only boundary screen."
+    },
+    {
+      "case_id": "streptomyces_collinus_antismash8",
+      "query_input": "input/NC_021985.1_antismash8.gbk",
+      "ec_file": "input/NC_021985.1_deepec.txt",
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": null,
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-screening",
+        "streptomyces",
+        "antismash8"
+      ],
+      "notes": "Repo-resident same-genus Streptomyces scaffold retained as a soft-label screening case."
+    },
+    {
+      "case_id": "streptomyces_collinus_refseq_genbank",
+      "query_input": "input/sample_input_two_CDS.gb",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": null,
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-screening",
+        "streptomyces",
+        "legacy-genbank"
+      ],
+      "notes": "Legacy same-organism variant retained as a soft-label boundary screen to probe ranking stability across input variants."
+    }
+  ]
+}

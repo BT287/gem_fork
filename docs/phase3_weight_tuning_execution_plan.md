@@ -29,7 +29,8 @@ For the first exact-reference loop:
 
 - fixed backend
 - narrow grid search
-- primary objective: mean reaction F1
+- primary objective: mean reaction F1 over `primary_exact` cases
+- secondary evidence: mean reaction F1 over `secondary_approximate` cases
 - recommendation hit rates kept as screening metrics
 
 This is intentionally conservative.
@@ -95,6 +96,7 @@ Required behavior:
 - run full reconstruction for selected benchmark cases
 - collect recommendation reports
 - evaluate against reference models when available
+- separate exact-anchor and approximate-secondary evidence in the summary
 - write a machine-readable tuning summary
 - write a sortable TSV table
 
@@ -106,10 +108,11 @@ Status:
 
 First objective:
 
-- `objective_reaction_f1_mean`
+- `primary_exact_reaction_f1_mean`
 
 Supporting summary fields:
 
+- secondary approximate reaction F1 mean
 - evaluated reference-case count
 - reaction precision/recall means
 - expected-template hit rates
@@ -138,7 +141,7 @@ Recommended first command:
 ```bash
 conda activate gmsm
 python scripts/tune_template_weights.py \
-  --case-id eco_w3110 \
+  --manifest benchmarks/phase3_tuning_manifest.yaml \
   --template-backend diamond \
   --template-diamond-hit-weights 0.75,0.85,0.95 \
   --template-bbh-template-weights 0.5,0.7,0.9 \
@@ -156,6 +159,16 @@ Observed outcome from the first executed pilot:
 Reference:
 
 - [phase3_eco_w3110_pilot_report.md](phase3_eco_w3110_pilot_report.md)
+
+Observed outcome from the first tiered multi-case pilot:
+
+- the exact+approximate tier split now runs successfully
+- but the three-case pilot still produced identical aggregate objective values
+  across all four tested settings
+
+Reference:
+
+- [phase3_tiered_multi_case_pilot_report.md](phase3_tiered_multi_case_pilot_report.md)
 
 ### Work Unit 5. Expand Only After The Pilot Is Stable
 
@@ -185,3 +198,18 @@ The first real `Phase 3` loop should be treated like a reactor shakedown run:
 - control the manipulated variables tightly
 - keep the objective simple
 - expand complexity only after the measurement loop is trustworthy
+
+Current implication after the tiered multi-case pilot:
+
+- the measurement loop is now trustworthy enough
+- the next bottleneck is benchmark discriminative power
+- the next upgrade should therefore be `Phase 1C` boundary-case curation rather
+  than a much larger same-species grid sweep
+- boundary-screening cases can now run in recommendation-only mode inside
+  `scripts/tune_template_weights.py`
+- the first operational boundary-only pilot is recorded in
+  [phase1c_boundary_screening_pilot_report.md](phase1c_boundary_screening_pilot_report.md)
+- a later integrated pilot now shows the desired pattern:
+  exact/approximate anchors remain stable while a promoted boundary case can
+  still switch under stressed settings
+- see [phase3_phase1c_integrated_pilot_report.md](phase3_phase1c_integrated_pilot_report.md)

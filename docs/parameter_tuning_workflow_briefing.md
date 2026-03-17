@@ -191,8 +191,10 @@ successfully evaluate.
 
 Current metric policy:
 
-- primary optimization metric: reaction F1 mean
+- primary optimization metric: reaction F1 mean over exact-anchor cases
+- secondary evidence metric: reaction F1 mean over approximate-reference cases
 - screening metric: expected-template / expected-neighbor hit behavior
+  including recommendation-only `boundary_screening` cases
 - secondary diagnostic: alias-harmonized gene metrics
 - raw gene overlap: diagnostic only
 
@@ -249,6 +251,7 @@ Reference:
 
 - recommendation benchmark remains the cheap regression screen
 - exact-reference E2E reaction metrics become the first true tuning objective
+- approximate-reference E2E metrics become secondary evidence, not the main objective
 - raw gene metrics stay diagnostic-only
 - alias-based gene metrics stay supplementary until stronger crosswalks exist
 

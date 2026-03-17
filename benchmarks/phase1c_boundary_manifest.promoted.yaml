@@ -1,0 +1,69 @@
+{
+  "manifest_version": 1,
+  "notes": "Promoted Phase 1C boundary-screening set after first intake smoke validation.",
+  "cases": [
+    {
+      "case_id": "actino_cglu_atcc13032",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/actino_cglu_atcc13032/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "actinobacteria",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted actinobacterial boundary case; mtu ranked first and sco ranked second during intake smoke."
+    },
+    {
+      "case_id": "clj_cauto_dsm10061",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/clj_cauto_dsm10061/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": [
+        "clj",
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "firmicutes",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted Firmicute boundary case; clj ranked first and bsu ranked second during intake smoke."
+    },
+    {
+      "case_id": "sco_sven_atcc10712",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/sco_sven_atcc10712/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco",
+        "mtu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "actinobacteria",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted Streptomyces boundary case; sco ranked first and mtu ranked second during intake smoke."
+    }
+  ]
+}

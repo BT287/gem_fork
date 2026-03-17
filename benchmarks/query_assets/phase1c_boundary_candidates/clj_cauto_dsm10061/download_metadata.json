@@ -1,0 +1,27 @@
+{
+  "assembly_accession": "GCA_000484505.2",
+  "case_id": "clj_cauto_dsm10061",
+  "nucleotide_accession": null,
+  "organism_name": "Clostridium autoethanogenum DSM 10061",
+  "soft_neighbors": [
+    "clj",
+    "bsu"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000484505.2",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1c-clj_cauto_dsm10061-on7zec9p/clj_cauto_dsm10061.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1c-clj_cauto_dsm10061-on7zec9p/extract/ncbi_dataset/data/GCA_000484505.2/genomic.gbff"
+  },
+  "strict_label": "clj"
+}

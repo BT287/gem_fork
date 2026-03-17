@@ -13,6 +13,10 @@
   - strong same-lineage approximation, but not the same strain
   - this is useful for later sensitivity analysis, not the first exact E2E
     anchor
+- staged secondary-evidence SBML:
+  - `benchmarks/reference_models/eco_bw25113/model.xml`
+  - exported locally from the shipped `eco` template pickle for controlled
+    approximate-reference tuning runs
 - promotion rule:
   - do not set `reference_model` in the main benchmark manifest until the exact
     W3110 loop is stable and the project explicitly accepts approximate

@@ -12,5 +12,9 @@
 - why not admitted yet:
   - same-species and laboratory-close, but still not exact strain matching
   - should be evaluated only after one exact-case E2E run is already working
+- staged secondary-evidence SBML:
+  - `benchmarks/reference_models/bsu_py79/model.xml`
+  - exported locally from the shipped `bsu` template pickle for controlled
+    approximate-reference tuning runs
 - priority note:
   - among approximate cases, this is the most defensible Bacillus follow-up

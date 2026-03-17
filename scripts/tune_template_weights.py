@@ -9,6 +9,7 @@ import json
 import statistics
 import subprocess
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 
@@ -191,6 +192,7 @@ def stream_command(command, cwd, log_path):
 
 
 def build_case_command(args, case, config, output_dir):
+    evaluation_tier = resolve_case_evaluation_tier(case)
     command = [
         args.python,
         "run_gmsm.py",
@@ -210,6 +212,8 @@ def build_case_command(args, case, config, output_dir):
         "-o",
         str(output_dir),
     ]
+    if evaluation_tier == "boundary_screening":
+        command.append("--template-recommendation-only")
     if case.get("ec_file"):
         command.extend(["-e", case["ec_file"]])
     if args.template_genome_bank:
@@ -237,13 +241,20 @@ def write_results_tsv(path, rows):
         "config_id",
         "template_backend",
         "objective_reaction_f1_mean",
+        "primary_exact_reaction_f1_mean",
+        "secondary_approximate_reaction_f1_mean",
+        "overall_reaction_f1_mean",
         "evaluated_reference_case_count",
+        "primary_exact_reference_case_count",
+        "secondary_approximate_reference_case_count",
         "failed_case_count",
         "top1_expected_template_hit_rate",
         "top1_expected_neighbor_hit_rate",
         "reaction_precision_mean",
         "reaction_recall_mean",
         "gene_alias_f1_mean",
+        "primary_exact_gene_alias_f1_mean",
+        "secondary_approximate_gene_alias_f1_mean",
         "template_rerank_topn",
         "template_ani_weight",
         "template_af_weight",
@@ -258,7 +269,14 @@ def write_results_tsv(path, rows):
         writer = csv.DictWriter(handle, fieldnames=fieldnames, delimiter="\t")
         writer.writeheader()
         for row in rows:
-            writer.writerow({field: row.get(field) for field in fieldnames})
+            flat_row = dict(row)
+            flat_row["top1_expected_template_hit_rate"] = row.get("aggregate_metrics", {}).get(
+                "top1_expected_template_hit_rate"
+            )
+            flat_row["top1_expected_neighbor_hit_rate"] = row.get("aggregate_metrics", {}).get(
+                "top1_expected_neighbor_hit_rate"
+            )
+            writer.writerow({field: flat_row.get(field) for field in fieldnames})
 
 
 def safe_mean(values):
@@ -266,6 +284,29 @@ def safe_mean(values):
     if not cleaned:
         return None
     return round(statistics.mean(cleaned), 6)
+
+
+def resolve_case_evaluation_tier(case):
+    if case.get("evaluation_tier"):
+        return case["evaluation_tier"]
+    if case.get("reference_model"):
+        return "primary_exact"
+    return None
+
+
+def summarize_screening_metrics(benchmark_module, case_results):
+    aggregate_metrics = benchmark_module.build_aggregate_metrics(case_results)
+    tier_case_map = defaultdict(list)
+    for case in case_results:
+        tier = case.get("evaluation_tier")
+        if not tier:
+            continue
+        tier_case_map[tier].append(case)
+
+    tier_metrics = {}
+    for tier, tier_cases in sorted(tier_case_map.items()):
+        tier_metrics[tier] = benchmark_module.build_aggregate_metrics(tier_cases)
+    return aggregate_metrics, tier_metrics
 
 
 def evaluate_case(evaluation_module, predicted_path, reference_path, case_id, model_kind, query_genbank):
@@ -279,21 +320,46 @@ def evaluate_case(evaluation_module, predicted_path, reference_path, case_id, mo
 
 
 def aggregate_configuration_result(benchmark_module, config, case_results):
-    aggregate_metrics = benchmark_module.build_aggregate_metrics(case_results)
+    aggregate_metrics, tier_screening_metrics = summarize_screening_metrics(benchmark_module, case_results)
 
     evaluated_cases = [
         case
         for case in case_results
         if case.get("status") == "passed" and case.get("evaluation", {}).get("reaction_metrics")
     ]
+    tier_to_cases = defaultdict(list)
+    for case in evaluated_cases:
+        tier_to_cases[case.get("evaluation_tier") or "primary_exact"].append(case)
+
+    primary_exact_cases = tier_to_cases.get("primary_exact", [])
+    secondary_approximate_cases = tier_to_cases.get("secondary_approximate", [])
     reaction_f1_values = [case["evaluation"]["reaction_metrics"].get("f1") for case in evaluated_cases]
     reaction_precision_values = [case["evaluation"]["reaction_metrics"].get("precision") for case in evaluated_cases]
     reaction_recall_values = [case["evaluation"]["reaction_metrics"].get("recall") for case in evaluated_cases]
+    primary_exact_reaction_f1_values = [
+        case["evaluation"]["reaction_metrics"].get("f1") for case in primary_exact_cases
+    ]
+    secondary_approximate_reaction_f1_values = [
+        case["evaluation"]["reaction_metrics"].get("f1") for case in secondary_approximate_cases
+    ]
     gene_alias_f1_values = [
         case["evaluation"].get("gene_alias_metrics", {}).get("f1")
         for case in evaluated_cases
         if case["evaluation"].get("gene_alias_metrics", {}).get("status") == "evaluated"
     ]
+    primary_exact_gene_alias_f1_values = [
+        case["evaluation"].get("gene_alias_metrics", {}).get("f1")
+        for case in primary_exact_cases
+        if case["evaluation"].get("gene_alias_metrics", {}).get("status") == "evaluated"
+    ]
+    secondary_approximate_gene_alias_f1_values = [
+        case["evaluation"].get("gene_alias_metrics", {}).get("f1")
+        for case in secondary_approximate_cases
+        if case["evaluation"].get("gene_alias_metrics", {}).get("status") == "evaluated"
+    ]
+
+    primary_exact_reaction_f1_mean = safe_mean(primary_exact_reaction_f1_values)
+    overall_reaction_f1_mean = safe_mean(reaction_f1_values)
 
     return {
         "config_id": config["config_id"],
@@ -307,13 +373,21 @@ def aggregate_configuration_result(benchmark_module, config, case_results):
         "template_bbh_target_weight": config["template_bbh_target_weight"],
         "template_coarse_weight": config["template_coarse_weight"],
         "template_rerank_weight": config["template_rerank_weight"],
-        "objective_reaction_f1_mean": safe_mean(reaction_f1_values),
+        "objective_reaction_f1_mean": primary_exact_reaction_f1_mean or overall_reaction_f1_mean,
+        "primary_exact_reaction_f1_mean": primary_exact_reaction_f1_mean,
+        "secondary_approximate_reaction_f1_mean": safe_mean(secondary_approximate_reaction_f1_values),
+        "overall_reaction_f1_mean": overall_reaction_f1_mean,
         "reaction_precision_mean": safe_mean(reaction_precision_values),
         "reaction_recall_mean": safe_mean(reaction_recall_values),
         "gene_alias_f1_mean": safe_mean(gene_alias_f1_values),
+        "primary_exact_gene_alias_f1_mean": safe_mean(primary_exact_gene_alias_f1_values),
+        "secondary_approximate_gene_alias_f1_mean": safe_mean(secondary_approximate_gene_alias_f1_values),
         "evaluated_reference_case_count": len(evaluated_cases),
+        "primary_exact_reference_case_count": len(primary_exact_cases),
+        "secondary_approximate_reference_case_count": len(secondary_approximate_cases),
         "failed_case_count": sum(case.get("status") != "passed" for case in case_results),
         "aggregate_metrics": aggregate_metrics,
+        "tier_screening_metrics": tier_screening_metrics,
     }
 
 
@@ -321,9 +395,13 @@ def ranking_sort_key(result):
     objective = result.get("objective_reaction_f1_mean")
     if objective is None:
         objective = -1.0
+    secondary = result.get("secondary_approximate_reaction_f1_mean")
+    if secondary is None:
+        secondary = -1.0
     return (
         -objective,
-        -int(result.get("evaluated_reference_case_count", 0)),
+        -secondary,
+        -int(result.get("primary_exact_reference_case_count", 0)),
         -float(result.get("aggregate_metrics", {}).get("top1_expected_neighbor_hit_rate") or 0.0),
         int(result.get("failed_case_count", 0)),
         result.get("config_id", ""),
@@ -353,12 +431,13 @@ def run_tuning(args):
         "python": args.python,
         "template_backend": args.template_backend,
         "objective_policy": {
-            "primary_metric": "reaction_f1_mean",
+            "primary_metric": "primary_exact_reaction_f1_mean",
             "screening_metrics": [
                 "top1_expected_template_hit_rate",
                 "top1_expected_neighbor_hit_rate",
             ],
             "secondary_metrics": [
+                "secondary_approximate_reaction_f1_mean",
                 "gene_alias_f1_mean",
             ],
         },
@@ -404,6 +483,12 @@ def run_tuning(args):
                 "case_id": case["case_id"],
                 "query_input": case["query_input"],
                 "reference_model": case.get("reference_model"),
+                "evaluation_tier": resolve_case_evaluation_tier(case),
+                "execution_mode": (
+                    "template_recommendation_only"
+                    if resolve_case_evaluation_tier(case) == "boundary_screening"
+                    else "full_reconstruction"
+                ),
                 "expected_template": case.get("expected_template"),
                 "expected_taxonomic_neighbors": case.get("expected_taxonomic_neighbors", []),
                 "config_id": config["config_id"],

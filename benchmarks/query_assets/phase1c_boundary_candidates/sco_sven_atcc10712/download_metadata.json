@@ -1,0 +1,15 @@
+{
+  "assembly_accession": null,
+  "case_id": "sco_sven_atcc10712",
+  "nucleotide_accession": "NC_018750.1",
+  "organism_name": "Streptomyces venezuelae ATCC 10712",
+  "soft_neighbors": [
+    "sco",
+    "mtu"
+  ],
+  "source_note": {
+    "download_method": "efetch",
+    "efetch_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_018750.1&rettype=gbwithparts&retmode=text"
+  },
+  "strict_label": "sco"
+}

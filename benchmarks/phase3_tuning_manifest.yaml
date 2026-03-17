@@ -1,0 +1,60 @@
+{
+  "manifest_version": 1,
+  "notes": "Tuning-focused manifest that separates admitted exact references from approximate secondary-evidence references.",
+  "cases": [
+    {
+      "case_id": "eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": "benchmarks/reference_models/eco_w3110/model.xml",
+      "evaluation_tier": "primary_exact",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "primary-exact",
+        "ecoli"
+      ],
+      "notes": "Primary exact anchor case for first tuning loops."
+    },
+    {
+      "case_id": "eco_bw25113",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_bw25113/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/eco_bw25113/model.xml",
+      "evaluation_tier": "secondary_approximate",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "secondary-approximate",
+        "ecoli"
+      ],
+      "notes": "Same-lineage approximate reference case used only as secondary evidence. A header-only external EC file is passed to suppress embedded GenBank EC annotations during offline tuning runs."
+    },
+    {
+      "case_id": "bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/bsu_py79/model.xml",
+      "evaluation_tier": "secondary_approximate",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "secondary-approximate",
+        "bacillus"
+      ],
+      "notes": "Same-species approximate reference case used only as secondary evidence. A header-only external EC file is passed to suppress embedded GenBank EC annotations during offline tuning runs."
+    }
+  ]
+}

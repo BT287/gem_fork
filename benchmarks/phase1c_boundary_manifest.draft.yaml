@@ -1,0 +1,86 @@
+{
+  "manifest_version": 1,
+  "notes": "Draft manifest for newly curated Phase 1C boundary-screening candidates. Promote only after local inputs are staged and parseability is checked.",
+  "cases": [
+    {
+      "case_id": "actino_cglu_atcc13032",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/actino_cglu_atcc13032/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "actinobacteria",
+        "screening-only"
+      ],
+      "notes": "Corynebacterium glutamicum ATCC 13032 boundary case bridging the mtu and sco actinobacterial templates."
+    },
+    {
+      "case_id": "clj_cauto_dsm10061",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/clj_cauto_dsm10061/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": [
+        "clj",
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "firmicutes",
+        "screening-only"
+      ],
+      "notes": "Clostridium autoethanogenum DSM 10061 boundary case bridging the clj and bsu Firmicute templates."
+    },
+    {
+      "case_id": "firmi_blich_dsm13",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/firmi_blich_dsm13/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu",
+        "clj"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "firmicutes",
+        "screening-only"
+      ],
+      "notes": "Bacillus licheniformis DSM 13 boundary case that should favor bsu but retain clj as the nearest panel alternative."
+    },
+    {
+      "case_id": "sco_sven_atcc10712",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/sco_sven_atcc10712/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco",
+        "mtu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1c",
+        "boundary-case",
+        "actinobacteria",
+        "screening-only"
+      ],
+      "notes": "Streptomyces venezuelae ATCC 10712 boundary case intended as a higher-quality replacement for legacy Streptomyces scaffolds."
+    }
+  ]
+}

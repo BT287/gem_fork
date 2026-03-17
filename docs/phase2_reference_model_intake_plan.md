@@ -206,6 +206,13 @@ Use `eco_w3110` as the first true `Phase 2` reference-model case.
 Treat the remaining four cases as staged backlog, not as equally mature E2E
 targets.
 
+Update after the first `Phase 3` tiered-tuning setup:
+
+- `eco_bw25113` and `bsu_py79` now also have locally staged template-derived
+  SBML files for controlled secondary-evidence runs
+- they still remain approximate references and should not be merged into the
+  main exact-reference objective without an explicit policy change
+
 Additional note from the first executed case:
 
 - reaction overlap is already useful
