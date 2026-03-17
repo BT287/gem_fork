@@ -15,3 +15,11 @@
   - interpretation noise is therefore higher than for `bsu_py79`
 - priority note:
   - keep behind `bsu_py79` in the Phase 2 intake queue
+- staged secondary-evidence SBML:
+  - `benchmarks/reference_models/bsu_ncib3610/model.xml`
+  - exported locally from the shipped `bsu` template pickle for controlled
+    approximate-reference tuning runs
+- promotion rule:
+  - use only as `secondary_approximate` evidence in expanded Phase 3 pilots
+  - do not merge into the primary exact-reference objective without an explicit
+    policy change

@@ -217,3 +217,9 @@ Current implication after the tiered multi-case pilot:
   both the tested diamond-hit band and the tested BBH-balance band are flat
 - see [phase3_local_search_diamondhit_report.md](phase3_local_search_diamondhit_report.md)
   and [phase3_local_search_bbh_report.md](phase3_local_search_bbh_report.md)
+- the later objective-expansion pass widened the secondary-evidence tier with
+  `bsu_ncib3610`, improving coverage without changing the main bottleneck
+- see [phase3_objective_expansion_report.md](phase3_objective_expansion_report.md)
+- a reserve-boundary probe then showed that `firmi_blich_dsm13` is biologically
+  acceptable but still weak as a ranking discriminator
+- see [phase3_objective_expansion_change_log.md](phase3_objective_expansion_change_log.md)

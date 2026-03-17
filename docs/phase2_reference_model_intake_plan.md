@@ -99,6 +99,10 @@ Use these labels when staging `benchmarks/reference_models/<case_id>/SOURCE.md`.
   - same species, but the domestication/background difference from 168 is
     larger than for PY79
   - this makes interpretation noisier than the W3110 or PY79 cases
+- local staging update:
+  - a template-derived `model.xml` can be staged locally for controlled
+    `secondary_approximate` tuning runs
+  - this does not change the case into an exact-reference target
 
 ### Tier 4. Hold Until Source Policy Is Clearer
 
