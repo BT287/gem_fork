@@ -1,0 +1,78 @@
+{
+  "manifest_version": 1,
+  "notes": "Draft Firmicute-focused Phase 3 round-3 boundary candidate intake manifest.",
+  "cases": [
+    {
+      "case_id": "firmi_cace_atcc824",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_cace_atcc824/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "clostridia", "screening-only", "draft"],
+      "notes": "Round-3 Firmicute intake candidate; classical solventogenic clostridial genome."
+    },
+    {
+      "case_id": "firmi_cthe_atcc27405",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_cthe_atcc27405/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "clostridia", "screening-only", "draft"],
+      "notes": "Round-3 Firmicute intake candidate; Acetivibrio thermocellus, formerly Clostridium thermocellum."
+    },
+    {
+      "case_id": "firmi_tsac_jwslys485",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_tsac_jwslys485/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "clostridia", "screening-only", "draft"],
+      "notes": "Round-3 Firmicute intake candidate; Thermoanaerobacterium clostridial-side screen."
+    },
+    {
+      "case_id": "firmi_bvelez_fzb42",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_bvelez_fzb42/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu", "clj"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "bacilli", "screening-only", "draft"],
+      "notes": "Round-3 Firmicute intake candidate; Bacillus velezensis FZB42 Bacillus-side screen."
+    },
+    {
+      "case_id": "firmi_bamy_dsm7",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_bamy_dsm7/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu", "clj"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "bacilli", "screening-only", "draft"],
+      "notes": "Round-3 Firmicute intake candidate; Bacillus amyloliquefaciens type-material Bacillus-side screen."
+    },
+    {
+      "case_id": "firmi_ppol_e681",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_ppol_e681/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu", "clj"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "bacilli", "screening-only", "draft"],
+      "notes": "Round-3 Firmicute intake candidate; Paenibacillus polymyxa E681 extended Bacilli-side probe."
+    }
+  ]
+}

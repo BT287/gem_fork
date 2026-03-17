@@ -233,12 +233,15 @@ Reference:
 - exact `eco_w3110` reference intake exists
 - E2E evaluator exists
 - alias-based gene harmonization exists as a bridge metric
+- the integrated screening set now contains a clean Firmicute leverage case
+  (`firmi_tsac_jwslys485`) in addition to the earlier actinobacterial
+  leverage set
 
 ## What Is Not Completed
 
 - multi-case exact-reference E2E benchmark coverage
 - reviewed gene crosswalks for exact cases
-- final tuning runner over a search grid
+- final local-search rerun over the stronger round-3 integrated manifest
 - confidence calibration
 
 ## What Changed From The Original Plan
@@ -257,6 +260,8 @@ Reference:
 - approximate-reference E2E metrics become secondary evidence, not the main objective
 - raw gene metrics stay diagnostic-only
 - alias-based gene metrics stay supplementary until stronger crosswalks exist
+- after the round-3 Firmicute curation pass, the next immediate action is a
+  rerun of the narrow local search rather than another broad benchmark hunt
 
 ## Practical Rule For The Next Block
 

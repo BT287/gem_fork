@@ -1,0 +1,26 @@
+{
+  "assembly_accession": "GCF_000146875.3",
+  "case_id": "firmi_ppol_e681",
+  "organism_name": "Paenibacillus polymyxa E681",
+  "soft_neighbors": [
+    "bsu",
+    "clj"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCF_000146875.3",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round3-firmi_ppol_e681-npd7n5ar/firmi_ppol_e681.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round3-firmi_ppol_e681-npd7n5ar/extract/ncbi_dataset/data/GCF_000146875.3/genomic.gbff"
+  },
+  "strict_label": "bsu"
+}

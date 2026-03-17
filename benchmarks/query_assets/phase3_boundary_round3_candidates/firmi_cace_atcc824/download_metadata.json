@@ -1,0 +1,26 @@
+{
+  "assembly_accession": "GCA_000008765.1",
+  "case_id": "firmi_cace_atcc824",
+  "organism_name": "Clostridium acetobutylicum ATCC 824",
+  "soft_neighbors": [
+    "clj",
+    "bsu"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000008765.1",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round3-firmi_cace_atcc824-vmxkhx2d/firmi_cace_atcc824.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round3-firmi_cace_atcc824-vmxkhx2d/extract/ncbi_dataset/data/GCA_000008765.1/genomic.gbff"
+  },
+  "strict_label": "clj"
+}

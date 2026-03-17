@@ -1,0 +1,26 @@
+{
+  "assembly_accession": "GCA_000307585.2",
+  "case_id": "firmi_tsac_jwslys485",
+  "organism_name": "Thermoanaerobacterium saccharolyticum JW/SL-YS485",
+  "soft_neighbors": [
+    "clj",
+    "bsu"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000307585.2",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round3-firmi_tsac_jwslys485-nyvaoogo/firmi_tsac_jwslys485.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round3-firmi_tsac_jwslys485-nyvaoogo/extract/ncbi_dataset/data/GCA_000307585.2/genomic.gbff"
+  },
+  "strict_label": "clj"
+}

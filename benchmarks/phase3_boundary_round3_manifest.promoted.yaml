@@ -1,0 +1,42 @@
+{
+  "manifest_version": 1,
+  "notes": "Promoted round-3 Firmicute boundary candidates with interpretable clj-vs-bsu competition.",
+  "cases": [
+    {
+      "case_id": "firmi_cace_atcc824",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_cace_atcc824/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "clostridia", "screening-only", "promoted"],
+      "notes": "Round-3 promoted classical solventogenic clostridial screen with clean clj-vs-bsu top-2 structure."
+    },
+    {
+      "case_id": "firmi_cthe_atcc27405",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_cthe_atcc27405/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "clostridia", "screening-only", "promoted"],
+      "notes": "Round-3 promoted cellulolytic clostridial-side screen with clean clj-vs-bsu top-2 structure."
+    },
+    {
+      "case_id": "firmi_tsac_jwslys485",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_tsac_jwslys485/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "clostridia", "screening-only", "promoted"],
+      "notes": "Round-3 promoted Thermoanaerobacterium screen; coarse stage already pressures the clj-vs-bsu boundary."
+    }
+  ]
+}

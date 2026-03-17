@@ -227,3 +227,10 @@ Current implication after the tiered multi-case pilot:
   leverage cases and strengthened integrated screening power
 - see [phase3_boundary_round2_intake_report.md](phase3_boundary_round2_intake_report.md)
   and [phase3_round2_integrated_pilot_report.md](phase3_round2_integrated_pilot_report.md)
+- round-3 Firmicute-focused curation then added the first clean Firmicute
+  leverage case (`firmi_tsac_jwslys485`) that flips from `clj` to `bsu`
+  instead of drifting to `eco`
+- see [phase3_boundary_round3_probe_report.md](phase3_boundary_round3_probe_report.md)
+  and [phase3_round3_integrated_pilot_report.md](phase3_round3_integrated_pilot_report.md)
+- after that round-3 upgrade, the next best move is no longer broad external
+  curation but a rerun of the local search on the stronger integrated manifest
