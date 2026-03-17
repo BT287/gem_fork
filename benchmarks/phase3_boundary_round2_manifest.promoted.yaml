@@ -1,0 +1,90 @@
+{
+  "manifest_version": 1,
+  "notes": "Promoted round-2 Phase 3 boundary-screening set after first intake smoke validation.",
+  "cases": [
+    {
+      "case_id": "actino_rjost_rha1",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_rjost_rha1/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "actinobacteria",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted Rhodococcus jostii RHA1 candidate for the mtu-vs-sco actinobacterial boundary."
+    },
+    {
+      "case_id": "actino_nfar_ifm10152",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_nfar_ifm10152/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "actinobacteria",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted Nocardia farcinica IFM 10152 candidate for the mtu-vs-sco actinobacterial boundary."
+    },
+    {
+      "case_id": "actino_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco",
+        "mtu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "actinobacteria",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted Saccharopolyspora erythraea NRRL 23338 candidate for the sco-vs-mtu actinobacterial boundary."
+    },
+    {
+      "case_id": "firmi_cbei_ncimb8052",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/firmi_cbei_ncimb8052/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": [
+        "clj",
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "firmicutes",
+        "screening-only",
+        "promoted"
+      ],
+      "notes": "Promoted Clostridium beijerinckii NCIMB 8052 candidate for the clj-vs-bsu Firmicute boundary."
+    }
+  ]
+}

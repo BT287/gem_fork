@@ -1,0 +1,27 @@
+{
+  "assembly_accession": "GCA_000011145.1",
+  "case_id": "firmi_bhal_c125",
+  "nucleotide_accession": null,
+  "organism_name": "Halalkalibacterium halodurans C-125",
+  "soft_neighbors": [
+    "bsu",
+    "clj"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000011145.1",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round2-firmi_bhal_c125-7y331764/firmi_bhal_c125.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round2-firmi_bhal_c125-7y331764/extract/ncbi_dataset/data/GCA_000011145.1/genomic.gbff"
+  },
+  "strict_label": "bsu"
+}

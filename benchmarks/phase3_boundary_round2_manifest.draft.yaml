@@ -1,0 +1,126 @@
+{
+  "manifest_version": 1,
+  "notes": "Draft manifest for round-2 Phase 3 boundary-screening candidates. Promote only after local inputs are staged and competition structure is audited.",
+  "cases": [
+    {
+      "case_id": "actino_rjost_rha1",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_rjost_rha1/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "actinobacteria",
+        "screening-only"
+      ],
+      "notes": "Rhodococcus jostii RHA1 candidate for the mtu-vs-sco actinobacterial boundary."
+    },
+    {
+      "case_id": "actino_nfar_ifm10152",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_nfar_ifm10152/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": [
+        "mtu",
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "actinobacteria",
+        "screening-only"
+      ],
+      "notes": "Nocardia farcinica IFM 10152 candidate for the mtu-vs-sco actinobacterial boundary."
+    },
+    {
+      "case_id": "actino_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco",
+        "mtu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "actinobacteria",
+        "screening-only"
+      ],
+      "notes": "Saccharopolyspora erythraea NRRL 23338 candidate for the sco-vs-mtu actinobacterial boundary."
+    },
+    {
+      "case_id": "firmi_cbei_ncimb8052",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/firmi_cbei_ncimb8052/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": [
+        "clj",
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "firmicutes",
+        "screening-only"
+      ],
+      "notes": "Clostridium beijerinckii NCIMB 8052 candidate for the clj-vs-bsu Firmicute boundary."
+    },
+    {
+      "case_id": "firmi_gkau_hta426",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/firmi_gkau_hta426/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu",
+        "clj"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "firmicutes",
+        "screening-only"
+      ],
+      "notes": "Geobacillus kaustophilus HTA426 candidate for the bsu-vs-clj Firmicute boundary."
+    },
+    {
+      "case_id": "firmi_bhal_c125",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/firmi_bhal_c125/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu",
+        "clj"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase3",
+        "boundary-round2",
+        "firmicutes",
+        "screening-only"
+      ],
+      "notes": "Halalkalibacterium halodurans C-125 candidate for the bsu-vs-clj Firmicute boundary."
+    }
+  ]
+}

@@ -223,3 +223,7 @@ Current implication after the tiered multi-case pilot:
 - a reserve-boundary probe then showed that `firmi_blich_dsm13` is biologically
   acceptable but still weak as a ranking discriminator
 - see [phase3_objective_expansion_change_log.md](phase3_objective_expansion_change_log.md)
+- round-2 external boundary curation then added multiple new actinobacterial
+  leverage cases and strengthened integrated screening power
+- see [phase3_boundary_round2_intake_report.md](phase3_boundary_round2_intake_report.md)
+  and [phase3_round2_integrated_pilot_report.md](phase3_round2_integrated_pilot_report.md)

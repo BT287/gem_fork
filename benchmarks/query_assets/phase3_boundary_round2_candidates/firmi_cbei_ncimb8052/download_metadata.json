@@ -1,0 +1,27 @@
+{
+  "assembly_accession": "GCA_000016965.1",
+  "case_id": "firmi_cbei_ncimb8052",
+  "nucleotide_accession": null,
+  "organism_name": "Clostridium beijerinckii NCIMB 8052",
+  "soft_neighbors": [
+    "clj",
+    "bsu"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000016965.1",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round2-firmi_cbei_ncimb8052-3d9z8mgn/firmi_cbei_ncimb8052.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round2-firmi_cbei_ncimb8052-3d9z8mgn/extract/ncbi_dataset/data/GCA_000016965.1/genomic.gbff"
+  },
+  "strict_label": "clj"
+}

@@ -1,0 +1,15 @@
+{
+  "assembly_accession": null,
+  "case_id": "actino_nfar_ifm10152",
+  "nucleotide_accession": "NC_006361.1",
+  "organism_name": "Nocardia farcinica IFM 10152",
+  "soft_neighbors": [
+    "mtu",
+    "sco"
+  ],
+  "source_note": {
+    "download_method": "efetch",
+    "efetch_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_006361.1&rettype=gbwithparts&retmode=text"
+  },
+  "strict_label": "mtu"
+}

@@ -1,0 +1,27 @@
+{
+  "assembly_accession": "GCA_000014565.1",
+  "case_id": "actino_rjost_rha1",
+  "nucleotide_accession": null,
+  "organism_name": "Rhodococcus jostii RHA1",
+  "soft_neighbors": [
+    "mtu",
+    "sco"
+  ],
+  "source_note": {
+    "datasets_command": [
+      "/opt/anaconda3/envs/gmsm/bin/datasets",
+      "download",
+      "genome",
+      "accession",
+      "GCA_000014565.1",
+      "--include",
+      "gbff",
+      "--filename",
+      "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round2-actino_rjost_rha1-rppuhp7z/actino_rjost_rha1.zip",
+      "--no-progressbar"
+    ],
+    "download_method": "datasets",
+    "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase3-round2-actino_rjost_rha1-rppuhp7z/extract/ncbi_dataset/data/GCA_000014565.1/genomic.gbff"
+  },
+  "strict_label": "mtu"
+}
