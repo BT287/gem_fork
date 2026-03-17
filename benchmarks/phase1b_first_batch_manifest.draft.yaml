@@ -1,0 +1,116 @@
+{
+  "manifest_version": 1,
+  "description": "Draft Phase 1B first batch. Populate local files under benchmarks/query_assets/phase1b_first_batch before running this manifest.",
+  "cases": [
+    {
+      "case_id": "eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1b",
+        "same-species",
+        "ecoli",
+        "strict-label"
+      ],
+      "notes": "Non-template E. coli K-12 W3110 case expected to map to eco.",
+      "source_accession": "GCA_000010245.1",
+      "organism_name": "Escherichia coli str. K-12 substr. W3110",
+      "strain_name": "W3110",
+      "provenance": "NCBI Datasets assembly GCA_000010245.1"
+    },
+    {
+      "case_id": "eco_bw25113",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_bw25113/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": [
+        "eco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1b",
+        "same-species",
+        "ecoli",
+        "strict-label"
+      ],
+      "notes": "Non-template E. coli BW25113 case expected to map to eco.",
+      "source_accession": "GCA_000750555.1",
+      "organism_name": "Escherichia coli BW25113",
+      "strain_name": "BW25113",
+      "provenance": "NCBI Datasets assembly GCA_000750555.1"
+    },
+    {
+      "case_id": "bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1b",
+        "same-species",
+        "bacillus",
+        "strict-label"
+      ],
+      "notes": "Non-template Bacillus subtilis PY79 case expected to map to bsu.",
+      "source_accession": "GCA_000497485.1",
+      "organism_name": "Bacillus subtilis PY79",
+      "strain_name": "PY79",
+      "provenance": "NCBI assembly / BioProject metadata for GCA_000497485.1"
+    },
+    {
+      "case_id": "bsu_ncib3610",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_ncib3610/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": [
+        "bsu"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1b",
+        "same-species",
+        "bacillus",
+        "strict-label"
+      ],
+      "notes": "Non-template Bacillus subtilis NCIB 3610 case expected to map to bsu.",
+      "source_accession": "GCA_006088795.1",
+      "organism_name": "Bacillus subtilis subsp. subtilis NCIB 3610",
+      "strain_name": "NCIB 3610",
+      "provenance": "NCBI Datasets assembly GCA_006088795.1"
+    },
+    {
+      "case_id": "sco_sliv_tk24",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/sco_sliv_tk24/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": [
+        "sco"
+      ],
+      "exclude_templates": [],
+      "tags": [
+        "phase1b",
+        "same-clade",
+        "streptomyces",
+        "soft-label-priority"
+      ],
+      "notes": "Streptomyces lividans TK24 same-clade case expected to map to sco.",
+      "source_accession": "GCA_000739105.1",
+      "organism_name": "Streptomyces lividans TK24",
+      "strain_name": "TK24",
+      "provenance": "NCBI BioProject 257077 / assembly GCA_000739105.1"
+    }
+  ]
+}

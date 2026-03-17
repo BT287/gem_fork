@@ -1,0 +1,19 @@
+{
+  "assembly_accession": "GCA_000010245.1",
+  "case_id": "eco_w3110",
+  "datasets_command": [
+    "/opt/anaconda3/envs/gmsm/bin/datasets",
+    "download",
+    "genome",
+    "accession",
+    "GCA_000010245.1",
+    "--include",
+    "gbff",
+    "--filename",
+    "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-eco_w3110-6_kg1wcm/eco_w3110.zip",
+    "--no-progressbar"
+  ],
+  "expected_template": "eco",
+  "organism_name": "Escherichia coli str. K-12 substr. W3110",
+  "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-eco_w3110-6_kg1wcm/extract/ncbi_dataset/data/GCA_000010245.1/genomic.gbff"
+}

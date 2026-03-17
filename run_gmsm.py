@@ -279,6 +279,7 @@ def main():
             get_homologs(io_ns, homology_ns)
             model = get_pickles_prunPhase(io_ns)
             modelPrunedGPR = run_prunPhase(model, io_ns, config_ns, homology_ns, primary_model_ns)
+            target_model = modelPrunedGPR
 
             if io_ns.targetGenome_locusTag_ec_dict:
                 get_pickles_augPhase(io_ns)

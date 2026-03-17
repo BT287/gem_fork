@@ -123,6 +123,8 @@ def ensure_modern_cobra_attrs(model):
     objects.extend(model.reactions)
     objects.extend(model.metabolites)
     objects.extend(model.genes)
+    if hasattr(model, "groups"):
+        objects.extend(model.groups)
 
     for obj in objects:
         if not hasattr(obj, "_annotation"):

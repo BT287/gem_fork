@@ -1,0 +1,19 @@
+{
+  "assembly_accession": "GCA_006088795.1",
+  "case_id": "bsu_ncib3610",
+  "datasets_command": [
+    "/opt/anaconda3/envs/gmsm/bin/datasets",
+    "download",
+    "genome",
+    "accession",
+    "GCA_006088795.1",
+    "--include",
+    "gbff",
+    "--filename",
+    "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-bsu_ncib3610-vpgqd336/bsu_ncib3610.zip",
+    "--no-progressbar"
+  ],
+  "expected_template": "bsu",
+  "organism_name": "Bacillus subtilis subsp. subtilis NCIB 3610",
+  "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-bsu_ncib3610-vpgqd336/extract/ncbi_dataset/data/GCA_006088795.1/genomic.gbff"
+}

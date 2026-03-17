@@ -2,7 +2,8 @@
 import warnings
 import pytest
 import stat
-from cobra import Reaction, Metabolite
+from cobra import Model, Reaction, Metabolite
+from cobra.core import Group
 from gmsm import utils
 from gmsm.config import load_config
 from os import remove
@@ -356,8 +357,20 @@ class TestUtils:
         label = 'test'
         
         model = utils.stabilize_model(sci_primary_model, folder, label)
-        
+
         assert len(model.reactions) == int(2009)
+
+
+    def test_ensure_modern_cobra_attrs_backfills_group_annotation(self):
+
+        model = Model("grouped_model")
+        group = Group("test_group")
+        model.add_groups([group])
+        delattr(group, "_annotation")
+
+        utils.ensure_modern_cobra_attrs(model)
+
+        assert group.annotation == {}
     
     
     def test_get_exrnxid_flux(self, sci_primary_model, sco_tmp_model_flux):

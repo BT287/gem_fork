@@ -1,0 +1,19 @@
+{
+  "assembly_accession": "GCA_000750555.1",
+  "case_id": "eco_bw25113",
+  "datasets_command": [
+    "/opt/anaconda3/envs/gmsm/bin/datasets",
+    "download",
+    "genome",
+    "accession",
+    "GCA_000750555.1",
+    "--include",
+    "gbff",
+    "--filename",
+    "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-eco_bw25113-3vsd6fxx/eco_bw25113.zip",
+    "--no-progressbar"
+  ],
+  "expected_template": "eco",
+  "organism_name": "Escherichia coli BW25113",
+  "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-eco_bw25113-3vsd6fxx/extract/ncbi_dataset/data/GCA_000750555.1/genomic.gbff"
+}

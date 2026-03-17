@@ -8,6 +8,10 @@ It is meant for fast alignment before implementation, not as the full handoff sp
 
 For the detailed implementation backlog, see [auto_template_next_steps_plan.md](auto_template_next_steps_plan.md).
 
+For a worked explanation of why final tuning should target end-to-end model
+quality rather than template top-1 accuracy alone, see
+[e2e_evaluation_rationale.md](e2e_evaluation_rationale.md).
+
 ## One-Line Summary
 
 The goal is **not** to maximize template top-1 classification accuracy.
@@ -257,6 +261,12 @@ This lets us measure both:
 Goal:
 
 - score the final reconstructed model, not only the recommendation stage
+
+Execution scaffold:
+
+- [phase2_e2e_evaluation_execution_plan.md](phase2_e2e_evaluation_execution_plan.md)
+- [phase2_reference_model_intake_plan.md](phase2_reference_model_intake_plan.md)
+- [phase2_eco_w3110_first_case_report.md](phase2_eco_w3110_first_case_report.md)
 
 Files:
 

@@ -12,6 +12,11 @@ Its scope is narrow:
 
 The goal is to strengthen the benchmark by adding **non-template query strains** that should still map to one of the existing 10 curated templates.
 
+For the concrete first-batch candidates and execution breakdown, see:
+
+- [phase1b_first_batch_candidates.md](phase1b_first_batch_candidates.md)
+- [phase1b_first_batch_execution_plan.md](phase1b_first_batch_execution_plan.md)
+
 ## Why This Is The Right Next Step
 
 Current status:

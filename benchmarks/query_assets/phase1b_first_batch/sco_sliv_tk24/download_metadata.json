@@ -1,0 +1,19 @@
+{
+  "assembly_accession": "GCA_000739105.1",
+  "case_id": "sco_sliv_tk24",
+  "datasets_command": [
+    "/opt/anaconda3/envs/gmsm/bin/datasets",
+    "download",
+    "genome",
+    "accession",
+    "GCA_000739105.1",
+    "--include",
+    "gbff",
+    "--filename",
+    "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-sco_sliv_tk24-yihcyqys/sco_sliv_tk24.zip",
+    "--no-progressbar"
+  ],
+  "expected_template": "sco",
+  "organism_name": "Streptomyces lividans TK24",
+  "source_gbff": "/var/folders/4p/sb20bp956_bgbntjhp461wbm0000gn/T/phase1b-sco_sliv_tk24-yihcyqys/extract/ncbi_dataset/data/GCA_000739105.1/genomic.gbff"
+}
