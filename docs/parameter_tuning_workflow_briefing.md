@@ -15,6 +15,9 @@ It is meant to answer four practical questions:
 For the more detailed planning backlog, see
 [parameter_plan.md](parameter_plan.md).
 
+For a fuller report-style explanation of the whole estimation workflow, see
+[auto_template_parameter_estimation_report.md](auto_template_parameter_estimation_report.md).
+
 ## One-Line Summary
 
 We are **not** fitting a learned regression model for template choice.
