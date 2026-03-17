@@ -3,6 +3,10 @@ import json
 from pathlib import Path
 
 import cobra
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqFeature import FeatureLocation, SeqFeature
+from Bio.SeqRecord import SeqRecord
 
 
 def load_module():
@@ -25,6 +29,50 @@ def make_model(path, model_id, reaction_ids, gene_rule_map):
         reaction.gene_reaction_rule = gene_rule_map.get(reaction_id, "")
         model.add_reactions([reaction])
     cobra.io.write_sbml_model(model, str(path))
+
+
+def make_annotated_model(path, model_id, reaction_ids, gene_rule_map, gene_annotations):
+    model = cobra.Model(model_id)
+    metabolite = cobra.Metabolite("m_c", compartment="c")
+    for reaction_id in reaction_ids:
+        reaction = cobra.Reaction(reaction_id)
+        reaction.lower_bound = 0.0
+        reaction.upper_bound = 1000.0
+        reaction.add_metabolites({metabolite: -1.0})
+        reaction.gene_reaction_rule = gene_rule_map.get(reaction_id, "")
+        model.add_reactions([reaction])
+
+    for gene_id, annotation in gene_annotations.items():
+        model.genes.get_by_id(gene_id).annotation = annotation
+
+    cobra.io.write_sbml_model(model, str(path))
+
+
+def make_query_genbank(path):
+    record = SeqRecord(Seq("ATG" * 200), id="TEST", name="TEST", description="synthetic")
+    record.annotations["molecule_type"] = "DNA"
+    record.features = [
+        SeqFeature(
+            FeatureLocation(0, 90),
+            type="CDS",
+            qualifiers={
+                "gene": ["geneA"],
+                "protein_id": ["protA"],
+                "translation": ["M" * 30],
+            },
+        ),
+        SeqFeature(
+            FeatureLocation(90, 180),
+            type="CDS",
+            qualifiers={
+                "gene": ["thrA"],
+                "protein_id": ["protThrA"],
+                "note": ["ECK0002:JW0001:b0002"],
+                "translation": ["M" * 30],
+            },
+        ),
+    ]
+    SeqIO.write(record, str(path), "genbank")
 
 
 class TestReconstructionQualityEval:
@@ -104,3 +152,101 @@ class TestReconstructionQualityEval:
         assert payload["skipped_case_count"] == 1
         assert payload["cases"][0]["status"] == "evaluated"
         assert payload["cases"][1]["status"] == "skipped"
+
+    def test_evaluate_single_case_reports_gene_alias_metrics(self, tmp_path):
+        module = load_module()
+        run_dir = tmp_path / "run-output"
+        primary_dir = run_dir / "3_primary_metabolic_model"
+        bbh_dir = run_dir / "2_blastp_results"
+        primary_dir.mkdir(parents=True)
+        bbh_dir.mkdir(parents=True)
+
+        predicted_path = primary_dir / "model.xml"
+        reference_path = tmp_path / "reference.xml"
+        query_genbank = tmp_path / "query.gbk"
+
+        make_model(
+            predicted_path,
+            "pred_model",
+            ["R_A", "R_B", "R_C"],
+            {"R_A": "protA", "R_B": "b0002", "R_C": "unmapped"},
+        )
+        make_annotated_model(
+            reference_path,
+            "ref_model",
+            ["R_A", "R_B"],
+            {"R_A": "REF_A", "R_B": "REF_THRA"},
+            {
+                "REF_A": {"refseq_name": "geneA"},
+                "REF_THRA": {"refseq_name": "thrA"},
+            },
+        )
+        make_query_genbank(query_genbank)
+        (bbh_dir / "temp_target_BBH_dict.txt").write_text("b0002\t['protThrA']\n", encoding="utf-8")
+
+        payload = module.evaluate_single_case(
+            run_dir,
+            reference_path,
+            label="case_alias",
+            model_kind="primary",
+            query_genbank=query_genbank,
+        )
+
+        assert payload["gene_metrics"]["overlap_count"] == 0
+        assert payload["gene_alias_metrics"]["status"] == "evaluated"
+        assert payload["gene_alias_metrics"]["overlap_count"] == 2
+        assert payload["gene_alias_metrics"]["precision"] == 0.666667
+        assert payload["gene_alias_metrics"]["recall"] == 1.0
+        assert payload["gene_alias_metrics"]["f1"] == 0.8
+
+    def test_evaluate_benchmark_batch_uses_query_input_for_gene_alias_metrics(self, tmp_path):
+        module = load_module()
+        run_dir = tmp_path / "benchmark-results" / "batch2"
+        case_dir = run_dir / "case1" / "run-output" / "3_primary_metabolic_model"
+        bbh_dir = run_dir / "case1" / "run-output" / "2_blastp_results"
+        case_dir.mkdir(parents=True)
+        bbh_dir.mkdir(parents=True)
+
+        predicted_path = case_dir / "model.xml"
+        reference_path = tmp_path / "reference.xml"
+        query_genbank = tmp_path / "query.gbk"
+        manifest_path = tmp_path / "manifest.yaml"
+
+        make_model(
+            predicted_path,
+            "pred_model",
+            ["R_A", "R_B"],
+            {"R_A": "protA", "R_B": "b0002"},
+        )
+        make_annotated_model(
+            reference_path,
+            "ref_model",
+            ["R_A", "R_B"],
+            {"R_A": "REF_A", "R_B": "REF_THRA"},
+            {
+                "REF_A": {"refseq_name": "geneA"},
+                "REF_THRA": {"refseq_name": "thrA"},
+            },
+        )
+        make_query_genbank(query_genbank)
+        (bbh_dir / "temp_target_BBH_dict.txt").write_text("b0002\t['protThrA']\n", encoding="utf-8")
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "cases": [
+                        {
+                            "case_id": "case1",
+                            "query_input": str(query_genbank),
+                            "reference_model": str(reference_path),
+                        }
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        payload = module.evaluate_benchmark_batch(manifest_path, run_dir, model_kind="primary")
+
+        assert payload["evaluated_case_count"] == 1
+        assert payload["cases"][0]["evaluation"]["gene_alias_metrics"]["status"] == "evaluated"
+        assert payload["cases"][0]["evaluation"]["gene_alias_metrics"]["overlap_count"] == 2

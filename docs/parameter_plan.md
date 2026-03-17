@@ -12,6 +12,9 @@ For a worked explanation of why final tuning should target end-to-end model
 quality rather than template top-1 accuracy alone, see
 [e2e_evaluation_rationale.md](e2e_evaluation_rationale.md).
 
+For the short workflow briefing version, see
+[parameter_tuning_workflow_briefing.md](parameter_tuning_workflow_briefing.md).
+
 ## One-Line Summary
 
 The goal is **not** to maximize template top-1 classification accuracy.
@@ -267,6 +270,8 @@ Execution scaffold:
 - [phase2_e2e_evaluation_execution_plan.md](phase2_e2e_evaluation_execution_plan.md)
 - [phase2_reference_model_intake_plan.md](phase2_reference_model_intake_plan.md)
 - [phase2_eco_w3110_first_case_report.md](phase2_eco_w3110_first_case_report.md)
+- [phase2_gene_harmonization_plan.md](phase2_gene_harmonization_plan.md)
+- [phase2_gene_crosswalk_candidate_plan.md](phase2_gene_crosswalk_candidate_plan.md)
 
 Files:
 
@@ -291,6 +296,10 @@ Goal:
 
 - search for a better `theta` using the benchmark
 
+Execution scaffold:
+
+- [phase3_weight_tuning_execution_plan.md](phase3_weight_tuning_execution_plan.md)
+
 Files:
 
 - `scripts/tune_template_weights.py`
@@ -308,10 +317,22 @@ Why:
 
 Recommended early search dimensions:
 
-- `ani_weight`
+- backend-specific coarse score weight:
+  - `ani_weight` for `skani`
+  - `diamond_hit_weight` for `diamond`
 - `bbh_template_cov_weight`
 - `coarse_weight`
 - `template_rerank_topn`
+
+Current first objective:
+
+- mean reaction F1 over evaluated reference cases
+
+Supporting screening metrics:
+
+- expected-template hit rate
+- expected-neighbor hit rate
+- alias-harmonized gene F1 as a secondary report-only signal
 
 Acceptance:
 

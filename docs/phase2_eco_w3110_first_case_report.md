@@ -64,7 +64,7 @@ Interpretation:
 - this is good enough to justify keeping reaction metrics in the early `Phase 2`
   objective
 
-### Gene Metrics
+### Raw Gene Metrics
 
 - precision: `0.000331`
 - recall: `0.000729`
@@ -90,6 +90,27 @@ Example:
 - gene IDs can fail to match even when the underlying homologous genes are
   biologically corresponding
 
+### Alias-Based Harmonized Gene Metrics
+
+- overlap count: `321`
+- precision: `0.106221`
+- recall: `0.233965`
+- F1: `0.146108`
+
+Interpretation:
+
+- this is the first non-trivial gene-level signal after harmonizing identifier
+  aliases from:
+  - the query GenBank
+  - the BBH output
+  - the reference SBML annotations
+- it is still conservative and metadata-limited
+- but it is far more informative than the raw near-zero overlap
+
+Reference:
+
+- `docs/phase2_gene_harmonization_plan.md`
+
 This is the same type of issue as comparing two reactor datasets after one file
 uses SI units and the other uses mixed engineering units:
 
@@ -102,12 +123,16 @@ uses SI units and the other uses mixed engineering units:
 For the next `Phase 2` step:
 
 - reaction overlap is an admissible early E2E metric
-- raw gene overlap should be treated as a **diagnostic only**, not yet as a
-  tuning objective
+- raw gene overlap should remain a **diagnostic only**
+- alias-based harmonized gene overlap can now be tracked as a first-pass
+  secondary signal
+- neither raw nor alias-based gene metrics should yet be treated as final
+  orthology-grade objectives
 
 ## Next Practical Tasks
 
-1. add a gene-identifier harmonization policy before using gene F1 for tuning
+1. strengthen the current alias-based gene harmonization toward a more
+   orthology-aware policy
 2. keep the exact `eco_w3110` reaction metric as the first real E2E anchor
 3. only then expand approximate references in this order:
    - `eco_bw25113`

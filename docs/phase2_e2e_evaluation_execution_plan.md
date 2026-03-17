@@ -71,10 +71,13 @@ Observed caveat from the first real case:
 
 - reaction overlap is already interpretable
 - raw gene overlap is not yet robust across differing gene-ID namespaces
+- alias-based harmonized gene matching now exists as a first-pass bridge layer
 
 Reference:
 
 - `docs/phase2_eco_w3110_first_case_report.md`
+- `docs/phase2_gene_harmonization_plan.md`
+- `docs/phase2_gene_crosswalk_candidate_plan.md`
 
 Defer for later:
 
@@ -166,6 +169,8 @@ Current result:
 - reaction metrics are already informative
 - raw gene metrics exposed an identifier-namespace blocker, not a biological
   failure
+- alias-based harmonized gene metrics now recover a non-trivial signal from the
+  same case
 
 Reference:
 
@@ -201,8 +206,8 @@ Current progress:
 The next real bottlenecks are now:
 
 - staging more trusted reference models under `benchmarks/reference_models/`
-- defining a gene-ID harmonization layer before gene-level metrics are used for
-  tuning
+- strengthening the current alias-based gene harmonization into a more
+  orthology-aware comparison layer before gene-level metrics are used for tuning
 
 ## Recommended Next Command
 

@@ -8,6 +8,7 @@ units.
 Current execution report:
 
 - `docs/phase2_eco_w3110_first_case_report.md`
+- `docs/phase2_gene_harmonization_plan.md`
 
 The key decision is:
 
@@ -208,5 +209,6 @@ targets.
 Additional note from the first executed case:
 
 - reaction overlap is already useful
-- raw gene overlap should remain diagnostic-only until identifier harmonization
-  is defined
+- raw gene overlap should remain diagnostic-only
+- a first alias-based harmonization layer now exists, but it should still be
+  treated as a bridge metric rather than a final orthology-grade target

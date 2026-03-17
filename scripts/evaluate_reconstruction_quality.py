@@ -1,10 +1,34 @@
 #!/usr/bin/env python
 
 import argparse
+import ast
 import json
+import re
+from collections import defaultdict
 from pathlib import Path
 
 import cobra
+
+try:
+    from Bio import SeqIO
+except ImportError:  # pragma: no cover - runtime dependency handled by CLI flow
+    SeqIO = None
+
+
+GENBANK_SUFFIXES = {".gb", ".gbk", ".gbff", ".genbank"}
+REFERENCE_ALIAS_FIELDS = (
+    "refseq_name",
+    "name",
+    "gene",
+    "refseq_locus_tag",
+    "refseq_old_locus_tag",
+    "old_locus_tag",
+    "locus_tag",
+    "ncbigi",
+    "ncbigene",
+)
+NOTE_ALIAS_SPLIT_RE = re.compile(r"[:;,|]")
+NOTE_ALIAS_TOKEN_RE = re.compile(r"^[A-Za-z0-9_.-]{2,40}$")
 
 
 def precision_recall_f1(predicted_ids, reference_ids):
@@ -71,7 +95,229 @@ def load_model_sets(model_path):
     }
 
 
-def evaluate_single_case(predicted_path, reference_path, label=None, model_kind="auto"):
+def iter_annotation_values(value):
+    if value in (None, ""):
+        return []
+    if isinstance(value, (list, tuple, set)):
+        items = value
+    else:
+        items = [value]
+    normalized = []
+    for item in items:
+        text = str(item).strip()
+        if text:
+            normalized.append(text)
+    return normalized
+
+
+def extract_note_aliases(note_values):
+    aliases = set()
+    for note in note_values or []:
+        for token in NOTE_ALIAS_SPLIT_RE.split(str(note)):
+            token = token.strip()
+            if not token or " " in token:
+                continue
+            if not NOTE_ALIAS_TOKEN_RE.match(token):
+                continue
+            if not any(character.isdigit() for character in token):
+                continue
+            aliases.add(token)
+    return aliases
+
+
+def build_query_alias_lookup(query_genbank_path):
+    if SeqIO is None:
+        raise ImportError("Biopython is required for GenBank-based gene harmonization")
+
+    query_path = Path(query_genbank_path).resolve()
+    alias_lookup = defaultdict(set)
+
+    for record in SeqIO.parse(str(query_path), "genbank"):
+        for feature in record.features:
+            if feature.type != "CDS":
+                continue
+
+            qualifiers = feature.qualifiers
+            direct_ids = set()
+            alias_values = set()
+
+            for field_name in ("gene", "locus_tag", "protein_id", "old_locus_tag"):
+                for value in iter_annotation_values(qualifiers.get(field_name)):
+                    direct_ids.add(value)
+                    alias_values.add(value)
+
+            for value in iter_annotation_values(qualifiers.get("db_xref")):
+                direct_ids.add(value)
+                alias_values.add(value)
+
+            note_aliases = extract_note_aliases(qualifiers.get("note"))
+            direct_ids.update(note_aliases)
+            alias_values.update(note_aliases)
+
+            if not direct_ids:
+                continue
+
+            for raw_identifier in direct_ids:
+                alias_lookup[raw_identifier].update(alias_values)
+
+    return dict(alias_lookup)
+
+
+def build_reference_gene_aliases(reference_model):
+    alias_map = {}
+    for gene in reference_model.genes:
+        aliases = {gene.id}
+        annotation = getattr(gene, "annotation", {}) or {}
+        for field_name in REFERENCE_ALIAS_FIELDS:
+            for value in iter_annotation_values(annotation.get(field_name)):
+                aliases.add(value)
+        alias_map[gene.id] = aliases
+    return alias_map
+
+
+def resolve_run_root(predicted_path, predicted_model_path):
+    original = Path(predicted_path).resolve()
+    if original.is_dir():
+        return original
+
+    model_parent = predicted_model_path.parent
+    if model_parent.name in ("3_primary_metabolic_model", "4_complete_model"):
+        return model_parent.parent
+    return model_parent
+
+
+def load_template_to_target_bbh(run_root):
+    bbh_path = Path(run_root).resolve() / "2_blastp_results" / "temp_target_BBH_dict.txt"
+    if not bbh_path.is_file():
+        return {}
+
+    mapping = {}
+    for raw_line in bbh_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        template_gene_id, targets_raw = line.split("\t", 1)
+        mapping[template_gene_id] = set(ast.literal_eval(targets_raw))
+    return mapping
+
+
+def build_predicted_gene_aliases(predicted_model, query_alias_lookup, template_to_target_bbh):
+    alias_map = {}
+    for gene in predicted_model.genes:
+        aliases = {gene.id}
+        aliases.update(query_alias_lookup.get(gene.id, set()))
+        for target_gene_id in template_to_target_bbh.get(gene.id, set()):
+            aliases.update(query_alias_lookup.get(target_gene_id, set()))
+        alias_map[gene.id] = aliases
+    return alias_map
+
+
+def build_candidate_reference_map(predicted_aliases, reference_aliases):
+    alias_to_reference_gene_ids = defaultdict(set)
+    for reference_gene_id, aliases in reference_aliases.items():
+        for alias in aliases:
+            alias_to_reference_gene_ids[alias].add(reference_gene_id)
+
+    candidate_map = {}
+    for predicted_gene_id, aliases in predicted_aliases.items():
+        candidates = set()
+        for alias in aliases:
+            candidates.update(alias_to_reference_gene_ids.get(alias, set()))
+        candidate_map[predicted_gene_id] = candidates
+    return candidate_map
+
+
+def maximum_bipartite_matching(candidate_map):
+    matched_reference = {}
+
+    def _augment(predicted_gene_id, seen_reference_gene_ids):
+        for reference_gene_id in sorted(candidate_map[predicted_gene_id]):
+            if reference_gene_id in seen_reference_gene_ids:
+                continue
+            seen_reference_gene_ids.add(reference_gene_id)
+            if reference_gene_id not in matched_reference or _augment(
+                matched_reference[reference_gene_id], seen_reference_gene_ids
+            ):
+                matched_reference[reference_gene_id] = predicted_gene_id
+                return True
+        return False
+
+    for predicted_gene_id in sorted(candidate_map):
+        _augment(predicted_gene_id, set())
+
+    return {predicted_gene_id: reference_gene_id for reference_gene_id, predicted_gene_id in matched_reference.items()}
+
+
+def compute_gene_alias_metrics(predicted_path, predicted_model_path, reference_model_path, query_genbank_path=None):
+    if not query_genbank_path:
+        return {
+            "status": "skipped",
+            "reason": "query_genbank is not set",
+        }
+
+    query_path = Path(query_genbank_path).resolve()
+    if query_path.suffix.lower() not in GENBANK_SUFFIXES:
+        return {
+            "status": "skipped",
+            "reason": "query_genbank is not a GenBank-like file",
+            "query_genbank_path": str(query_path),
+        }
+
+    query_alias_lookup = build_query_alias_lookup(query_path)
+    run_root = resolve_run_root(predicted_path, predicted_model_path)
+    template_to_target_bbh = load_template_to_target_bbh(run_root)
+
+    predicted_model = cobra.io.read_sbml_model(str(predicted_model_path))
+    reference_model = cobra.io.read_sbml_model(str(reference_model_path))
+
+    predicted_aliases = build_predicted_gene_aliases(predicted_model, query_alias_lookup, template_to_target_bbh)
+    reference_aliases = build_reference_gene_aliases(reference_model)
+    candidate_map = build_candidate_reference_map(predicted_aliases, reference_aliases)
+    matched_pairs = maximum_bipartite_matching(candidate_map)
+
+    matched_reference_gene_ids = sorted(matched_pairs.values())
+    predicted_count = len(predicted_aliases)
+    reference_count = len(reference_aliases)
+    overlap_count = len(matched_pairs)
+
+    precision = overlap_count / float(predicted_count) if predicted_count else None
+    recall = overlap_count / float(reference_count) if reference_count else None
+    if precision is None or recall is None or (precision + recall) == 0:
+        f1 = None if precision is None or recall is None else 0.0
+    else:
+        f1 = 2.0 * precision * recall / (precision + recall)
+
+    matched_pair_rows = []
+    for predicted_gene_id, reference_gene_id in sorted(matched_pairs.items()):
+        shared_aliases = sorted(predicted_aliases[predicted_gene_id] & reference_aliases[reference_gene_id])
+        matched_pair_rows.append(
+            {
+                "predicted_gene_id": predicted_gene_id,
+                "reference_gene_id": reference_gene_id,
+                "shared_aliases": shared_aliases,
+            }
+        )
+
+    return {
+        "status": "evaluated",
+        "strategy": "query_alias_intersection_max_matching",
+        "query_genbank_path": str(query_path),
+        "predicted_count": predicted_count,
+        "reference_count": reference_count,
+        "overlap_count": overlap_count,
+        "precision": round(precision, 6) if precision is not None else None,
+        "recall": round(recall, 6) if recall is not None else None,
+        "f1": round(f1, 6) if f1 is not None else None,
+        "overlap_ids": matched_reference_gene_ids,
+        "predicted_genes_with_query_aliases": sum(len(aliases) > 1 for aliases in predicted_aliases.values()),
+        "reference_genes_with_annotation_aliases": sum(len(aliases) > 1 for aliases in reference_aliases.values()),
+        "predicted_genes_with_candidate_reference": sum(bool(candidates) for candidates in candidate_map.values()),
+        "bbh_template_gene_count": len(template_to_target_bbh),
+        "matched_pairs": matched_pair_rows,
+    }
+
+
+def evaluate_single_case(predicted_path, reference_path, label=None, model_kind="auto", query_genbank=None):
     predicted_model_path = resolve_model_xml(predicted_path, model_kind=model_kind)
     reference_model_path = resolve_model_xml(reference_path, model_kind="auto")
 
@@ -86,6 +332,12 @@ def evaluate_single_case(predicted_path, reference_path, label=None, model_kind=
         "reference_model_id": reference["model_id"],
         "reaction_metrics": precision_recall_f1(predicted["reaction_ids"], reference["reaction_ids"]),
         "gene_metrics": precision_recall_f1(predicted["gene_ids"], reference["gene_ids"]),
+        "gene_alias_metrics": compute_gene_alias_metrics(
+            predicted_path=predicted_path,
+            predicted_model_path=predicted_model_path,
+            reference_model_path=reference_model_path,
+            query_genbank_path=query_genbank,
+        ),
     }
 
 
@@ -119,12 +371,14 @@ def evaluate_benchmark_batch(manifest_path, benchmark_run_dir, model_kind="auto"
             continue
 
         predicted_case_dir = run_dir / case_id / "run-output"
+        query_input = case.get("query_input")
         try:
             case_result["evaluation"] = evaluate_single_case(
                 predicted_path=predicted_case_dir,
                 reference_path=reference_model,
                 label=case_id,
                 model_kind=model_kind,
+                query_genbank=query_input,
             )
             case_result["status"] = "evaluated"
         except Exception as exc:
@@ -158,6 +412,11 @@ def build_parser():
     parser.add_argument("--predicted", help="Predicted model path or output directory.")
     parser.add_argument("--reference", help="Reference SBML path or directory containing model.xml.")
     parser.add_argument("--label", default=None, help="Optional label for the output JSON.")
+    parser.add_argument(
+        "--query-genbank",
+        default=None,
+        help="Optional GenBank query input used for alias-based gene harmonization.",
+    )
     parser.add_argument(
         "--model-kind",
         default="auto",
@@ -199,6 +458,7 @@ def main():
         reference_path=args.reference,
         label=args.label,
         model_kind=args.model_kind,
+        query_genbank=args.query_genbank,
     )
     predicted_model_path = Path(payload["predicted_model_path"])
     output_json = args.output_json or str(predicted_model_path.parent / "evaluation.json")
