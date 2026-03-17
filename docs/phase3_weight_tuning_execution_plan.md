@@ -213,3 +213,7 @@ Current implication after the tiered multi-case pilot:
   exact/approximate anchors remain stable while a promoted boundary case can
   still switch under stressed settings
 - see [phase3_phase1c_integrated_pilot_report.md](phase3_phase1c_integrated_pilot_report.md)
+- later local-search reports show that, inside the current preferred family,
+  both the tested diamond-hit band and the tested BBH-balance band are flat
+- see [phase3_local_search_diamondhit_report.md](phase3_local_search_diamondhit_report.md)
+  and [phase3_local_search_bbh_report.md](phase3_local_search_bbh_report.md)
