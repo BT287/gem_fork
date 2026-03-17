@@ -120,7 +120,7 @@ Supporting summary fields:
 
 Status:
 
-- next practical run
+- completed for the first 4-config `eco_w3110` pilot
 
 Recommended first pilot:
 
@@ -146,6 +146,16 @@ python scripts/tune_template_weights.py \
   --template-rerank-topn-values 1,3 \
   --label phase3-narrow-diamond-eco_w3110
 ```
+
+Observed outcome from the first executed pilot:
+
+- the runner completed successfully
+- the tested `eco_w3110` 4-config pilot produced identical top-level reaction
+  objective values across all four settings
+
+Reference:
+
+- [phase3_eco_w3110_pilot_report.md](phase3_eco_w3110_pilot_report.md)
 
 ### Work Unit 5. Expand Only After The Pilot Is Stable
 
