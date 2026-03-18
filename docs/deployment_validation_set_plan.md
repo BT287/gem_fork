@@ -79,3 +79,7 @@ Reference files:
 
 - [auto_template_v1_operational_default.md](auto_template_v1_operational_default.md)
 - [deployment_validation_manifest.template.yaml](../benchmarks/deployment_validation_manifest.template.yaml)
+- [deployment_validation_natural_product_recommendation.md](deployment_validation_natural_product_recommendation.md)
+- [deployment_validation_manifest.natural_products_v1.yaml](../benchmarks/deployment_validation_manifest.natural_products_v1.yaml)
+- [deployment_future_intake_actino_plan.md](deployment_future_intake_actino_plan.md)
+- [deployment_validation_manifest.future_intake.actino_candidates.yaml](../benchmarks/deployment_validation_manifest.future_intake.actino_candidates.yaml)

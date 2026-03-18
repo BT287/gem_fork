@@ -1,0 +1,28 @@
+{
+  "manifest_version": 1,
+  "notes": "Draft future-intake actinomycete deployment candidates. These cases are not part of the immediate runnable v1 deployment set until asset staging and recommendation-only smoke are complete.",
+  "cases": [
+    {
+      "case_id": "actino_salbus_j1074",
+      "query_input": "benchmarks/query_assets/deployment_future_intake_candidates/actino_salbus_j1074/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["future-intake", "actino-core", "heterologous-host", "natural-products"],
+      "notes": "Draft future-intake case. Literature usually names this strain Streptomyces albus J1074, while current NCBI naming uses Streptomyces albidoflavus J1074."
+    },
+    {
+      "case_id": "actino_amed_s699",
+      "query_input": "benchmarks/query_assets/deployment_future_intake_candidates/actino_amed_s699/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": null,
+      "expected_taxonomic_neighbors": ["mtu", "sco"],
+      "exclude_templates": [],
+      "tags": ["future-intake", "actino-core", "industrial-producer", "natural-products", "provisional-label"],
+      "notes": "Draft future-intake case. Amycolatopsis mediterranei S699 is a rifamycin producer, but strict expected-template assignment should wait for intake smoke."
+    }
+  ]
+}

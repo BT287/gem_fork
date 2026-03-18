@@ -1,0 +1,50 @@
+{
+  "manifest_version": 1,
+  "notes": "Actinomycete-centered deployment validation set for natural-product queries. This is the immediate runnable v1 set recommended by docs/deployment_validation_natural_product_recommendation.md.",
+  "cases": [
+    {
+      "case_id": "deploy_np_sco_sliv_tk24",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/sco_sliv_tk24/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment-primary", "actino-core", "heterologous-host", "natural-products"],
+      "notes": "Highest-priority immediate actinomycete deployment case. Streptomyces lividans TK24 is a classic Streptomyces host for heterologous natural-product expression."
+    },
+    {
+      "case_id": "deploy_np_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment-primary", "actino-core", "industrial-producer", "natural-products"],
+      "notes": "Highest-priority industrial actinomycete deployment case. Saccharopolyspora erythraea NRRL 23338 is the classical erythromycin producer."
+    },
+    {
+      "case_id": "deploy_np_sco_sven_atcc10712",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/sco_sven_atcc10712/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment-secondary", "actino-secondary", "fast-host", "natural-products"],
+      "notes": "Secondary actinomycete deployment case. Streptomyces venezuelae adds a fast-growing Streptomyces lineage without changing the deployment center away from actinomycetes."
+    },
+    {
+      "case_id": "deploy_np_bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu"],
+      "exclude_templates": [],
+      "tags": ["deployment-secondary", "non-actino-control", "heterologous-host", "natural-products"],
+      "notes": "Secondary non-actinomycete control. Bacillus subtilis is literature-supported as a heterologous host for natural-product BGC expression."
+    }
+  ]
+}
