@@ -234,6 +234,8 @@ Reference:
 - public same-strain Bacillus exact-candidate reconstructions now exist for
   `bsu_py79` and `bsu_ncib3610`, but they are still below `admitted-exact`
   status pending source-policy review
+- a provisional `bsu_py79` primary-exact pilot has now been executed, and it
+  still leaves the current local safe family completely flat
 - E2E evaluator exists
 - alias-based gene harmonization exists as a bridge metric
 - the integrated screening set now contains a clean Firmicute leverage case
@@ -251,6 +253,8 @@ Reference:
 - reviewed gene crosswalks for exact cases
 - confidence calibration
 - explicit promotion policy for public pan-model-derived exact candidates
+- a deployment-validation set built from the query GBKs the project actually
+  expects to use most often
 
 ## What Changed From The Original Plan
 
@@ -277,6 +281,9 @@ Reference:
 - after the first Bacillus exact-source expansion, the next immediate action
   becomes exact-candidate policy review rather than immediate promotion into the
   primary exact objective
+- after the provisional `bsu_py79` primary-exact rerun remained flat, the next
+  immediate action becomes deployment-aware validation rather than more
+  safe-family micro-tuning
 
 ## Practical Rule For The Next Block
 
@@ -307,3 +314,5 @@ Detailed breakdown:
 - [phase3_weight_tuning_execution_plan.md](phase3_weight_tuning_execution_plan.md)
 - [phase3_round3_diamondhit_degradation_boundary_report.md](phase3_round3_diamondhit_degradation_boundary_report.md)
 - [phase2_bacillus_exact_candidate_intake_report.md](phase2_bacillus_exact_candidate_intake_report.md)
+- [phase3_provisional_bsu_py79_primary_exact_report.md](phase3_provisional_bsu_py79_primary_exact_report.md)
+- [deployment_validation_set_plan.md](deployment_validation_set_plan.md)

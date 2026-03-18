@@ -418,6 +418,8 @@ In practical terms:
 - one exact anchor exists
 - two additional Bacillus exact-source candidates now exist, but are not yet
   promoted into the primary exact objective
+- a provisional `bsu_py79` primary-exact pilot has now been executed and still
+  leaves the local safe family flat
 - approximate-reference evidence has been widened
 - multiple strong boundary discriminators now exist
 - the first degradation boundary on the `diamond_hit_weight` axis has been
@@ -430,6 +432,8 @@ What is still missing is:
 - multi-case exact-reference support for deciding between otherwise safe
   parameter families
 - an explicit promotion policy for public pan-model-derived exact candidates
+- a deployment-aware validation set built from the real query GBKs the project
+  expects to process most often
 
 ## Strategy Going Forward
 
@@ -463,6 +467,16 @@ The immediate sub-question is now narrower:
 
 - whether `candidate-exact-reconstructed` Bacillus cases should be admitted into
   `primary_exact` directly, or first tracked in a separate review tier
+
+Current update after the provisional `bsu_py79` rerun:
+
+- adding a second common-use exact anchor was still not enough to create local
+  discrimination inside the current safe family
+
+So the new highest-value practical step becomes:
+
+- deployment-aware validation on the query GBKs the project actually expects to
+  use in practice
 
 The goal is to determine:
 

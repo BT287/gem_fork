@@ -242,3 +242,10 @@ Current implication after the tiered multi-case pilot:
 - refinement then showed that the first practical degradation begins at `0.55`
 - so the next best move is no longer more search on this axis but stronger
   exact-reference coverage for the primary objective
+- a provisional `bsu_py79` primary-exact pilot has now been executed on the
+  round-3 manifest, using the new exact-candidate Bacillus reference
+- that pilot still left both the local diamond-hit band and the local BBH band
+  completely flat
+- see [phase3_provisional_bsu_py79_primary_exact_report.md](phase3_provisional_bsu_py79_primary_exact_report.md)
+- so the next best move is now deployment-aware validation rather than more
+  safe-family micro-tuning

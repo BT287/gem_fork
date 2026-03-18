@@ -1,0 +1,150 @@
+{
+  "manifest_version": 1,
+  "notes": "Round-3 tuning manifest with bsu_py79 promoted only provisionally into the primary_exact tier, to test whether a second common-use exact anchor increases local-search discrimination.",
+  "cases": [
+    {
+      "case_id": "eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": "benchmarks/reference_models/eco_w3110/model.xml",
+      "evaluation_tier": "primary_exact",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": ["eco"],
+      "exclude_templates": [],
+      "tags": ["phase3", "primary-exact", "ecoli"],
+      "notes": "Primary exact anchor case for tiered tuning runs."
+    },
+    {
+      "case_id": "bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/bsu_py79/model_exact_candidate.xml",
+      "evaluation_tier": "primary_exact",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "primary-exact", "bacillus", "provisional-exact-candidate"],
+      "notes": "Provisional primary_exact admission used only to test whether a second common-use chassis anchor creates local-search separation."
+    },
+    {
+      "case_id": "eco_bw25113",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_bw25113/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/eco_bw25113/model.xml",
+      "evaluation_tier": "secondary_approximate",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": ["eco"],
+      "exclude_templates": [],
+      "tags": ["phase3", "secondary-approximate", "ecoli"],
+      "notes": "Approximate same-lineage evidence case used only as secondary evidence."
+    },
+    {
+      "case_id": "bsu_ncib3610",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_ncib3610/input.gbk",
+      "ec_file": "benchmarks/no_ec_override.tsv",
+      "reference_model": "benchmarks/reference_models/bsu_ncib3610/model.xml",
+      "evaluation_tier": "secondary_approximate",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "secondary-approximate", "bacillus", "harder-than-py79"],
+      "notes": "Approximate same-species but less domesticated Bacillus follow-up used only as secondary evidence."
+    },
+    {
+      "case_id": "actino_cglu_atcc13032",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/actino_cglu_atcc13032/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": ["mtu", "sco"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-case", "actinobacteria", "screening-only", "promoted"],
+      "notes": "Promoted Actinobacteria boundary screen."
+    },
+    {
+      "case_id": "clj_cauto_dsm10061",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/clj_cauto_dsm10061/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-case", "firmicutes", "screening-only", "promoted"],
+      "notes": "Promoted Firmicute boundary screen."
+    },
+    {
+      "case_id": "sco_sven_atcc10712",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/sco_sven_atcc10712/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-case", "actinobacteria", "screening-only", "promoted"],
+      "notes": "Promoted Streptomyces boundary screen."
+    },
+    {
+      "case_id": "actino_rjost_rha1",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_rjost_rha1/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": ["mtu", "sco"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round2", "actinobacteria", "screening-only", "promoted"],
+      "notes": "Round-2 promoted Rhodococcus jostii RHA1 boundary screen."
+    },
+    {
+      "case_id": "actino_nfar_ifm10152",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_nfar_ifm10152/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": ["mtu", "sco"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round2", "actinobacteria", "screening-only", "promoted"],
+      "notes": "Round-2 promoted Nocardia farcinica IFM 10152 boundary screen."
+    },
+    {
+      "case_id": "actino_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round2", "actinobacteria", "screening-only", "promoted"],
+      "notes": "Round-2 promoted Saccharopolyspora erythraea NRRL 23338 boundary screen."
+    },
+    {
+      "case_id": "firmi_cbei_ncimb8052",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/firmi_cbei_ncimb8052/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round2", "firmicutes", "screening-only", "provisional"],
+      "notes": "Round-2 provisional Clostridium beijerinckii NCIMB 8052 boundary screen; intended clj-vs-bsu axis but stressed-setting behavior should be rechecked."
+    },
+    {
+      "case_id": "firmi_tsac_jwslys485",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_tsac_jwslys485/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "evaluation_tier": "boundary_screening",
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["phase3", "boundary-round3", "firmicutes", "screening-only", "promoted", "clean-firmicute-leverage"],
+      "notes": "Round-3 promoted clean Firmicute leverage case; flips from clj to bsu under the stressed config without eco drift."
+    }
+  ]
+}
