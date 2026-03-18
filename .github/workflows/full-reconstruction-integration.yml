@@ -87,6 +87,7 @@ jobs:
         run: |
           conda activate gmsm
           python scripts/run_full_integration_check.py \
+            --template-backend "${{ matrix.expected_backend }}" \
             --expected-backend skani \
             --report-dir full-integration-artifacts \
             --output-dir full-integration-output

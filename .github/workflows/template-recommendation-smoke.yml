@@ -97,6 +97,7 @@ jobs:
           conda activate gmsm
           python scripts/run_template_recommendation_smoke.py \
             --expected-backend "${{ matrix.expected_backend }}" \
+            --template-backend "${{ matrix.expected_backend }}" \
             --report-dir smoke-artifacts
 
       - name: Upload smoke artifacts
