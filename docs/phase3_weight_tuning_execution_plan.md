@@ -232,5 +232,13 @@ Current implication after the tiered multi-case pilot:
   instead of drifting to `eco`
 - see [phase3_boundary_round3_probe_report.md](phase3_boundary_round3_probe_report.md)
   and [phase3_round3_integrated_pilot_report.md](phase3_round3_integrated_pilot_report.md)
-- after that round-3 upgrade, the next best move is no longer broad external
-  curation but a rerun of the local search on the stronger integrated manifest
+- after that round-3 upgrade, the local-search rerun on the stronger manifest
+  showed that both the safe diamond-hit band and the safe BBH band remain flat
+- see [phase3_round3_local_search_diamondhit_report.md](phase3_round3_local_search_diamondhit_report.md)
+  and [phase3_round3_local_search_bbh_report.md](phase3_round3_local_search_bbh_report.md)
+- that outward search has now been executed in two passes
+- see [phase3_round3_diamondhit_degradation_boundary_report.md](phase3_round3_diamondhit_degradation_boundary_report.md)
+- the safe region now extends through `template_diamond_hit_weight = 0.50`
+- refinement then showed that the first practical degradation begins at `0.55`
+- so the next best move is no longer more search on this axis but stronger
+  exact-reference coverage for the primary objective

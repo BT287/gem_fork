@@ -355,7 +355,7 @@ The project is no longer at the "design only" stage.
 The tuning runner, benchmark manifests, E2E evaluator, and admission policy are
 all wired together.
 
-### Finding 2. The Current Preferred Weight Family Is Locally Flat
+### Finding 2. The Current Preferred Weight Family Is Flat Only Inside A Real Safe Region
 
 Inside the currently preferred region:
 
@@ -370,24 +370,31 @@ the tested local search was operationally flat.
 This means:
 
 - nearby micro-adjustments are not currently producing informative separation
+- but the flatness is not unbounded
 
-### Finding 3. Benchmark Discrimination, Not Weight Resolution, Is The Bottleneck
+Later outward search now shows:
+
+- the safe region extends through `template_diamond_hit_weight = 0.50`
+- refinement then shows that the first practical degradation begins at `0.55`
+- the earliest failures occur in leverage-bearing actinobacterial boundary
+  cases
+
+### Finding 3. Benchmark Discrimination Is No Longer The Main Bottleneck
 
 The project can reject a clearly stressed setting because:
 
 - exact and approximate anchors stay stable
 - a promoted boundary case can flip away from its strict label
 
-But when approximate coverage was widened and a reserve Firmicute probe was
-added, the next leverage point still did not come from finer weight search.
+After the round-2 and round-3 boundary curation passes, the benchmark gained
+enough leverage to show a real degradation ladder as `diamond_hit_weight`
+increases.
 
-It came from benchmark design.
+So the current bottleneck is now:
 
-So the current bottleneck is:
-
+- not benchmark discrimination alone
 - not optimizer sophistication
-- not more decimal places in the weights
-- but the availability of one more genuinely leverage-bearing boundary case
+- but sparse exact-reference coverage in the primary objective
 
 ## Current Best Interpretation
 
@@ -402,20 +409,25 @@ In practical terms:
 - the tuning runner works
 - one exact anchor exists
 - approximate-reference evidence has been widened
-- one strong boundary discriminator exists
+- multiple strong boundary discriminators now exist
+- the first degradation boundary on the `diamond_hit_weight` axis has been
+  bracketed
 
 What is still missing is:
 
 - broader exact-reference coverage
 - a stronger gene harmonization policy
-- one more external boundary case with real ranking leverage
+- multi-case exact-reference support for deciding between otherwise safe
+  parameter families
 
 ## Strategy Going Forward
 
 The next strategy should **not** be "run a much larger global grid now."
 
-That would be premature because the benchmark surface is still too flat in the
-current preferred family.
+That would be premature because the first informative threshold has already
+been localized well enough for a practical default, and the next gain comes
+from a stronger primary objective rather than from more search on the same
+axis.
 
 The next strategy should be:
 
@@ -426,18 +438,20 @@ Operational default region:
 - `diamond` backend
 - `template_coarse_weight = 0.95`
 - `template_rerank_topn = 3`
-- stay inside the already-validated stable neighborhood for the remaining local
-  score weights
+- keep `template_diamond_hit_weight <= 0.50` as the current safe region
+- keep the previously validated BBH balance neighborhood for the remaining
+  local score weights
 
-### Strategy 2. Treat Benchmark Design As The Main Lever
+### Strategy 2. Expand The Exact-Reference Tier
 
 The highest-value next action is:
 
-- round-2 external boundary curation
+- exact-reference expansion for the `primary_exact` tier
 
-The goal is to find one more candidate that creates:
+The goal is to determine:
 
-- a stable-vs-stressed ranking split
+- whether otherwise safe parameter families differ in end-to-end quality on
+  more than one exact anchor
 
 without destabilizing:
 
@@ -472,17 +486,19 @@ to:
 
 - "parameter tuning now exists as a real executable workflow"
 
-The main remaining challenge is no longer wiring or infrastructure.
+The main remaining challenge is no longer wiring or first-pass benchmark
+construction.
 
 The main remaining challenge is:
 
-- building a benchmark that produces more informative discrimination between
-  biologically good and biologically bad settings
+- making the primary objective less sparse so that otherwise safe parameter
+  families can be compared on more than one exact anchor
 
 That is why the next step should focus on:
 
-- new external boundary-case curation
+- expanding the exact-reference tier
 
 rather than:
 
 - larger blind parameter sweeps
+- another broad boundary-hunt cycle

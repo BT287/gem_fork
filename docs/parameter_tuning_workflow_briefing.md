@@ -236,12 +236,16 @@ Reference:
 - the integrated screening set now contains a clean Firmicute leverage case
   (`firmi_tsac_jwslys485`) in addition to the earlier actinobacterial
   leverage set
+- the stronger round-3 benchmark still leaves the tested local diamond-hit and
+  BBH bands flat, so the safe family appears genuinely robust in that region
+- outward search plus refinement now show that the first practical degradation
+  begins at `template_diamond_hit_weight = 0.55`, so the current safe upper
+  bound is `0.50`
 
 ## What Is Not Completed
 
 - multi-case exact-reference E2E benchmark coverage
 - reviewed gene crosswalks for exact cases
-- final local-search rerun over the stronger round-3 integrated manifest
 - confidence calibration
 
 ## What Changed From The Original Plan
@@ -262,6 +266,10 @@ Reference:
 - alias-based gene metrics stay supplementary until stronger crosswalks exist
 - after the round-3 Firmicute curation pass, the next immediate action is a
   rerun of the narrow local search rather than another broad benchmark hunt
+- after completing that rerun, the next immediate action becomes an outward
+  degradation-boundary search rather than finer tuning inside the safe band
+- after completing the outward search and refinement, the next immediate action
+  becomes exact-reference expansion rather than more search on the same axis
 
 ## Practical Rule For The Next Block
 
@@ -279,13 +287,15 @@ Reason:
 
 ## Next Step
 
-The most reasonable next implementation is a narrow `Phase 3` tuning runner that:
+The most reasonable next implementation is now exact-reference expansion for
+the primary objective:
 
-1. builds a small backend-specific search grid
-2. runs full reconstruction for selected benchmark cases
-3. evaluates each run with the E2E evaluator
-4. writes sortable summaries
+1. keep the current default family below `template_diamond_hit_weight = 0.50`
+2. expand exact-reference E2E coverage
+3. strengthen the primary optimization objective
+4. return to cross-axis tuning only after the exact tier is less sparse
 
 Detailed breakdown:
 
 - [phase3_weight_tuning_execution_plan.md](phase3_weight_tuning_execution_plan.md)
+- [phase3_round3_diamondhit_degradation_boundary_report.md](phase3_round3_diamondhit_degradation_boundary_report.md)
