@@ -231,6 +231,9 @@ Reference:
 - recommendation benchmark runner exists
 - first `Phase 1B` benchmark batch exists
 - exact `eco_w3110` reference intake exists
+- public same-strain Bacillus exact-candidate reconstructions now exist for
+  `bsu_py79` and `bsu_ncib3610`, but they are still below `admitted-exact`
+  status pending source-policy review
 - E2E evaluator exists
 - alias-based gene harmonization exists as a bridge metric
 - the integrated screening set now contains a clean Firmicute leverage case
@@ -247,6 +250,7 @@ Reference:
 - multi-case exact-reference E2E benchmark coverage
 - reviewed gene crosswalks for exact cases
 - confidence calibration
+- explicit promotion policy for public pan-model-derived exact candidates
 
 ## What Changed From The Original Plan
 
@@ -270,6 +274,9 @@ Reference:
   degradation-boundary search rather than finer tuning inside the safe band
 - after completing the outward search and refinement, the next immediate action
   becomes exact-reference expansion rather than more search on the same axis
+- after the first Bacillus exact-source expansion, the next immediate action
+  becomes exact-candidate policy review rather than immediate promotion into the
+  primary exact objective
 
 ## Practical Rule For The Next Block
 
@@ -299,3 +306,4 @@ Detailed breakdown:
 
 - [phase3_weight_tuning_execution_plan.md](phase3_weight_tuning_execution_plan.md)
 - [phase3_round3_diamondhit_degradation_boundary_report.md](phase3_round3_diamondhit_degradation_boundary_report.md)
+- [phase2_bacillus_exact_candidate_intake_report.md](phase2_bacillus_exact_candidate_intake_report.md)

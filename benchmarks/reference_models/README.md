@@ -20,6 +20,9 @@ Admission rule:
 Current interpretation split:
 
 - `admitted-exact` models may be used in the primary tuning objective
+- `candidate-exact-reconstructed` models match the benchmark strain and have a
+  reproducible public reconstruction path, but still need source-policy review
+  before they are promoted into the primary exact objective
 - `candidate-approximate` models may be staged locally for secondary evidence,
   but should not silently replace exact-reference anchors
 

@@ -167,6 +167,11 @@ The first exact-reference anchor was:
 
 This was the first case that made the end-to-end objective concrete.
 
+The first post-anchor exact-source expansion now also exists for:
+
+- `bsu_py79` as a `candidate-exact-reconstructed` case
+- `bsu_ncib3610` as a `candidate-exact-reconstructed` case
+
 ### 5. Phase 3 Tuning Runner
 
 A tuning orchestrator was implemented to:
@@ -329,6 +334,9 @@ Status:
 Meaning:
 
 - the project has one strong exact anchor: `eco_w3110`
+- two Bacillus same-strain public exact-source candidates are now staged:
+  - `bsu_py79`
+  - `bsu_ncib3610`
 - approximate-reference coverage now includes:
   - `eco_bw25113`
   - `bsu_py79`
@@ -408,6 +416,8 @@ In practical terms:
 - the E2E evaluator works
 - the tuning runner works
 - one exact anchor exists
+- two additional Bacillus exact-source candidates now exist, but are not yet
+  promoted into the primary exact objective
 - approximate-reference evidence has been widened
 - multiple strong boundary discriminators now exist
 - the first degradation boundary on the `diamond_hit_weight` axis has been
@@ -419,6 +429,7 @@ What is still missing is:
 - a stronger gene harmonization policy
 - multi-case exact-reference support for deciding between otherwise safe
   parameter families
+- an explicit promotion policy for public pan-model-derived exact candidates
 
 ## Strategy Going Forward
 
@@ -447,6 +458,11 @@ Operational default region:
 The highest-value next action is:
 
 - exact-reference expansion for the `primary_exact` tier
+
+The immediate sub-question is now narrower:
+
+- whether `candidate-exact-reconstructed` Bacillus cases should be admitted into
+  `primary_exact` directly, or first tracked in a separate review tier
 
 The goal is to determine:
 

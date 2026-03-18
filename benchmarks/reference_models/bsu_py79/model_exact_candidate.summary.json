@@ -1,0 +1,12 @@
+{
+  "accession": "GCF_000497485_1",
+  "accession_index": 15,
+  "model_id": "bsu_py79_pan_exact",
+  "output_model": "/Users/lavi/gem_fork_auto_template/benchmarks/reference_models/bsu_py79/model_exact_candidate.xml",
+  "pan_model_gene_count": 2424,
+  "pan_model_reaction_count": 2239,
+  "removed_reaction_count": 53,
+  "source_dir": "/private/tmp/Bacillus_Pan_Genome_Model/Models",
+  "strain_gene_count": 2391,
+  "strain_reaction_count": 2186
+}

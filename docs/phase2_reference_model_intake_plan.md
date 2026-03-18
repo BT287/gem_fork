@@ -50,6 +50,10 @@ Use these labels when staging `benchmarks/reference_models/<case_id>/SOURCE.md`.
 - `admitted-exact`
   The reference strain matches the query strain closely enough to use for
   primary E2E evaluation.
+- `candidate-exact-reconstructed`
+  The reference strain matches the query strain and can be reconstructed from a
+  reproducible public source, but the source policy is not yet strong enough to
+  promote it directly into the primary exact objective.
 - `candidate-approximate`
   The reference is biologically related and may be useful later, but should not
   be the first tuning target.
@@ -70,7 +74,41 @@ Use these labels when staging `benchmarks/reference_models/<case_id>/SOURCE.md`.
   - stable BiGG SBML endpoint
   - `eco` auto-template recommendation already validated in `Phase 1B`
 
-### Tier 2. Useful Later, But Approximate
+### Tier 2. Exact Candidates With Public Reconstruction Paths
+
+#### `bsu_py79`
+
+- status: `candidate-exact-reconstructed`
+- exact-source direction:
+  - Bacillus pan-model strain reconstruction from the public
+    `Bacillus_Pan_Genome_Model` repository
+- accession evidence:
+  - `GCF_000497485_1` is present in the published `strain_list.mat`
+- current local staging:
+  - `benchmarks/reference_models/bsu_py79/model_exact_candidate.xml`
+- why not admitted yet:
+  - this is an automatically reconstructed same-strain model, not yet a
+    separately curated trusted GEM
+  - reaction overlap is already informative, but source-policy review should
+    happen before it enters the primary exact objective
+
+#### `bsu_ncib3610`
+
+- status: `candidate-exact-reconstructed`
+- exact-source direction:
+  - Bacillus pan-model strain reconstruction from the public
+    `Bacillus_Pan_Genome_Model` repository
+- accession evidence:
+  - `GCF_006088795_1` is present in the published `strain_list.mat`
+- current local staging:
+  - `benchmarks/reference_models/bsu_ncib3610/model_exact_candidate.xml`
+- why not admitted yet:
+  - same reason as `bsu_py79`, with the additional interpretation risk that
+    NCIB 3610 is already a more divergent Bacillus benchmark case
+  - this makes it a useful exact-source candidate, but not yet a safe primary
+    anchor
+
+### Tier 3. Useful Later, But Approximate
 
 #### `eco_bw25113`
 
@@ -80,29 +118,21 @@ Use these labels when staging `benchmarks/reference_models/<case_id>/SOURCE.md`.
   - `iML1515` is MG1655, not BW25113
   - still useful as a K-12 lineage comparison after the exact W3110 loop works
 
-#### `bsu_py79`
+#### `bsu_py79` approximate fallback
 
 - status: `candidate-approximate`
-- current candidate: BiGG `iYO844`
-- why approximate:
-  - `iYO844` is strain 168
-  - PY79 is same-species and laboratory-close, so this remains biologically
-    meaningful but not exact
+- fallback candidate: BiGG `iYO844`
+- why still keep it:
+  - useful lineage-level comparison if the pan-model exact candidate is not yet
+    admitted
 
-### Tier 3. Lower-Priority Approximate
-
-#### `bsu_ncib3610`
+#### `bsu_ncib3610` approximate fallback
 
 - status: `candidate-approximate`
-- current candidate: BiGG `iYO844`
-- why lower priority:
-  - same species, but the domestication/background difference from 168 is
-    larger than for PY79
-  - this makes interpretation noisier than the W3110 or PY79 cases
-- local staging update:
-  - a template-derived `model.xml` can be staged locally for controlled
-    `secondary_approximate` tuning runs
-  - this does not change the case into an exact-reference target
+- fallback candidate: BiGG `iYO844`
+- why still keep it:
+  - useful for controlled `secondary_approximate` tuning runs, even if the
+    exact-source candidate remains under review
 
 ### Tier 4. Hold Until Source Policy Is Clearer
 
@@ -216,6 +246,15 @@ Update after the first `Phase 3` tiered-tuning setup:
   SBML files for controlled secondary-evidence runs
 - they still remain approximate references and should not be merged into the
   main exact-reference objective without an explicit policy change
+
+Update after the Bacillus exact-source intake:
+
+- `bsu_py79` and `bsu_ncib3610` now also have public same-strain
+  `candidate-exact-reconstructed` SBML files built from the published Bacillus
+  pan-model reconstruction assets
+- these candidates are stronger than the old `iYO844` fallback for exactness,
+  but they still should not silently become `admitted-exact` until their source
+  policy and E2E role are explicitly accepted
 
 Additional note from the first executed case:
 
