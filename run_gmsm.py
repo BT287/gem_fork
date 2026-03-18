@@ -98,7 +98,7 @@ def main():
                         help="Automatically recommend a template before primary modeling")
     group.add_argument('--template-backend',
                         dest='template_backend',
-                        default='auto',
+                        default='diamond',
                         choices=['auto', 'skani', 'diamond'],
                         help="Backend to use for automatic template recommendation (default: %(default)s)")
     group.add_argument('--template-topk',
@@ -132,32 +132,32 @@ def main():
                         help="Weight for aligned fraction in skani coarse ranking (default: %(default)s)")
     group.add_argument('--template-diamond-hit-weight',
                         dest='template_diamond_hit_weight',
-                        default=0.85,
+                        default=0.05,
                         type=float,
                         help="Weight for hit coverage in DIAMOND coarse ranking (default: %(default)s)")
     group.add_argument('--template-diamond-identity-weight',
                         dest='template_diamond_identity_weight',
-                        default=0.15,
+                        default=0.95,
                         type=float,
                         help="Weight for mean identity in DIAMOND coarse ranking (default: %(default)s)")
     group.add_argument('--template-bbh-template-weight',
                         dest='template_bbh_template_weight',
-                        default=0.7,
+                        default=0.5,
                         type=float,
                         help="Weight for template coverage in BBH reranking (default: %(default)s)")
     group.add_argument('--template-bbh-target-weight',
                         dest='template_bbh_target_weight',
-                        default=0.3,
+                        default=0.5,
                         type=float,
                         help="Weight for target coverage in BBH reranking (default: %(default)s)")
     group.add_argument('--template-coarse-weight',
                         dest='template_coarse_weight',
-                        default=0.6,
+                        default=0.95,
                         type=float,
                         help="Weight for coarse ranking in final template score (default: %(default)s)")
     group.add_argument('--template-rerank-weight',
                         dest='template_rerank_weight',
-                        default=0.4,
+                        default=0.05,
                         type=float,
                         help="Weight for BBH rerank score in final template score (default: %(default)s)")
 

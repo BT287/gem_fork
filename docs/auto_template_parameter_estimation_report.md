@@ -420,6 +420,8 @@ In practical terms:
   promoted into the primary exact objective
 - a provisional `bsu_py79` primary-exact pilot has now been executed and still
   leaves the local safe family flat
+- the current safe family has now been frozen as the V1 operational default
+  until deployment-aware validation says otherwise
 - approximate-reference evidence has been widened
 - multiple strong boundary discriminators now exist
 - the first degradation boundary on the `diamond_hit_weight` axis has been

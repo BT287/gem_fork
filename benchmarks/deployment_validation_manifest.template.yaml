@@ -1,0 +1,28 @@
+{
+  "manifest_version": 1,
+  "notes": "Template for deployment-aware auto-template validation on real query GBKs. Copy this file, replace placeholder paths, and keep the current v1 operational default unless there is a project-specific reason to override it.",
+  "cases": [
+    {
+      "case_id": "deployment_case_1",
+      "query_input": "path/to/real_query_1.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": ["eco"],
+      "exclude_templates": [],
+      "tags": ["deployment-primary", "real-query"],
+      "notes": "Most representative real deployment query. Replace with the actual rationale."
+    },
+    {
+      "case_id": "deployment_case_2",
+      "query_input": "path/to/real_query_2.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu"],
+      "exclude_templates": [],
+      "tags": ["deployment-secondary", "real-query"],
+      "notes": "Second real deployment query from a frequent organism family."
+    }
+  ]
+}

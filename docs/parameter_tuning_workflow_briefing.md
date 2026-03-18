@@ -236,6 +236,8 @@ Reference:
   status pending source-policy review
 - a provisional `bsu_py79` primary-exact pilot has now been executed, and it
   still leaves the current local safe family completely flat
+- the current safe family has now been frozen explicitly as the V1 operational
+  default for deployment validation
 - E2E evaluator exists
 - alias-based gene harmonization exists as a bridge metric
 - the integrated screening set now contains a clean Firmicute leverage case
@@ -316,3 +318,4 @@ Detailed breakdown:
 - [phase2_bacillus_exact_candidate_intake_report.md](phase2_bacillus_exact_candidate_intake_report.md)
 - [phase3_provisional_bsu_py79_primary_exact_report.md](phase3_provisional_bsu_py79_primary_exact_report.md)
 - [deployment_validation_set_plan.md](deployment_validation_set_plan.md)
+- [auto_template_v1_operational_default.md](auto_template_v1_operational_default.md)

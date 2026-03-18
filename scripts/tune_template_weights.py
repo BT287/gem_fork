@@ -27,20 +27,20 @@ WEIGHT_OPTION_MAP = (
 DEFAULT_FIXED_WEIGHTS = {
     "template_ani_weight": 0.7,
     "template_af_weight": 0.3,
-    "template_diamond_hit_weight": 0.85,
-    "template_diamond_identity_weight": 0.15,
-    "template_bbh_template_weight": 0.7,
-    "template_bbh_target_weight": 0.3,
-    "template_coarse_weight": 0.6,
-    "template_rerank_weight": 0.4,
+    "template_diamond_hit_weight": 0.05,
+    "template_diamond_identity_weight": 0.95,
+    "template_bbh_template_weight": 0.5,
+    "template_bbh_target_weight": 0.5,
+    "template_coarse_weight": 0.95,
+    "template_rerank_weight": 0.05,
 }
 
 DEFAULT_GRID_VALUES = {
-    "diamond_hit_weights": "0.75,0.85,0.95",
+    "diamond_hit_weights": "0.01,0.05,0.10",
     "ani_weights": "0.5,0.7,0.9",
-    "bbh_template_weights": "0.5,0.7,0.9",
-    "coarse_weights": "0.4,0.6,0.8",
-    "rerank_topn_values": "1,3",
+    "bbh_template_weights": "0.3,0.5,0.7",
+    "coarse_weights": "0.95",
+    "rerank_topn_values": "3",
 }
 
 

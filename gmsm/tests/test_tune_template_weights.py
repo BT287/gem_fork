@@ -27,11 +27,11 @@ def make_args(**overrides):
         "template_genome_bank": None,
         "model_kind": "primary",
         "cpus": 1,
-        "template_diamond_hit_weights": "0.75,0.95",
+        "template_diamond_hit_weights": "0.01,0.10",
         "template_ani_weights": "0.5,0.9",
-        "template_bbh_template_weights": "0.7",
-        "template_coarse_weights": "0.6",
-        "template_rerank_topn_values": "1",
+        "template_bbh_template_weights": "0.5",
+        "template_coarse_weights": "0.95",
+        "template_rerank_topn_values": "3",
     }
     defaults.update(overrides)
     return Namespace(**defaults)
@@ -79,8 +79,8 @@ class TestTuneTemplateWeights:
         assert config["template_backend"] == "skani"
         assert config["template_ani_weight"] == 0.6
         assert config["template_af_weight"] == 0.4
-        assert config["template_diamond_hit_weight"] == 0.85
-        assert config["template_diamond_identity_weight"] == 0.15
+        assert config["template_diamond_hit_weight"] == 0.05
+        assert config["template_diamond_identity_weight"] == 0.95
 
     def test_build_case_command_uses_recommendation_only_for_boundary_screening(self):
         module = load_module()

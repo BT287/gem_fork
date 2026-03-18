@@ -22,12 +22,12 @@ _MACHO_MAGICS = {
 _TEMPLATE_SCORE_DEFAULTS = {
     'template_ani_weight': 0.7,
     'template_af_weight': 0.3,
-    'template_diamond_hit_weight': 0.85,
-    'template_diamond_identity_weight': 0.15,
-    'template_bbh_template_weight': 0.7,
-    'template_bbh_target_weight': 0.3,
-    'template_coarse_weight': 0.6,
-    'template_rerank_weight': 0.4,
+    'template_diamond_hit_weight': 0.05,
+    'template_diamond_identity_weight': 0.95,
+    'template_bbh_template_weight': 0.5,
+    'template_bbh_target_weight': 0.5,
+    'template_coarse_weight': 0.95,
+    'template_rerank_weight': 0.05,
 }
 
 _TEMPLATE_SCORE_PAIRS = (

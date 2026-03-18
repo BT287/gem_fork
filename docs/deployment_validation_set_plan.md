@@ -74,3 +74,8 @@ That means:
 - the current default family has been run on it
 - the project can state whether the benchmark-tuned default also looks sensible
   on real expected workloads
+
+Reference files:
+
+- [auto_template_v1_operational_default.md](auto_template_v1_operational_default.md)
+- [deployment_validation_manifest.template.yaml](../benchmarks/deployment_validation_manifest.template.yaml)
