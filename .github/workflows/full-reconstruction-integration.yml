@@ -24,12 +24,10 @@ jobs:
         include:
           - os: ubuntu-latest
             platform_file: envs/environment.linux-64.yml
-            skani_install: conda
-            expected_backend: skani
+            expected_backend: diamond
           - os: macos-14
             platform_file: envs/environment.osx-arm64.yml
-            skani_install: brew
-            expected_backend: skani
+            expected_backend: diamond
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     defaults:
@@ -54,16 +52,6 @@ jobs:
         run: |
           conda install -n gmsm -c bioconda -c conda-forge diamond -y
 
-      - name: Install skani via conda
-        if: matrix.skani_install == 'conda'
-        run: |
-          conda install -n gmsm -c bioconda skani -y
-
-      - name: Install skani via Homebrew
-        if: matrix.skani_install == 'brew'
-        run: |
-          brew install skani
-
       - name: Runtime stack sanity check
         run: |
           conda activate gmsm
@@ -71,7 +59,6 @@ jobs:
             --json \
             --output runtime-stack-full.json \
             --require-executable diamond \
-            --require-executable skani \
             --require-module cobra \
             --require-module optlang \
             --require-module libsbml \
@@ -88,7 +75,7 @@ jobs:
           conda activate gmsm
           python scripts/run_full_integration_check.py \
             --template-backend "${{ matrix.expected_backend }}" \
-            --expected-backend skani \
+            --expected-backend "${{ matrix.expected_backend }}" \
             --skip-secondary \
             --report-dir full-integration-artifacts \
             --output-dir full-integration-output

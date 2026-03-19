@@ -105,16 +105,35 @@ So the step fails before reconstruction validation begins.
 
 ## Practical Fix For The Remaining Failure
 
-Add:
+Two changes were needed.
 
-- `expected_backend: skani`
+### 1. Fix The Immediate Workflow Bug
 
-to both matrix entries in `.github/workflows/full-reconstruction-integration.yml`.
+Define `expected_backend` in the matrix so the validator does not receive an
+empty backend string.
 
-This keeps the full integration workflow aligned with its existing:
+### 2. Align Full Integration With The Current V1 Default
 
-- `--expected-backend skani`
-- `Install template genome bank`
-- `require-executable skani`
+For merge-ready validation, `Full Reconstruction Integration` should validate
+the currently deployed recommendation path rather than a non-default backend.
 
-logic.
+The current production-oriented default is:
+
+- `template_backend = diamond`
+
+So the workflow should now:
+
+- use `expected_backend: diamond`
+- pass `--template-backend diamond`
+- pass `--expected-backend diamond`
+- require only `diamond` in the runtime check
+
+`skani` remains covered by:
+
+- `Template Recommendation Smoke`
+
+This keeps CI responsibilities separated cleanly:
+
+- runtime portability matrix
+- explicit skani recommendation smoke
+- diamond-based production full integration
