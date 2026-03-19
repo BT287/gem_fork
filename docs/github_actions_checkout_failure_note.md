@@ -157,6 +157,38 @@ not automatically as:
 
 - a confirmed algorithmic failure of the production default
 
+## Confirmed Remaining Root Cause
+
+Authenticated artifact inspection of the latest failed run showed that
+`run_gmsm.py` failed during augmentation-phase pickle loading with:
+
+- `_pickle.UnpicklingError: invalid load key, 'v'`
+
+This happened while reading:
+
+- `gmsm/io/data/input2/mnxm_compoundInfo_dict.p`
+
+That error is consistent with an unresolved Git LFS pointer file, because the
+pointer text begins with:
+
+- `version ...`
+
+So the remaining CI failure is not currently a scoring-logic failure.
+
+It is a repository-asset materialization failure inside the full integration
+path.
+
+## Practical Fix For The Current Remaining Failure
+
+Before running the full integration validator, pull the required LFS assets
+explicitly:
+
+- `gmsm/io/data/input2/mnxm_compoundInfo_dict.p`
+- `scripts/input2_data/mnxref.zip`
+
+This keeps the lightweight smoke/runtime workflows free of LFS while restoring
+the specific assets that the augmentation phase actually needs.
+
 ## Debugging Change
 
 The workflow should emit the following directly into the job log even when the

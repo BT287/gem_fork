@@ -52,6 +52,11 @@ jobs:
         run: |
           conda install -n gmsm -c bioconda -c conda-forge diamond -y
 
+      - name: Pull required LFS assets for full integration
+        run: |
+          git lfs version
+          git lfs pull --include="gmsm/io/data/input2/mnxm_compoundInfo_dict.p,scripts/input2_data/mnxref.zip"
+
       - name: Runtime stack sanity check
         run: |
           conda activate gmsm
