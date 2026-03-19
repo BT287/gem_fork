@@ -13,6 +13,8 @@ on:
       - scripts/run_full_integration_check.py
       - scripts/check_runtime_stack.py
       - scripts/fetch_template_genome_bank.py
+      - scripts/fetch_runtime_assets.py
+      - scripts/runtime_assets_manifest.json
       - scripts/check_template_genome_bank.py
   workflow_dispatch:
 
@@ -52,10 +54,10 @@ jobs:
         run: |
           conda install -n gmsm -c bioconda -c conda-forge diamond -y
 
-      - name: Pull required LFS assets for full integration
+      - name: Fetch required runtime assets for full integration
         run: |
-          git lfs version
-          git lfs pull --include="gmsm/io/data/input2/mnxm_compoundInfo_dict.p,scripts/input2_data/mnxref.zip"
+          conda activate gmsm
+          python scripts/fetch_runtime_assets.py --json
 
       - name: Runtime stack sanity check
         run: |

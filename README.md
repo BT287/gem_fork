@@ -2,7 +2,9 @@
 
 GMSM builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
 
-This repository is intended to be self-contained: a first-time user should be able to create the environment, run GMSM, and inspect outputs from this repo alone.
+The code and small reference data live in this repository. Two large runtime
+assets are fetched on demand through `scripts/fetch_runtime_assets.py` and
+cached locally under `.runtime-assets/`.
 
 ## Start Here
 
@@ -54,7 +56,7 @@ pip install -r requirements.txt
 - `diamond` must be available on `PATH` or in the repo-local `bin/` directory
 - On Windows, the executable must be `diamond.exe`; a Unix `bin/diamond` file is not usable
 - `skani` is optional but recommended if you want genome-level automatic template recommendation
-- Git LFS is required if your checkout stores large assets through LFS
+- Runtime augmentation assets are fetched on demand through `scripts/fetch_runtime_assets.py`
 - Internet access is required for primary-model augmentation through KEGG
 
 Install DIAMOND after creating the Python environment:
@@ -70,17 +72,17 @@ conda install -n gmsm -c bioconda -c conda-forge diamond
   - place `diamond.exe` on `PATH` or copy it to `bin/diamond.exe`
   - if DIAMOND reports a missing runtime, install the Microsoft Visual C++ Redistributable
 
-Git LFS setup:
+Fetch the runtime assets required for augmentation and full integration:
 
 ```bash
-git lfs install
-git lfs pull
+python scripts/fetch_runtime_assets.py
 ```
 
 Basic verification:
 
 ```bash
 diamond --version
+python scripts/fetch_runtime_assets.py --json
 python run_gmsm.py -h
 ```
 

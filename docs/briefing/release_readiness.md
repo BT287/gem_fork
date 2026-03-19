@@ -75,12 +75,17 @@ It is:
 
 - "deployment-ready for the current intended organism mix"
 
-### 4. CI Full Integration Closure
+### 4. Runtime Asset Delivery
 
-`Runtime Stack Matrix` and `Template Recommendation Smoke` are already green.
+The two runtime-critical binary assets are no longer intended to be consumed
+through Git LFS in CI.
 
-`Full Reconstruction Integration` is still the remaining CI closure item while
-the workflow is being aligned to the frozen `diamond`-based production default.
+Current direction:
+
+- fetch those assets through the shared external delivery path
+- cache them under `.runtime-assets/`
+- keep recommendation and reconstruction logic independent from fork-network
+  LFS quota
 
 ## Merge Recommendation
 

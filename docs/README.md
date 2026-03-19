@@ -8,6 +8,7 @@ entire history first, start here:
 - `docs/briefing/README.md`
 - `docs/briefing/auto_template_scoring_and_tuning.md`
 - `docs/briefing/release_readiness.md`
+- `docs/briefing/runtime_asset_delivery.md`
 
 ## Historical Working Notes
 

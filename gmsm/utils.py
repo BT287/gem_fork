@@ -81,7 +81,13 @@ def get_git_log():
 
 def load_legacy_pickle(path):
     """Load old Python pickles shipped with GMSM across Python 3 versions."""
-    with open(path, 'rb') as handle:
+    from gmsm import runtime_assets
+
+    resolved_path = runtime_assets.resolve_runtime_asset_path(path)
+    if not os.path.isfile(resolved_path) or runtime_assets.is_lfs_pointer_file(resolved_path):
+        raise FileNotFoundError(runtime_assets.runtime_asset_missing_message(path))
+
+    with open(resolved_path, 'rb') as handle:
         raw = handle.read()
 
     try:

@@ -15,10 +15,15 @@ This directory is the merge-review entry point for the auto-template work.
    - what is still limited
    - what CI is supposed to guarantee
 
-3. `../deployment_validation_sbml_lab_recommendation.md`
+3. `runtime_asset_delivery.md`
+   - why runtime assets moved out of Git LFS
+   - why Google Drive is the short-term delivery path
+   - when to switch to GitHub Release assets
+
+4. `../deployment_validation_sbml_lab_recommendation.md`
    - literature-backed deployment organism choice
 
-4. `../deployment_validation_sbml_lab_v1_report.md`
+5. `../deployment_validation_sbml_lab_v1_report.md`
    - runnable deployment-set result
 
 ## Historical Context

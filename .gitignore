@@ -33,6 +33,7 @@ EFICAz2.5.1.tar.gz
 tmp
 gmsm/tests/_tmp/
 pytest-cache-files-*
+.runtime-assets/
 
 # System
 *.log

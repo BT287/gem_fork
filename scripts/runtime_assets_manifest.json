@@ -1,0 +1,24 @@
+{
+  "version": "drive-v1",
+  "asset_root": ".runtime-assets",
+  "assets": [
+    {
+      "name": "mnxm_compound_info_dict",
+      "target_relpath": "gmsm/io/data/input2/mnxm_compoundInfo_dict.p",
+      "sha256": "8026ca5d805f396e28321a7f10df6c1ab3f9aa24286d63bfb3d0c33b6dd9b22a",
+      "source": {
+        "type": "google_drive",
+        "file_id": "1A5fAGmmgMy-bghpbgeA1it5sIcszZfbP"
+      }
+    },
+    {
+      "name": "mnxref_zip",
+      "target_relpath": "scripts/input2_data/mnxref.zip",
+      "sha256": "e4c266a51cf594ca833d3c51d3902c878e530dade3614e9d8d3da5de040e6469",
+      "source": {
+        "type": "google_drive",
+        "file_id": "19hKZATU1OW7z4d_HpgXxi1DN13xWypkM"
+      }
+    }
+  ]
+}

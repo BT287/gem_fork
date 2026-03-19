@@ -17,6 +17,7 @@ from os.path import join, abspath, dirname
 
 sys.path.insert(0, abspath(join(dirname(__file__), '..')))
 import gmsm
+from gmsm import runtime_assets
 
 
 input2_dir = join(os.pardir, 'gmsm', 'io', 'data', 'input2')
@@ -486,7 +487,8 @@ class ParseMNXref(object):
 def unzip_tsv_files():
     tsv_files = glob.glob(join(input2_tmp_dir, '*.tsv'))
     if len(tsv_files) ==  0:
-        zip = zipfile.ZipFile(join(input2_tmp_dir, 'mnxref.zip'))
+        mnxref_zip = runtime_assets.resolve_runtime_asset_path('./scripts/input2_data/mnxref.zip')
+        zip = zipfile.ZipFile(mnxref_zip)
         zip.extractall(input2_tmp_dir)
         zip.close()
 
