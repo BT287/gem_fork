@@ -137,3 +137,33 @@ This keeps CI responsibilities separated cleanly:
 - runtime portability matrix
 - explicit skani recommendation smoke
 - diamond-based production full integration
+
+## Current State After Alignment
+
+Local reproduction with:
+
+- `--template-backend diamond`
+- `--expected-backend diamond`
+- `--skip-secondary`
+
+now passes on the maintainer machine.
+
+So the remaining red `Full Reconstruction Integration` status should currently
+be interpreted as:
+
+- a CI-specific failure that still needs direct log visibility
+
+not automatically as:
+
+- a confirmed algorithmic failure of the production default
+
+## Debugging Change
+
+The workflow should emit the following directly into the job log even when the
+validator fails:
+
+- `full_integration_summary.json`
+- the tail of `full_integration.log`
+
+This makes the next remaining failure directly inspectable without relying only
+on downloaded artifacts.

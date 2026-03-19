@@ -71,6 +71,8 @@ jobs:
           python scripts/check_template_genome_bank.py
 
       - name: Run full reconstruction integration validator
+        id: integration
+        continue-on-error: true
         run: |
           conda activate gmsm
           python scripts/run_full_integration_check.py \
@@ -79,6 +81,26 @@ jobs:
             --skip-secondary \
             --report-dir full-integration-artifacts \
             --output-dir full-integration-output
+
+      - name: Show full integration summary
+        if: always()
+        run: |
+          if [ -f full-integration-artifacts/full_integration_summary.json ]; then
+            echo "===== full_integration_summary.json ====="
+            cat full-integration-artifacts/full_integration_summary.json
+          else
+            echo "full_integration_summary.json not found"
+          fi
+
+      - name: Show full integration log tail
+        if: always()
+        run: |
+          if [ -f full-integration-artifacts/full_integration.log ]; then
+            echo "===== tail full_integration.log ====="
+            tail -n 200 full-integration-artifacts/full_integration.log
+          else
+            echo "full_integration.log not found"
+          fi
 
       - name: Upload runtime stack report
         if: always()
@@ -95,3 +117,9 @@ jobs:
           name: full-reconstruction-integration-${{ matrix.os }}
           path: full-integration-artifacts
           if-no-files-found: warn
+
+      - name: Fail if integration validator failed
+        if: steps.integration.outcome != 'success'
+        run: |
+          echo "Full reconstruction integration validator failed"
+          exit 1
