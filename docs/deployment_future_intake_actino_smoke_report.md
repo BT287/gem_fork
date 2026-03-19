@@ -75,6 +75,52 @@ Decision:
 - evaluate it with `expected_taxonomic_neighbors = [mtu, sco]`
 - do not assign a strict template yet
 
+## Stability Probe for `actino_amed_s699`
+
+To test whether `actino_amed_s699` could be promoted from neighbor-only to a
+strict-template deployment case, additional recommendation-only runs were
+executed across the current safe family and one boundary setting.
+
+Tested settings and results:
+
+- `amed_default`
+  - top-1 `sco`
+  - top-2 `mtu`
+  - gap `0.001292`
+- `amed_hit001`
+  - top-1 `mtu`
+  - top-2 `sco`
+  - gap `0.001041`
+- `amed_hit010`
+  - top-1 `sco`
+  - top-2 `mtu`
+  - gap `0.004211`
+- `amed_bbh03`
+  - top-1 `sco`
+  - top-2 `mtu`
+  - gap `0.002750`
+- `amed_bbh07`
+  - top-1 `mtu`
+  - top-2 `sco`
+  - gap `0.000166`
+- `amed_hit055`
+  - top-1 `sco`
+  - top-2 `mtu`
+  - gap `0.030473`
+
+Interpretation:
+
+- the candidate is biologically well placed inside the actinomycete axis
+- but it is not template-stable inside the safe family
+- both `sco` and `mtu` are plausible top-1 outcomes under small parameter
+  changes
+
+Decision after stability probe:
+
+- `actino_amed_s699` remains a neighbor-based validation case only
+- it should not be promoted to strict `expected_template`
+- the active deployment v2 set remains unchanged
+
 ## Deployment Set Update
 
 The immediate active deployment set should now move from the original v1 core
