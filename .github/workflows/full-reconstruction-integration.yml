@@ -10,6 +10,7 @@ on:
       - envs/**
       - run_gmsm.py
       - gmsm/**
+      - '!gmsm/tests/**'
       - scripts/run_full_integration_check.py
       - scripts/check_runtime_stack.py
       - scripts/fetch_template_genome_bank.py
