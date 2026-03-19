@@ -68,3 +68,53 @@ After this change:
 - checkout should stop failing immediately on runtime-stack and smoke workflows
 - integration should validate the auto-template plus primary-model path instead
   of blocking on secondary-model LFS assets
+
+## Follow-Up Observation
+
+After the checkout/LFS fix, the observed CI state changed:
+
+- `Runtime Stack Matrix`: passed
+- `Template Recommendation Smoke`: passed
+- `Full Reconstruction Integration`: still failed
+
+The remaining failure no longer occurs at checkout.
+
+It occurs at:
+
+- `Run full reconstruction integration validator`
+
+## Remaining Full-Integration Failure Cause
+
+The workflow step currently launches:
+
+- `python scripts/run_full_integration_check.py --template-backend "${{ matrix.expected_backend }}" ...`
+
+But the workflow matrix did not define `expected_backend`.
+
+That means the shell expands the argument to an empty string, which becomes:
+
+- `--template-backend ""`
+
+The validator CLI only accepts:
+
+- `auto`
+- `skani`
+- `diamond`
+
+So the step fails before reconstruction validation begins.
+
+## Practical Fix For The Remaining Failure
+
+Add:
+
+- `expected_backend: skani`
+
+to both matrix entries in `.github/workflows/full-reconstruction-integration.yml`.
+
+This keeps the full integration workflow aligned with its existing:
+
+- `--expected-backend skani`
+- `Install template genome bank`
+- `require-executable skani`
+
+logic.

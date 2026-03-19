@@ -25,9 +25,11 @@ jobs:
           - os: ubuntu-latest
             platform_file: envs/environment.linux-64.yml
             skani_install: conda
+            expected_backend: skani
           - os: macos-14
             platform_file: envs/environment.osx-arm64.yml
             skani_install: brew
+            expected_backend: skani
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     defaults:
