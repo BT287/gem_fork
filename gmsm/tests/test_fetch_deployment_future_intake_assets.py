@@ -38,6 +38,16 @@ class TestFetchDeploymentFutureIntakeAssets:
         assert "CP004370.1" in url
         assert "rettype=gbwithparts" in url
 
+    def test_build_curl_command_points_to_destination(self, tmp_path):
+        module = load_module()
+        destination_path = tmp_path / "input.gbk"
+
+        command = module.build_curl_command("https://example.org/test", str(destination_path))
+
+        assert command[0] == "curl"
+        assert "https://example.org/test" in command
+        assert str(destination_path) in command
+
     def test_write_download_metadata_records_soft_neighbors(self, tmp_path):
         module = load_module()
         destination_dir = tmp_path / "case"

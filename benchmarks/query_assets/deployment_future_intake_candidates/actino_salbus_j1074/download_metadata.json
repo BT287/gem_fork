@@ -1,0 +1,15 @@
+{
+  "case_id": "actino_salbus_j1074",
+  "expected_template": "sco",
+  "legacy_literature_name": "Streptomyces albus J1074",
+  "nucleotide_accession": "CP004370.1",
+  "organism_name": "Streptomyces albidoflavus J1074",
+  "soft_neighbors": [
+    "sco",
+    "mtu"
+  ],
+  "source_note": {
+    "download_method": "efetch",
+    "efetch_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=CP004370.1&rettype=gbwithparts&retmode=text"
+  }
+}

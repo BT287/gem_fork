@@ -1,0 +1,50 @@
+{
+  "manifest_version": 1,
+  "notes": "Actinomycete-centered deployment validation set after future-intake smoke promotion. S. albus J1074 is now promoted into the active working set; A. mediterranei S699 remains provisional and is not yet part of the strict deployment core.",
+  "cases": [
+    {
+      "case_id": "deploy_np_sco_sliv_tk24",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/sco_sliv_tk24/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment-primary", "actino-core", "heterologous-host", "natural-products"],
+      "notes": "Primary actinomycete deployment anchor. Streptomyces lividans TK24 remains the cleanest already-staged actinomycete host case."
+    },
+    {
+      "case_id": "deploy_np_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment-primary", "actino-core", "industrial-producer", "natural-products"],
+      "notes": "Primary industrial actinomycete deployment anchor. Saccharopolyspora erythraea NRRL 23338 keeps the erythromycin-producer axis in the active set."
+    },
+    {
+      "case_id": "deploy_np_salbus_j1074",
+      "query_input": "benchmarks/query_assets/deployment_future_intake_candidates/actino_salbus_j1074/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment-secondary", "actino-core", "heterologous-host", "natural-products", "promoted-from-future-intake"],
+      "notes": "Promoted after smoke staging. Literature usually calls this Streptomyces albus J1074, while current NCBI naming uses Streptomyces albidoflavus J1074."
+    },
+    {
+      "case_id": "deploy_np_bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu"],
+      "exclude_templates": [],
+      "tags": ["deployment-secondary", "non-actino-control", "heterologous-host", "natural-products"],
+      "notes": "Secondary non-actinomycete control. Bacillus subtilis remains the one broader bacterial chassis in the active deployment set."
+    }
+  ]
+}

@@ -83,3 +83,5 @@ Reference files:
 - [deployment_validation_manifest.natural_products_v1.yaml](../benchmarks/deployment_validation_manifest.natural_products_v1.yaml)
 - [deployment_future_intake_actino_plan.md](deployment_future_intake_actino_plan.md)
 - [deployment_validation_manifest.future_intake.actino_candidates.yaml](../benchmarks/deployment_validation_manifest.future_intake.actino_candidates.yaml)
+- [deployment_future_intake_actino_smoke_report.md](deployment_future_intake_actino_smoke_report.md)
+- [deployment_validation_manifest.natural_products_v2.yaml](../benchmarks/deployment_validation_manifest.natural_products_v2.yaml)

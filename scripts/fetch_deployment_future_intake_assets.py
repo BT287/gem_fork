@@ -3,6 +3,8 @@
 import argparse
 import json
 import os
+import shutil
+import subprocess
 import sys
 import urllib.request
 
@@ -49,6 +51,25 @@ def build_efetch_url(nucleotide_accession):
     ) % nucleotide_accession
 
 
+def build_curl_command(url, destination_path):
+    return [
+        "curl",
+        "-L",
+        "--fail",
+        "--retry",
+        "2",
+        "--retry-delay",
+        "2",
+        "--max-time",
+        "300",
+        "-A",
+        "gmsm-deployment-future-intake/1.0",
+        "-o",
+        destination_path,
+        url,
+    ]
+
+
 def write_download_metadata(destination_dir, case_id, spec):
     payload = {
         "case_id": case_id,
@@ -76,16 +97,24 @@ def download_case(case_id, spec, output_root, overwrite=False):
         print("Skipping existing case: %s" % case_id)
         return destination_path
 
-    request = urllib.request.Request(
-        build_efetch_url(spec["nucleotide_accession"]),
-        headers={"User-Agent": "gmsm-deployment-future-intake/1.0"},
-    )
-    with urllib.request.urlopen(request) as response:
-        payload = response.read()
-    if not payload:
-        raise RuntimeError("Empty response while downloading %s" % spec["nucleotide_accession"])
-    with open(destination_path, "wb") as handle:
-        handle.write(payload)
+    url = build_efetch_url(spec["nucleotide_accession"])
+    curl_executable = shutil.which("curl")
+    if curl_executable:
+        command = build_curl_command(url, destination_path)
+        subprocess.run(command, check=True)
+        if not os.path.exists(destination_path) or os.path.getsize(destination_path) == 0:
+            raise RuntimeError("Empty response while downloading %s" % spec["nucleotide_accession"])
+    else:
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": "gmsm-deployment-future-intake/1.0"},
+        )
+        with urllib.request.urlopen(request, timeout=60) as response:
+            payload = response.read()
+        if not payload:
+            raise RuntimeError("Empty response while downloading %s" % spec["nucleotide_accession"])
+        with open(destination_path, "wb") as handle:
+            handle.write(payload)
     write_download_metadata(case_dir, case_id, spec)
     return destination_path
 

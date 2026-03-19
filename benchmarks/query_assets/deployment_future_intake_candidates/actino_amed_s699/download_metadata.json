@@ -1,0 +1,15 @@
+{
+  "case_id": "actino_amed_s699",
+  "expected_template": null,
+  "legacy_literature_name": null,
+  "nucleotide_accession": "NC_017186.1",
+  "organism_name": "Amycolatopsis mediterranei S699",
+  "soft_neighbors": [
+    "mtu",
+    "sco"
+  ],
+  "source_note": {
+    "download_method": "efetch",
+    "efetch_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_017186.1&rettype=gbwithparts&retmode=text"
+  }
+}

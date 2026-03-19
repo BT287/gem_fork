@@ -5,6 +5,13 @@
 This note recommends a literature-backed deployment validation set for the
 auto-template workflow.
 
+Update after future-intake smoke:
+
+- `actino_salbus_j1074` has now been staged and smoke-tested successfully
+- it should replace `sco_sven_atcc10712` in the active deployment working set
+- `actino_amed_s699` stays provisional until repeated smoke behavior is judged
+  stable
+
 The target use case is not generic microbial benchmarking.
 
 It is:
@@ -268,11 +275,15 @@ This composition is the best compromise between:
 
 For the current project, the correct immediate move is:
 
-- deploy with an actinomycete-heavy `4-case` set
+- deploy with an actinomycete-heavy `4-case` set built around:
+  - `sco_sliv_tk24`
+  - `actino_sery_nrrl23338`
+  - `actino_salbus_j1074`
+  - `bsu_py79`
 - keep `bsu_py79` as the one broader bacterial control
 - keep `eco_w3110` optional rather than core
-- make `Streptomyces albus J1074` the next highest-priority future intake
-- make `Amycolatopsis mediterranei` the next industrial-producer intake
+- keep `Amycolatopsis mediterranei` as the next industrial-producer intake
+  candidate, but still provisional at the strict-template level
 
 This keeps the deployment objective aligned with the actual research goal
 instead of drifting toward a generic all-microbe average.
