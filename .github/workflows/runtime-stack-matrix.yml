@@ -27,9 +27,9 @@ jobs:
             require_skani: true
           - os: windows-latest
             platform_file: envs/environment.win-64.yml
-            diamond_install: none
+            diamond_install: release
             skani_install: none
-            require_diamond: false
+            require_diamond: true
             require_skani: false
     runs-on: ${{ matrix.os }}
     defaults:
@@ -54,6 +54,12 @@ jobs:
         if: matrix.diamond_install == 'conda'
         run: |
           conda install -n gmsm -c bioconda -c conda-forge diamond -y
+
+      - name: Install DIAMOND from official Windows release
+        if: matrix.diamond_install == 'release'
+        run: |
+          conda activate gmsm
+          python scripts/install_diamond_windows.py --json
 
       - name: Install skani via conda
         if: matrix.skani_install == 'conda'

@@ -34,7 +34,7 @@ The current CI layout is intended to provide:
 - `Runtime Stack Matrix`
   - environment and binary availability check
 - `Template Recommendation Smoke`
-  - recommendation path sanity check
+  - recommendation path sanity check across Linux/macOS and Windows
 - `Full Reconstruction Integration`
   - auto-template plus primary-model end-to-end check on macOS and Linux
 
@@ -42,7 +42,7 @@ The current CI layout is intended to provide:
 
 ### 1. Windows Full E2E
 
-Windows currently has runtime-stack coverage, not production-grade full
+Windows currently has runtime-stack and recommendation-smoke coverage, not production-grade full
 reconstruction coverage.
 
 Reason:

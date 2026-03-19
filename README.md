@@ -68,8 +68,8 @@ conda install -n gmsm -c bioconda -c conda-forge diamond
 ```
 
 - Windows:
-  - download the official Windows release of DIAMOND and extract `diamond.exe`
-  - place `diamond.exe` on `PATH` or copy it to `bin/diamond.exe`
+  - preferred: run `python scripts/install_diamond_windows.py`
+  - or download the official Windows release of DIAMOND and place `diamond.exe` on `PATH` or in `bin/diamond.exe`
   - if DIAMOND reports a missing runtime, install the Microsoft Visual C++ Redistributable
 
 Fetch the runtime assets required for augmentation and full integration:
@@ -208,18 +208,22 @@ Automatic EFICAz execution via `-E` is retired in the current supported workflow
 
 ## Auto-Template Recommendation
 
-`--auto-template` now prefers `skani` by default when both of these are available:
+The current `v1` operational default for `--auto-template` is `diamond`.
+
+If you explicitly set `--template-backend auto`, GMSM prefers `skani` when both
+of these are available:
 
 - a `skani` executable on `PATH`
 - a template genome bank, either under `gmsm/io/data/input1/genomes/` using the filenames in `gmsm/io/data/input1/template_catalog.json`, or via `--template-genome-bank <path>`
 
-If those assets are missing, GMSM falls back to a DIAMOND-based proteome ranking using the bundled template proteomes.
+If those assets are missing, `--template-backend auto` falls back to a
+DIAMOND-based proteome ranking using the bundled template proteomes.
 
 Current support note:
 
-- Linux or WSL: install `skani`, install the template genome bank, then use `--auto-template`
-- macOS: `skani`-first recommendation is supported when the executable and genome bank are available
-- Native Windows: `--auto-template` is still useful, but expect DIAMOND fallback unless you have a working `skani` binary
+- Linux or WSL: install `skani`, install the template genome bank, then use `--auto-template --template-backend auto`
+- macOS: `skani`-first recommendation is supported when the executable and genome bank are available and `--template-backend auto` is selected
+- Native Windows: the current supported default is DIAMOND-backed recommendation; use `--template-backend auto` only if you have a working `skani` binary
 
 The current recommendation flow is intentionally staged:
 

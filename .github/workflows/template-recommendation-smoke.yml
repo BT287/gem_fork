@@ -15,16 +15,25 @@ jobs:
         include:
           - os: ubuntu-latest
             platform_file: envs/environment.linux-64.yml
+            diamond_install: conda
             skani_install: conda
             require_skani: true
             install_template_bank: true
             expected_backend: skani
           - os: macos-14
             platform_file: envs/environment.osx-arm64.yml
+            diamond_install: conda
             skani_install: brew
             require_skani: true
             install_template_bank: true
             expected_backend: skani
+          - os: windows-latest
+            platform_file: envs/environment.win-64.yml
+            diamond_install: release
+            skani_install: none
+            require_skani: false
+            install_template_bank: true
+            expected_backend: diamond
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -45,8 +54,15 @@ jobs:
           conda env update -n gmsm -f ${{ matrix.platform_file }}
 
       - name: Install DIAMOND
+        if: matrix.diamond_install == 'conda'
         run: |
           conda install -n gmsm -c bioconda -c conda-forge diamond -y
+
+      - name: Install DIAMOND from official Windows release
+        if: matrix.diamond_install == 'release'
+        run: |
+          conda activate gmsm
+          python scripts/install_diamond_windows.py --json
 
       - name: Install skani via conda
         if: matrix.skani_install == 'conda'

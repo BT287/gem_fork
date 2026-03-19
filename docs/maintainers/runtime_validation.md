@@ -23,7 +23,7 @@ python scripts/check_runtime_stack.py --json --output runtime-stack.json
 Cross-platform recommendation smoke validator:
 
 ```bash
-python scripts/run_template_recommendation_smoke.py --expected-backend skani --report-dir smoke-artifacts
+python scripts/run_template_recommendation_smoke.py --expected-backend diamond --template-backend diamond --report-dir smoke-artifacts
 ```
 
 The validator runs recommendation-only cases for `--template-rerank-topn 0` and `3`, stores logs and outputs under the report directory, and writes a summary JSON file at `template_recommendation_smoke_summary.json`.
@@ -32,17 +32,20 @@ The validator runs recommendation-only cases for `--template-rerank-topn 0` and 
 
 ```bash
 python scripts/check_runtime_stack.py --require-module cobra --require-module optlang --require-module libsbml --require-module swiglpk
+python scripts/install_diamond_windows.py
 python scripts/run_template_recommendation_smoke.py --expected-backend diamond --template-backend diamond --report-dir smoke-artifacts-windows
 ```
 
-Before running the Windows fallback validator, install the official `diamond.exe` and place it on `PATH` or in `bin/diamond.exe`.
+Before running the Windows fallback validator, install the official `diamond.exe`
+with `python scripts/install_diamond_windows.py` or place it on `PATH` / in
+`bin/diamond.exe`.
 
 ## Full Reconstruction Validation
 
 Manual full-integration validator:
 
 ```bash
-python scripts/run_full_integration_check.py --expected-backend skani --report-dir full-integration-artifacts
+python scripts/run_full_integration_check.py --expected-backend diamond --template-backend diamond --report-dir full-integration-artifacts
 ```
 
 This validator runs `run_gmsm.py` through the full `-p -s --auto-template` path, captures the log, and validates the key outputs in:
@@ -59,14 +62,14 @@ The current divide-and-conquer support plan separates recommendation smoke from 
 | --- | --- | --- | --- |
 | Split-environment scaffold | `envs/environment.linux-64.yml` | `envs/environment.osx-arm64.yml` | `envs/environment.win-64.yml` |
 | Runtime stack validation | yes | yes | yes |
-| `skani`-first recommendation smoke CI | yes | yes | no |
-| `--auto-template` fallback without `skani` | yes | yes | local/manual |
+| Recommendation smoke CI | yes | yes | yes (`diamond`) |
+| `--auto-template` fallback without `skani` | yes | yes | yes |
 | Full reconstruction integration | manual workflow | manual workflow | not yet |
 
 Interpretation:
 
-- Linux and macOS are the default platforms for `skani`-first template recommendation
-- Native Windows is supported first for environment creation, local `diamond.exe` onboarding, and manual fallback validation
+- Linux and macOS are the default platforms for `skani`-capable recommendation smoke
+- Native Windows is supported for runtime validation and DIAMOND-backed recommendation smoke
 - Full reconstruction compatibility is still tracked separately from template recommendation smoke because solver and package compatibility can fail after the recommendation stage
 
 ## Maintainer Workflow
@@ -75,14 +78,14 @@ Recommended development workflow for maintainers:
 
 1. implement features and quick smoke checks on macOS or Linux
 2. validate onboarding and executable resolution on native Windows
-3. use Linux CI as the merge gate for reproducible recommendation smoke
+3. use CI to keep Linux/macOS `skani` smoke and Windows `diamond` smoke reproducible
 
 This split keeps platform-specific installation failures separate from recommendation logic failures:
 
-- `template-recommendation-smoke.yml` verifies the `skani` path on Linux and macOS
+- `template-recommendation-smoke.yml` verifies the `skani` path on Linux/macOS and the `diamond` path on Windows
 - `scripts/run_template_recommendation_smoke.py` provides a shared local validator for recommendation-only smoke checks
 - `scripts/check_runtime_stack.py` provides a shared local validator for the runtime stack across Linux, macOS, and Windows
-- native Windows DIAMOND-backed fallback remains a local/manual validation target until a stable CI installation path for `diamond.exe` is added
+- `scripts/install_diamond_windows.py` provides a shared installation path for native Windows and Windows CI
 - `full-reconstruction-integration.yml` is the manual P2 workflow for Linux and macOS full reconstruction validation
 
 ## Repository Positioning
