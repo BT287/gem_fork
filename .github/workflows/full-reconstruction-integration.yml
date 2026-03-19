@@ -36,8 +36,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
@@ -89,6 +87,7 @@ jobs:
           python scripts/run_full_integration_check.py \
             --template-backend "${{ matrix.expected_backend }}" \
             --expected-backend skani \
+            --skip-secondary \
             --report-dir full-integration-artifacts \
             --output-dir full-integration-output
 

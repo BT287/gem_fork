@@ -1,0 +1,61 @@
+{
+  "manifest_version": 1,
+  "notes": "SBML-oriented deployment validation set emphasizing organisms repeatedly used in KAIST SBML or adjacent medicinal / natural-product studies.",
+  "cases": [
+    {
+      "case_id": "sbml_actino_salbus_j1074",
+      "query_input": "benchmarks/query_assets/deployment_future_intake_candidates/actino_salbus_j1074/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["sbml-primary", "actino-host", "natural-products", "medicinal"],
+      "notes": "SBML-oriented actinomycete host anchor. Literature usually names this strain Streptomyces albus J1074, while current NCBI naming uses Streptomyces albidoflavus J1074."
+    },
+    {
+      "case_id": "sbml_sco_sliv_tk24",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/sco_sliv_tk24/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["sbml-primary", "actino-host", "natural-products", "medicinal"],
+      "notes": "Classic Streptomyces host retained in the SBML-oriented deployment set."
+    },
+    {
+      "case_id": "sbml_actino_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["sbml-primary", "industrial-producer", "actino-producer", "medicinal"],
+      "notes": "Industrial actinomycete producer included for the erythromycin axis."
+    },
+    {
+      "case_id": "sbml_sco_sven_atcc10712",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/sco_sven_atcc10712/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["sbml-primary", "actino-host", "pikromycin", "medicinal"],
+      "notes": "Included because Streptomyces venezuelae is directly used in the 2022 SBML-related pikromycin engineering paper."
+    },
+    {
+      "case_id": "sbml_eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": ["eco"],
+      "exclude_templates": [],
+      "tags": ["sbml-secondary", "medicinal", "heterologous-host", "ecoli"],
+      "notes": "Included because E. coli is directly used in the 2024 SBML actinocin / medicinal-molecule production paper."
+    }
+  ]
+}
