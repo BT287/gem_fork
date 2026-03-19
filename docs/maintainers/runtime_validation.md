@@ -97,5 +97,5 @@ This split keeps platform-specific installation failures separate from recommend
 ## Related Docs
 
 - workflow auth note: [../github_workflow_push_auth.md](../github_workflow_push_auth.md)
-- auto-template next work plan: [../auto_template_next_steps_plan.md](../auto_template_next_steps_plan.md)
-- branch briefing: [../../AUTO_TEMPLATE_BRIEFING.md](../../AUTO_TEMPLATE_BRIEFING.md)
+- release briefing: [../briefing/README.md](../briefing/README.md)
+- historical auto-template archive: [../archive/auto_template_history/README.md](../archive/auto_template_history/README.md)

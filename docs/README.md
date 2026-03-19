@@ -7,18 +7,25 @@ entire history first, start here:
 
 - `docs/briefing/README.md`
 - `docs/briefing/auto_template_scoring_and_tuning.md`
+- `docs/briefing/deployment_validation_set.md`
 - `docs/briefing/release_readiness.md`
 - `docs/briefing/runtime_asset_delivery.md`
 
+## Maintainer Notes
+
+- `docs/maintainers/runtime_validation.md`
+- `docs/github_workflow_push_auth.md`
+
 ## Historical Working Notes
 
-The root `docs/` directory keeps the phase-by-phase planning, pilot reports,
-and curation logs that were generated during development.
+Historical phase-by-phase planning notes, pilot reports, curation logs, and
+exploratory tuning documents were moved to:
+
+- `docs/archive/auto_template_history/`
 
 These files are intentionally preserved as project history, but they are no
 longer the best first entry point for review or merge preparation.
 
-## Operational / Maintainer Notes
+Related benchmark history was moved to:
 
-- `docs/maintainers/runtime_validation.md`
-- `docs/github_actions_checkout_failure_note.md`
+- `benchmarks/archive/auto_template_history/`

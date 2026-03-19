@@ -10,30 +10,26 @@ This directory is the merge-review entry point for the auto-template work.
    - benchmark / deployment dataset structure
    - current `v1` operational default
 
-2. `release_readiness.md`
+2. `deployment_validation_set.md`
+   - current deployment-facing organism mix
+   - active deployment manifest
+   - relation to archived exploratory manifests
+
+3. `release_readiness.md`
    - what is validated
    - what is still limited
    - what CI is supposed to guarantee
 
-3. `runtime_asset_delivery.md`
+4. `runtime_asset_delivery.md`
    - why runtime assets moved out of Git LFS
    - why Google Drive is the short-term delivery path
    - when to switch to GitHub Release assets
 
-4. `../deployment_validation_sbml_lab_recommendation.md`
-   - literature-backed deployment organism choice
-
-5. `../deployment_validation_sbml_lab_v1_report.md`
-   - runnable deployment-set result
-
 ## Historical Context
 
-Detailed phase-by-phase working history remains in the parent `docs/` folder:
+Detailed phase-by-phase working history now lives in:
 
-- `parameter_plan.md`
-- `parameter_tuning_workflow_briefing.md`
-- `auto_template_parameter_estimation_report.md`
-- `phase1*`, `phase2*`, `phase3*` reports
+- `../archive/auto_template_history/`
 
 Those are still useful for auditability, but they are not the best first read
 for merge review.

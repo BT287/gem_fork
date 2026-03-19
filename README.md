@@ -16,7 +16,7 @@ Use the path that matches your goal:
 | Use automatic template recommendation | [Auto-Template Recommendation](#auto-template-recommendation) |
 | Inspect output file semantics | [OUTPUTS.md](OUTPUTS.md) |
 | Validate runtime stack, smoke tests, or full integration | [docs/maintainers/runtime_validation.md](docs/maintainers/runtime_validation.md) |
-| Read the current auto-template handoff / next work plan | [AUTO_TEMPLATE_BRIEFING.md](AUTO_TEMPLATE_BRIEFING.md) and [docs/auto_template_next_steps_plan.md](docs/auto_template_next_steps_plan.md) |
+| Read the current auto-template release briefing | [docs/briefing/README.md](docs/briefing/README.md) |
 
 ## Quickstart
 
@@ -374,9 +374,10 @@ Source: `gmsm/config/gmsm.cfg`
 
 - Runtime stack, smoke tests, platform matrix, and validation flow: [docs/maintainers/runtime_validation.md](docs/maintainers/runtime_validation.md)
 - Workflow push auth note: [docs/github_workflow_push_auth.md](docs/github_workflow_push_auth.md)
-- Current branch briefing: [AUTO_TEMPLATE_BRIEFING.md](AUTO_TEMPLATE_BRIEFING.md)
-- Concise parameter tuning briefing: [docs/parameter_plan.md](docs/parameter_plan.md)
-- Current next-step implementation plan: [docs/auto_template_next_steps_plan.md](docs/auto_template_next_steps_plan.md)
+- Current release briefing: [docs/briefing/README.md](docs/briefing/README.md)
+- Scoring equations and tuning logic: [docs/briefing/auto_template_scoring_and_tuning.md](docs/briefing/auto_template_scoring_and_tuning.md)
+- Deployment validation set: [docs/briefing/deployment_validation_set.md](docs/briefing/deployment_validation_set.md)
+- Historical phase logs: [docs/archive/auto_template_history/README.md](docs/archive/auto_template_history/README.md)
 
 ## Troubleshooting
 

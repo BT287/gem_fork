@@ -1,0 +1,105 @@
+{
+  "manifest_version": 1,
+  "notes": "Phase 4 backend comparison manifest. Reuses the currently promoted tiered tuning set so skani and diamond can be compared under the same evidence stack.",
+  "cases": [
+    {
+      "case_id": "eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": "benchmarks/reference_models/eco_w3110/model.xml",
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": ["eco"],
+      "exclude_templates": [],
+      "tags": ["primary_exact", "deployment-like", "ecoli"],
+      "notes": "Exact anchor retained for backend-comparison primary objective."
+    },
+    {
+      "case_id": "bsu_py79",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/bsu_py79/input.gbk",
+      "ec_file": null,
+      "reference_model": "benchmarks/reference_models/bsu_py79/model_exact_candidate.xml",
+      "expected_template": "bsu",
+      "expected_taxonomic_neighbors": ["bsu"],
+      "exclude_templates": [],
+      "tags": ["candidate_exact", "secondary_approximate", "bacillus"],
+      "notes": "Candidate-exact Bacillus anchor retained as secondary evidence until stricter source-policy promotion."
+    },
+    {
+      "case_id": "sbml_actino_salbus_j1074",
+      "query_input": "benchmarks/query_assets/deployment_future_intake_candidates/actino_salbus_j1074/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment_validation", "sbml-primary", "actino-host"],
+      "notes": "SBML-oriented deployment host case."
+    },
+    {
+      "case_id": "sbml_sco_sliv_tk24",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/sco_sliv_tk24/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment_validation", "sbml-primary", "actino-host"],
+      "notes": "Classic Streptomyces host retained in deployment validation."
+    },
+    {
+      "case_id": "sbml_actino_sery_nrrl23338",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round2_candidates/actino_sery_nrrl23338/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment_validation", "sbml-primary", "industrial-producer"],
+      "notes": "Industrial medicinal actinomycete retained in deployment validation."
+    },
+    {
+      "case_id": "sbml_sco_sven_atcc10712",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/sco_sven_atcc10712/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "sco",
+      "expected_taxonomic_neighbors": ["sco", "mtu"],
+      "exclude_templates": [],
+      "tags": ["deployment_validation", "sbml-primary", "pikromycin"],
+      "notes": "SBML-related medicinal Streptomyces case."
+    },
+    {
+      "case_id": "sbml_eco_w3110",
+      "query_input": "benchmarks/query_assets/phase1b_first_batch/eco_w3110/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "eco",
+      "expected_taxonomic_neighbors": ["eco"],
+      "exclude_templates": [],
+      "tags": ["deployment_validation", "sbml-secondary", "ecoli"],
+      "notes": "Lab-adjacent medicinal E. coli chassis."
+    },
+    {
+      "case_id": "actino_cglu_atcc13032",
+      "query_input": "benchmarks/query_assets/phase1c_boundary_candidates/actino_cglu_atcc13032/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "mtu",
+      "expected_taxonomic_neighbors": ["mtu", "sco"],
+      "exclude_templates": [],
+      "tags": ["boundary_screening", "actino-boundary"],
+      "notes": "Known leverage case for actino boundary screening."
+    },
+    {
+      "case_id": "firmi_tsac_jwslys485",
+      "query_input": "benchmarks/query_assets/phase3_boundary_round3_candidates/firmi_tsac_jwslys485/input.gbk",
+      "ec_file": null,
+      "reference_model": null,
+      "expected_template": "clj",
+      "expected_taxonomic_neighbors": ["clj", "bsu"],
+      "exclude_templates": [],
+      "tags": ["boundary_screening", "firmicute-boundary"],
+      "notes": "Known clean Firmicute leverage case."
+    }
+  ]
+}
