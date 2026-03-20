@@ -98,4 +98,5 @@ This split keeps platform-specific installation failures separate from recommend
 
 - workflow auth note: [../github_workflow_push_auth.md](../github_workflow_push_auth.md)
 - release briefing: [../briefing/README.md](../briefing/README.md)
+- clean-room onboarding checklist: [clean_room_onboarding_validation.md](clean_room_onboarding_validation.md)
 - historical auto-template archive: [../archive/auto_template_history/README.md](../archive/auto_template_history/README.md)

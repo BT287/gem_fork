@@ -208,6 +208,8 @@ Sample inputs in this repository:
 - Release briefing: [docs/briefing/README.md](docs/briefing/README.md)
 - Runtime and CI validation notes:
   [docs/maintainers/runtime_validation.md](docs/maintainers/runtime_validation.md)
+- Clean-room onboarding checklist:
+  [docs/maintainers/clean_room_onboarding_validation.md](docs/maintainers/clean_room_onboarding_validation.md)
 - Historical phase logs:
   [docs/archive/auto_template_history/README.md](docs/archive/auto_template_history/README.md)
 
