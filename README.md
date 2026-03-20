@@ -50,8 +50,7 @@ Swap the second file for your platform:
 
 ###Major runtime requirements
 
-- `diamond` must be available on `PATH` or in `bin/`
-- On Windows, the executable must be `diamond.exe`
+- `diamond` is required for the current `v1` auto-template default
 - `skani` is optional and only needed if you want genome-level auto-template
   retrieval with `--template-backend auto`
 - Runtime augmentation assets must be fetched with
@@ -72,6 +71,10 @@ conda install -n gmsm -c bioconda -c conda-forge diamond
 python scripts/install_diamond_windows.py
 ```
 
+On Windows, this installs `diamond.exe` into the repository-local `bin/`
+directory. GMSM detects that path automatically, so adding it to the global
+`PATH` is optional.
+
 Fetch runtime assets required for augmentation and full integration:
 
 ```bash
@@ -81,8 +84,8 @@ python scripts/fetch_runtime_assets.py
 Basic verification:
 
 ```bash
-diamond --version
 python scripts/fetch_runtime_assets.py --json
+python scripts/check_runtime_stack.py --require-executable diamond
 python run_gmsm.py -h
 ```
 
@@ -217,6 +220,9 @@ Sample inputs in this repository:
 
 - If `diamond` is missing on Windows, run
   `python scripts/install_diamond_windows.py`
+- On Windows, `diamond --version` may fail if `diamond.exe` is not on the
+  global `PATH`; if `check_runtime_stack.py` succeeds, GMSM can still run by
+  using the repository-local `bin/diamond.exe`
 - If primary modeling stalls, verify internet access to KEGG
 - If an old environment behaves strangely, recreate it from `environment.yml`
 - If you use antiSMASH 4 input, make sure the input file is the GenBank export
