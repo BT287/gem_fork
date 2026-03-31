@@ -1,63 +1,58 @@
-# GMSM
+# **GMSM**
 
-***G***enome-scale metabolic ***M***odeling with ***S***econdary ***M***etabolism (GMSM) builds a genome-scale metabolic model (GEM) from a microbial genome and can extend that model with secondary-metabolism reactions derived from antiSMASH-annotated GenBank input.
+***G***enome-scale metabolic ***M***odeling with ***S***econdary
+***M***etabolism (GMSM) automatically generates secondary metabolite
+biosynthetic reactions in a genome-scale metabolic model (GEM) from microbial
+genome input, with antiSMASH-annotated GenBank support for secondary
+metabolism. GMSM enables high-throughput modeling of both primary and
+secondary metabolism, and the current release also supports automatic template
+recommendation before primary-model reconstruction.
 
-#Development
-This project was initiated as a research collaboration between [Metabolic & Biomolecular Eng. Nat’l Research Laboratory (MBEL) & BioInformatics Research Center](http://mbel.kaist.ac.kr/) at KAIST and [Novo Nordisk Foundation Center for Biosustainability](http://www.biosustain.dtu.dk/english) at DTU.
+# Development
 
-## What This Repository Does
+This project was initiated as a research collaboration between
+[Metabolic & Biomolecular Eng. Nat'l Research Laboratory (MBEL) & BioInformatics Research Center](http://mbel.kaist.ac.kr/)
+at KAIST and
+[Novo Nordisk Foundation Center for Biosustainability](http://www.biosustain.dtu.dk/english)
+at DTU.
 
-Given a genome input, GMSM can:
+# Current features
 
-1. parse genome features and amino-acid sequences
-2. find homologs against a template GEM using DIAMOND
-3. prune unsupported template reactions
-4. add primary-metabolism reactions from EC annotations and KEGG
-5. add secondary-metabolism reactions from antiSMASH BGC annotations
-6. export SBML and review tables for downstream analysis
+- Metabolic modeling for primary metabolism
+- Metabolic modeling for secondary metabolism
+- Automatic template recommendation with `--auto-template`
+- Cross-platform runtime validation on Linux, macOS, and Windows
+- Full reconstruction integration validated on Linux and macOS
 
-## Recommended Runtime and Installation
+# Installation
 
-Validated on 2026-03-11:
+### Recommended environment
 
-- Python `3.11`
-- `cobra==0.30.0`
-- `biopython==1.86`
-- `python-libsbml==5.21.1`
-- `swiglpk==5.0.13`
-- `tox -e py311`
-
-1. Clone the repository
+Create and activate the validated environment:
 
        git clone https://github.com/kaist-sbml/gem.git
 
-2. Create the recommended environment:
+If you prefer the split platform overlays:
 
-    2-A) From scratch:
-       
-       conda env create -f environment.yml
-       conda activate gmsm
-        
+```bash
+conda env create -n gmsm -f environment.base.yml
+conda env update -n gmsm -f envs/environment.linux-64.yml
+```
 
-    2-B) If you already created `gmsm` before this refresh, update it in place:
-    
-       conda env update -n gmsm -f environment.yml --prune
-       conda activate gmsm
+Swap the second file for your platform:
 
-    2-C) Fallback without `environment.yml`:
+- `envs/environment.linux-64.yml`
+- `envs/environment.osx-arm64.yml`
+- `envs/environment.win-64.yml`
 
-       conda create -n gmsm python=3.11
-       conda activate gmsm
-       pip install -r requirements.txt
+### Major runtime requirements
 
-
-## External Requirements
-
-- `diamond` must be available on `PATH` or in the repo-local `bin/` directory
-- On Windows, the executable must be `diamond.exe`; a Unix `bin/diamond` file is not usable
-- Git LFS is required if your checkout stores large assets through LFS
-- Guorbi is required if you need large-scale and faster optimization
-- Internet access is required for primary-model augmentation through KEGG
+- `diamond` is required for the current `v1` auto-template default
+- `skani` is optional and only needed if you want genome-level auto-template
+  retrieval with `--template-backend auto`
+- Runtime augmentation assets must be fetched with
+  `scripts/fetch_runtime_assets.py`
+- Internet access is required for KEGG-based primary-model augmentation
 
 ### DIAMOND
 
@@ -70,21 +65,19 @@ conda install -n gmsm -c bioconda -c conda-forge diamond
 ```
 
 - Windows:
-  - download the [official Windows release](https://github.com/bbuchfink/diamond/releases) of DIAMOND and extract `diamond.exe` 
-  - place `diamond.exe` on `PATH` or copy it to `bin/diamond.exe`
-  - if DIAMOND reports a missing runtime, install the Microsoft Visual C++ Redistributable
-
-Verify DIAMOND before running `tox` or `run_gmsm.py`:
 
 ```bash
-diamond --version
+python scripts/install_diamond_windows.py
 ```
 
-### Git LFS setup
+On Windows, this installs `diamond.exe` into the repository-local `bin/`
+directory. GMSM detects that path automatically, so adding it to the global
+`PATH` is optional.
+
+Fetch runtime assets required for augmentation and full integration:
 
 ```bash
-git lfs install
-git lfs pull
+python scripts/fetch_runtime_assets.py
 ```
 
 ### Gurobi (optional)
@@ -99,12 +92,12 @@ git lfs pull
 ### Basic verification
 
 ```bash
-diamond --version
+python scripts/fetch_runtime_assets.py --json
+python scripts/check_runtime_stack.py --require-executable diamond
 python run_gmsm.py -h
-tox -e py311
 ```
 
-## Supported Inputs
+# Quick start
 
 ### antiSMASH versions
 
@@ -123,10 +116,17 @@ tox -e py311
 - EC prediction file via `-e`
 - compartment annotation file via `-C`
 
+### Supported inputs
 
-## First Run
+Sample inputs in this repository:
 
-Primary modeling only:
+- `input/NC_021985.1_antismash8.gbk`
+- `input/NC_021985.1_deepec.txt`
+- `input/sample_compartment_info.txt`
+- `input/sample_input_ten_CDS.fasta`
+- `input/sample_input_two_CDS.gb`
+
+### Primary metabolism only
 
 ```bash
 python run_gmsm.py \
@@ -136,16 +136,7 @@ python run_gmsm.py \
   -o output_primary
 ```
 
-Secondary modeling only:
-
-```bash
-python run_gmsm.py \
-  -i input/NC_021985.1_antismash8.gbk \
-  -s -d \
-  -o output_secondary
-```
-
-Primary + secondary modeling:
+### Primary + secondary metabolism
 
 ```bash
 python run_gmsm.py \
@@ -155,125 +146,103 @@ python run_gmsm.py \
   -o output_e2e
 ```
 
-Use a fresh `-o` directory name when you want a clean comparison. Reusing an existing output directory overwrites files for the stages you rerun, and an older `3_complete_model/` can remain if you later rerun only `-p`.
+### Automatic template recommendation
 
-## At-a-Glance Workflow
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  -e input/NC_021985.1_deepec.txt \
+  --auto-template \
+  -p -s -d -c 4 \
+  -o output_auto_template
+```
 
-Use this mental model when reading the repo:
+### Recommendation-only smoke run
 
-1. prepare genome input and optional EC annotations
-2. parse CDS and antiSMASH features
-3. run DIAMOND homology against the template GEM
-4. prune unsupported template reactions
-5. add primary-metabolism reactions from EC and KEGG
-6. optionally add secondary-metabolism reactions from BGC annotations
-7. export SBML, summaries, and canonical tables
+```bash
+python run_gmsm.py \
+  -i input/NC_021985.1_antismash8.gbk \
+  --auto-template \
+  --template-recommendation-only \
+  --template-rerank-topn 0 \
+  -p -d \
+  -o output_auto_template_smoke
+```
 
-Short form:
+Use a fresh `-o` directory name when you want a clean comparison. Reusing an
+existing directory can leave stale downstream files behind if you rerun only a
+subset of stages.
 
-`input -> homology -> prune -> primary augmentation -> secondary augmentation -> SBML and reports`
+# Auto-template recommendation
 
-## Pipeline Architecture
+The operational default is `diamond`.
 
-| Stage | Main module | Purpose |
-|---|---|---|
-| Input parsing | `gmsm/io/input_file_manager.py` | load genome records, CDS, EC annotations, BGC counts |
-| Homology | `gmsm/homology/` | build DIAMOND databases and reciprocal best hits |
-| Primary pruning | `gmsm/primary_model/prunPhase_utils.py` | remove unsupported template reactions and swap GPRs |
-| Primary augmentation | `gmsm/primary_model/augPhase_utils.py` | query KEGG and add EC-supported reactions |
-| Secondary modeling | `gmsm/secondary_model/` | convert antiSMASH BGC signals into biosynthetic reactions |
-| Output export | `gmsm/io/output_file_manager.py` | write SBML, tables, summaries, and review artifacts |
+That means:
 
-## Input Files
+- `--auto-template` without extra backend flags uses the DIAMOND-based coarse
+  ranking path
+- reciprocal-hit reranking is still applied when `--template-rerank-topn > 0`
 
-| File | Meaning |
-|---|---|
-| `input/NC_021985.1_antismash8.gbk` | sample antiSMASH 8 GenBank input |
-| `input/NC_021985.1_deepec.txt` | sample EC prediction file |
-| `input/sample_compartment_info.txt` | sample compartment annotation file |
-| `input/sample_input_ten_CDS.fasta` | minimal FASTA sample |
-| `input/sample_input_two_CDS.gb` | minimal GenBank sample |
+If you explicitly set `--template-backend auto`, GMSM prefers `skani` when:
 
-## Output Layout
+- a working `skani` executable is available
+- a template genome bank is installed
+- the query input is compatible with the genome-level path
 
-GMSM writes:
+Practical support note:
 
-- `2_primary_metabolic_model/` for the primary-model stage
-- `3_complete_model/` for the final model with secondary metabolism
+- Linux or macOS: `skani` path is supported when installed explicitly
+- Native Windows: use the current DIAMOND-backed default unless you manage
+  your own working `skani` binary
 
-Each output folder now contains:
+Install and validate a template genome bank with:
 
-- `model.xml`: SBML model
-- `summary_report.txt`: legacy text summary
-- `summary_report.json`: machine-readable run summary
-- `report.md`: human-readable output overview
-- `manifest.json`: file inventory for automation
-- canonical TSV tables such as `reactions.tsv` and `metabolites.tsv`
-- legacy `rmc_*.txt` review files for backward compatibility
+```bash
+python scripts/fetch_template_genome_bank.py --from-manifest
+python scripts/check_template_genome_bank.py
+```
 
-Detailed output reference: [OUTPUTS.md](OUTPUTS.md)
+# Platform support
 
-## Canonical Output Files
+- Linux:
+  - runtime stack validated
+  - recommendation smoke validated
+  - full reconstruction integration validated
+- macOS:
+  - runtime stack validated
+  - recommendation smoke validated
+  - full reconstruction integration validated
+- Windows:
+  - runtime stack validated
+  - recommendation smoke validated with `diamond.exe`
+  - full reconstruction remains a local/manual target rather than a merge gate
 
-| File | Purpose |
-|---|---|
-| `summary_report.json` | compact metadata for pipelines and UI layers |
-| `report.md` | quick human-readable run report |
-| `reactions.tsv` | all reactions |
-| `metabolites.tsv` | all metabolites |
-| `template_remaining_reactions.tsv` | reactions kept from the template after pruning |
-| `kegg_added_reactions.tsv` | reactions added during KEGG augmentation |
-| `gpr_notes.tsv` | template-gene carryover and duplicate-gene notes |
-| `bgc_fluxes.tsv` | per-BGC export fluxes in complete-model output |
-| `gapfilling_needed.tsv` | metabolites still blocking secondary production |
+# Repository guide
 
-## Key Hyperparameters
+- Output semantics: [OUTPUTS.md](OUTPUTS.md)
+- Release briefing: [docs/briefing/README.md](docs/briefing/README.md)
+- Runtime and CI validation notes:
+  [docs/maintainers/runtime_validation.md](docs/maintainers/runtime_validation.md)
+- Clean-room onboarding checklist:
+  [docs/maintainers/clean_room_onboarding_validation.md](docs/maintainers/clean_room_onboarding_validation.md)
+- Historical phase logs:
+  [docs/archive/auto_template_history/README.md](docs/archive/auto_template_history/README.md)
 
-Source: `gmsm/config/gmsm.cfg`
+# Troubleshooting
 
-| Parameter | Default | Meaning |
-|---|---|---|
-| `blastp.evalue` | `1e-30` | DIAMOND hit cutoff for homology acceptance |
-| `cobrapy.non_zero_flux_cutoff` | `1e-3` | flux threshold for treating production as non-zero |
-| `cobrapy.nutrient_uptake_rate` | `2` | nutrient uptake fold change bound used in model setup |
-| `cobrapy.gapfill_iter` | `1` | number of SMILEY gap-filling iterations |
-| `utils.time_bomb_duration` | `90` | cache lifetime in days for KEGG-derived data |
+- If `diamond` is missing on Windows, run
+  `python scripts/install_diamond_windows.py`
+- On Windows, `diamond --version` may fail if `diamond.exe` is not on the
+  global `PATH`; if `check_runtime_stack.py` succeeds, GMSM can still run by
+  using the repository-local `bin/diamond.exe`
+- If primary modeling stalls, verify internet access to KEGG
+- If an old environment behaves strangely, recreate it from `environment.yml`
+- If you use antiSMASH 4 input, make sure the input file is the GenBank export
+  with `cluster` annotations
 
-## CLI Options You Will Actually Use
+# Model refinement
 
-| Option | Meaning |
-|---|---|
-| `-i` | input GenBank or FASTA |
-| `-o` | output directory |
-| `-m` | template GEM organism |
-| `-e` | EC prediction file |
-| `-p` | primary modeling |
-| `-s` | secondary modeling |
-| `-C` | compartment annotation file |
-| `-c` | CPU count |
-| `-d` | debug logging |
-| `-v` | verbose logging |
+Model drafts created by GMSM should still be refined manually. Output files
+with prefix `rmc_` provide starting points for manual curation.
 
-## Repository Structure
-
-| Path | Meaning |
-|---|---|
-| `run_gmsm.py` | CLI entrypoint |
-| `gmsm/` | implementation package |
-| `gmsm/tests/` | pytest suite |
-| `input/` | sample inputs |
-| `bin/` | local executables such as DIAMOND |
-| `environment.yml` | validated conda environment |
-| `requirements.txt` | pip fallback dependency list |
-
-## Which Document to Read First
-
-- New user who just wants to run GMSM once:
-  - start with this README
-  - run one of the commands in `First Run`
-- User who wants the code-level pipeline and supported inputs:
-  - read this README
-- User who wants output semantics for UI or downstream automation:
-  - read [OUTPUTS.md](OUTPUTS.md)
-- User who is using an external tutorial workspace:
-  - read that workspace's README after finishing the setup in this repo
+# Publication

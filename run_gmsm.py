@@ -37,6 +37,7 @@ from gmsm.secondary_model.run_secondary_modeling import (
     get_target_nonprod_monomers_for_gapfilling,
     run_gapfilling
     )
+from gmsm.template_recommendation import recommend_template
 
 
 def main():
@@ -90,6 +91,75 @@ def main():
                         "'sce': iMM904 (19321003); Saccharomyces cerevisiae S288C\n"
                         "'sco': iKS1317 (30525286); Streptomyces coelicolor A3(2)"
                         )
+    group.add_argument('--auto-template',
+                        dest='auto_template',
+                        default=False,
+                        action='store_true',
+                        help="Automatically recommend a template before primary modeling")
+    group.add_argument('--template-backend',
+                        dest='template_backend',
+                        default='diamond',
+                        choices=['auto', 'skani', 'diamond'],
+                        help="Backend to use for automatic template recommendation (default: %(default)s)")
+    group.add_argument('--template-topk',
+                        dest='template_topk',
+                        default=3,
+                        type=int,
+                        help="How many template candidates to keep in the recommendation output (default: %(default)s)")
+    group.add_argument('--template-genome-bank',
+                        dest='template_genome_bank',
+                        default=False,
+                        help="Directory containing template genome FASTA files for skani-based recommendation")
+    group.add_argument('--template-rerank-topn',
+                        dest='template_rerank_topn',
+                        default=3,
+                        type=int,
+                        help="How many top template candidates to rerank with reciprocal hits (default: %(default)s)")
+    group.add_argument('--template-recommendation-only',
+                        dest='template_recommendation_only',
+                        default=False,
+                        action='store_true',
+                        help="Run only the template recommendation stage and stop before homology/pruning")
+    group.add_argument('--template-ani-weight',
+                        dest='template_ani_weight',
+                        default=0.7,
+                        type=float,
+                        help="Weight for normalized ANI in skani coarse ranking (default: %(default)s)")
+    group.add_argument('--template-af-weight',
+                        dest='template_af_weight',
+                        default=0.3,
+                        type=float,
+                        help="Weight for aligned fraction in skani coarse ranking (default: %(default)s)")
+    group.add_argument('--template-diamond-hit-weight',
+                        dest='template_diamond_hit_weight',
+                        default=0.05,
+                        type=float,
+                        help="Weight for hit coverage in DIAMOND coarse ranking (default: %(default)s)")
+    group.add_argument('--template-diamond-identity-weight',
+                        dest='template_diamond_identity_weight',
+                        default=0.95,
+                        type=float,
+                        help="Weight for mean identity in DIAMOND coarse ranking (default: %(default)s)")
+    group.add_argument('--template-bbh-template-weight',
+                        dest='template_bbh_template_weight',
+                        default=0.5,
+                        type=float,
+                        help="Weight for template coverage in BBH reranking (default: %(default)s)")
+    group.add_argument('--template-bbh-target-weight',
+                        dest='template_bbh_target_weight',
+                        default=0.5,
+                        type=float,
+                        help="Weight for target coverage in BBH reranking (default: %(default)s)")
+    group.add_argument('--template-coarse-weight',
+                        dest='template_coarse_weight',
+                        default=0.95,
+                        type=float,
+                        help="Weight for coarse ranking in final template score (default: %(default)s)")
+    group.add_argument('--template-rerank-weight',
+                        dest='template_rerank_weight',
+                        default=0.05,
+                        type=float,
+                        help="Weight for BBH rerank score in final template score (default: %(default)s)")
 
     group = parser.add_argument_group('GMSM modeling options',
                         "At least one of the two options should be selected:"
@@ -184,6 +254,17 @@ def main():
     if run_ns.pmr_generation:
         get_target_genome_from_input(filetype, run_ns, io_ns)
 
+        if run_ns.auto_template and io_ns.targetGenome_locusTag_aaSeq_dict:
+            recommend_template(filetype, run_ns, io_ns)
+            if run_ns.template_recommendation_only:
+                runtime0 = time.strftime("Elapsed time %H:%M:%S",
+                        time.gmtime(time.time() - start))
+                logging.info("Template recommendation-only mode completed")
+                logging.info(runtime0)
+                return
+        elif run_ns.auto_template:
+            logging.warning("Automatic template recommendation skipped; no amino acid sequences found in input genome data")
+
         if run_ns.ec_file:
             get_ec_file(run_ns, io_ns)
 
@@ -193,6 +274,7 @@ def main():
             get_homologs(io_ns, homology_ns)
             model = get_pickles_prunPhase(io_ns)
             modelPrunedGPR = run_prunPhase(model, io_ns, config_ns, homology_ns, primary_model_ns)
+            target_model = modelPrunedGPR
 
             if io_ns.targetGenome_locusTag_ec_dict:
                 get_pickles_augPhase(io_ns)

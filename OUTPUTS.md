@@ -2,6 +2,8 @@
 
 GMSM keeps legacy text outputs for backward compatibility and now also writes canonical files for UI layers and downstream pipelines.
 
+When automatic template recommendation is enabled, GMSM also writes a `0_template_recommendation/` stage before the primary-model output directories.
+
 ## Design Rules
 
 - legacy files are preserved
@@ -17,6 +19,29 @@ GMSM keeps legacy text outputs for backward compatibility and now also writes ca
 | `summary_report.json` | JSON | machine-readable summary |
 | `report.md` | Markdown | human-readable output report |
 | `manifest.json` | JSON | inventory of generated files |
+
+## Template Recommendation Stage
+
+These files appear in `0_template_recommendation/` when `--auto-template` is enabled.
+
+| File | Format | Meaning |
+|---|---|---|
+| `template_candidates.tsv` | TSV | ranked template candidates with coarse metrics, optional BBH rerank metrics, and the final recommendation score |
+| `template_recommendation.json` | JSON | selected template, confidence, backend, strategy, and the retained top-k candidates |
+
+Key columns in `template_candidates.tsv`:
+
+- `coarse_backend`: initial retrieval backend used for ranking
+- `coarse_score`: score before any reciprocal-hit reranking
+- `primary_metric` / `secondary_metric`: the metrics that actually determined the final ranking
+- `bbh_template_coverage`: fraction of template genes supported by reciprocal best hits
+- `bbh_target_coverage`: fraction of target genes participating in reciprocal best hits
+- `selection_stage`: `coarse` or `coarse+bbh`
+
+Runtime interpretation:
+
+- if `coarse_backend=skani`, the first pass was genome-level ANI/AF ranking
+- if `coarse_backend=diamond`, GMSM fell back to proteome-level coarse ranking because skani assets were not available
 
 ## Canonical Tables
 

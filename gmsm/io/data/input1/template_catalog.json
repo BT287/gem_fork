@@ -1,0 +1,54 @@
+{
+  "templates": {
+    "bsu": {
+      "organism": "Bacillus subtilis subsp. subtilis str. 168",
+      "model": "iYO844",
+      "genome_fasta": "genomes/bsu.fna"
+    },
+    "clj": {
+      "organism": "Clostridium ljungdahlii DSM 13528",
+      "model": "iHN637",
+      "genome_fasta": "genomes/clj.fna"
+    },
+    "cre": {
+      "organism": "Chlamydomonas reinhardtii",
+      "model": "iCre1355",
+      "genome_fasta": "genomes/cre.fna"
+    },
+    "eco": {
+      "organism": "Escherichia coli str. K-12 substr. MG1655",
+      "model": "iML1515",
+      "genome_fasta": "genomes/eco.fna"
+    },
+    "hpy": {
+      "organism": "Helicobacter pylori 26695",
+      "model": "iIT341",
+      "genome_fasta": "genomes/hpy.fna"
+    },
+    "mtu": {
+      "organism": "Mycobacterium tuberculosis H37Rv",
+      "model": "iNJ661",
+      "genome_fasta": "genomes/mtu.fna"
+    },
+    "nsal": {
+      "organism": "Nannochloropsis salina",
+      "model": "iNS934",
+      "genome_fasta": "genomes/nsal.fna"
+    },
+    "ppu": {
+      "organism": "Pseudomonas putida KT2440",
+      "model": "iJN746",
+      "genome_fasta": "genomes/ppu.fna"
+    },
+    "sce": {
+      "organism": "Saccharomyces cerevisiae S288C",
+      "model": "iMM904",
+      "genome_fasta": "genomes/sce.fna"
+    },
+    "sco": {
+      "organism": "Streptomyces coelicolor A3(2)",
+      "model": "iKS1317",
+      "genome_fasta": "genomes/sco.fna"
+    }
+  }
+}

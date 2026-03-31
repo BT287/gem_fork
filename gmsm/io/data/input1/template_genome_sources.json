@@ -1,0 +1,106 @@
+{
+  "description": "Curated source manifest for the template genome bank used by skani-first automatic template recommendation.",
+  "version": "2026-03-13",
+  "templates": {
+    "bsu": {
+      "organism": "Bacillus subtilis subsp. subtilis str. 168",
+      "template_model": "iYO844",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000009045.1",
+      "expected_relative_path": "genomes/bsu.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/bioproject/76",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000009045.1/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "Reference strain 168 used by the Bacillus subtilis template GEM."
+    },
+    "clj": {
+      "organism": "Clostridium ljungdahlii DSM 13528",
+      "template_model": "iHN637",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCA_000143685.1",
+      "expected_relative_path": "genomes/clj.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_000143685/",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCA_000143685.1/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "Complete genome assembly for DSM 13528 aligned with the C. ljungdahlii template organism."
+    },
+    "cre": {
+      "organism": "Chlamydomonas reinhardtii",
+      "template_model": "iCre1355",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000002595.2",
+      "expected_relative_path": "genomes/cre.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/bioproject/21061",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000002595.2/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "NCBI RefSeq genome used as the default Chlamydomonas reference for the cre template."
+    },
+    "eco": {
+      "organism": "Escherichia coli str. K-12 substr. MG1655",
+      "template_model": "iML1515",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000005845.2",
+      "expected_relative_path": "genomes/eco.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/bioproject/57779",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000005845.2/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "NCBI RefSeq MG1655 reference assembly matching the E. coli template GEM."
+    },
+    "hpy": {
+      "organism": "Helicobacter pylori 26695",
+      "template_model": "iIT341",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCA_000008525.1",
+      "expected_relative_path": "genomes/hpy.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/bioproject/233",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCA_000008525.1/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "Classical complete-genome assembly for strain 26695 associated with the H. pylori template model."
+    },
+    "mtu": {
+      "organism": "Mycobacterium tuberculosis H37Rv",
+      "template_model": "iNJ661",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000195955.2",
+      "expected_relative_path": "genomes/mtu.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/bioproject/57777",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000195955.2/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "NCBI RefSeq complete genome for H37Rv, consistent with the MTB template GEM."
+    },
+    "nsal": {
+      "organism": "Nannochloropsis salina CCMP1776",
+      "template_model": "iNS934",
+      "source_type": "direct_https",
+      "accession": "SDOX00000000",
+      "expected_relative_path": "genomes/nsal.fna",
+      "source_page": "https://nandesyn.single-cell.cn/download",
+      "download_url": "https://ftp.nandesyn.single-cell.cn/N_salina.genome.fasta",
+      "selection_note": "High-quality draft nuclear assembly for CCMP1776 reported by Ohan et al. 2019 and mirrored by NanDeSyn; used as the default N. salina template-bank genome."
+    },
+    "ppu": {
+      "organism": "Pseudomonas putida KT2440",
+      "template_model": "iJN746",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000007565.2",
+      "expected_relative_path": "genomes/ppu.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/bioproject/267",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000007565.2/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "NCBI RefSeq KT2440 assembly matching the Pseudomonas template GEM."
+    },
+    "sce": {
+      "organism": "Saccharomyces cerevisiae S288C",
+      "template_model": "iMM904",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000146045.2",
+      "expected_relative_path": "genomes/sce.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000146045.2/",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000146045.2/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "NCBI S288C R64 reference assembly matching the yeast template GEM."
+    },
+    "sco": {
+      "organism": "Streptomyces coelicolor A3(2)",
+      "template_model": "iKS1317",
+      "source_type": "ncbi_datasets_accession",
+      "accession": "GCF_000203835.1",
+      "expected_relative_path": "genomes/sco.fna",
+      "source_page": "https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000203835.1",
+      "download_url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000203835.1/download?include_annotation_type=GENOME_FASTA",
+      "selection_note": "NCBI assembly selected as the default Streptomyces coelicolor A3(2) genome bank reference for the sco template."
+    }
+  }
+}

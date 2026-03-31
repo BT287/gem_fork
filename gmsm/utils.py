@@ -2,11 +2,40 @@
 import cobra
 import datetime
 import logging
+import math
 import os
 import pickle
 import sys
 import subprocess
 from os.path import abspath, dirname, getmtime, isfile, join, split
+
+_ELF_MAGIC = b"\x7fELF"
+_MACHO_MAGICS = {
+    b"\xfe\xed\xfa\xce",
+    b"\xce\xfa\xed\xfe",
+    b"\xfe\xed\xfa\xcf",
+    b"\xcf\xfa\xed\xfe",
+    b"\xca\xfe\xba\xbe",
+    b"\xbe\xba\xfe\xca",
+}
+
+_TEMPLATE_SCORE_DEFAULTS = {
+    'template_ani_weight': 0.7,
+    'template_af_weight': 0.3,
+    'template_diamond_hit_weight': 0.05,
+    'template_diamond_identity_weight': 0.95,
+    'template_bbh_template_weight': 0.5,
+    'template_bbh_target_weight': 0.5,
+    'template_coarse_weight': 0.95,
+    'template_rerank_weight': 0.05,
+}
+
+_TEMPLATE_SCORE_PAIRS = (
+    ('template_ani_weight', 'template_af_weight'),
+    ('template_diamond_hit_weight', 'template_diamond_identity_weight'),
+    ('template_bbh_template_weight', 'template_bbh_target_weight'),
+    ('template_coarse_weight', 'template_rerank_weight'),
+)
 
 
 def setup_logging(run_ns):
@@ -52,7 +81,13 @@ def get_git_log():
 
 def load_legacy_pickle(path):
     """Load old Python pickles shipped with GMSM across Python 3 versions."""
-    with open(path, 'rb') as handle:
+    from gmsm import runtime_assets
+
+    resolved_path = runtime_assets.resolve_runtime_asset_path(path)
+    if not os.path.isfile(resolved_path) or runtime_assets.is_lfs_pointer_file(resolved_path):
+        raise FileNotFoundError(runtime_assets.runtime_asset_missing_message(path))
+
+    with open(resolved_path, 'rb') as handle:
         raw = handle.read()
 
     try:
@@ -94,6 +129,8 @@ def ensure_modern_cobra_attrs(model):
     objects.extend(model.reactions)
     objects.extend(model.metabolites)
     objects.extend(model.genes)
+    if hasattr(model, "groups"):
+        objects.extend(model.groups)
 
     for obj in objects:
         if not hasattr(obj, "_annotation"):
@@ -106,6 +143,10 @@ def check_input_options(run_ns):
     pmr_generation = getattr(run_ns, 'pmr_generation', False)
     smr_generation = getattr(run_ns, 'smr_generation', False)
     comp = getattr(run_ns, 'comp', None)
+    template_topk = getattr(run_ns, 'template_topk', 3)
+    template_genome_bank = getattr(run_ns, 'template_genome_bank', None)
+    template_rerank_topn = getattr(run_ns, 'template_rerank_topn', 3)
+    template_recommendation_only = getattr(run_ns, 'template_recommendation_only', False)
 
     if not input_file:
         logging.warning("Provide input file via ('-i')")
@@ -130,6 +171,76 @@ def check_input_options(run_ns):
                     "Primary metabolic modeling option ('-p') should also be selected")
             sys.exit(1)
 
+    if template_topk is not None and int(template_topk) < 1:
+        logging.warning("Template recommendation requires '--template-topk' to be at least 1")
+        sys.exit(1)
+
+    if template_genome_bank and not os.path.isdir(template_genome_bank):
+        logging.warning("Template genome bank directory not found: %s", template_genome_bank)
+        sys.exit(1)
+
+    if template_rerank_topn is not None and int(template_rerank_topn) < 0:
+        logging.warning("Template recommendation requires '--template-rerank-topn' to be 0 or greater")
+        sys.exit(1)
+
+    validate_template_score_options(run_ns)
+
+    if template_recommendation_only:
+        if not getattr(run_ns, 'auto_template', False):
+            logging.warning("Template recommendation-only mode requires '--auto-template'")
+            sys.exit(1)
+        if not pmr_generation:
+            logging.warning("Template recommendation-only mode requires primary modeling option ('-p')")
+            sys.exit(1)
+        if smr_generation:
+            logging.warning("Template recommendation-only mode cannot be combined with secondary modeling ('-s')")
+            sys.exit(1)
+
+
+def validate_template_score_options(run_ns):
+    for field_name, default in _TEMPLATE_SCORE_DEFAULTS.items():
+        value = float(getattr(run_ns, field_name, default))
+        if value < 0.0 or value > 1.0:
+            logging.warning(
+                "Template recommendation weight '%s' must be within [0, 1]",
+                _format_cli_option(field_name),
+            )
+            sys.exit(1)
+
+    for left_field, right_field in _TEMPLATE_SCORE_PAIRS:
+        left_value = float(getattr(run_ns, left_field, _TEMPLATE_SCORE_DEFAULTS[left_field]))
+        right_value = float(getattr(run_ns, right_field, _TEMPLATE_SCORE_DEFAULTS[right_field]))
+        if not math.isclose(left_value + right_value, 1.0, abs_tol=1e-9):
+            logging.warning(
+                "Template recommendation weights '%s' and '%s' must sum to 1.0",
+                _format_cli_option(left_field),
+                _format_cli_option(right_field),
+            )
+            sys.exit(1)
+
+
+def _format_cli_option(field_name):
+    return '--' + field_name.replace('_', '-')
+
+
+def _read_executable_magic(candidate):
+    try:
+        with open(candidate, "rb") as handle:
+            return handle.read(4)
+    except OSError:
+        return b""
+
+
+def _is_unix_binary_compatible(candidate):
+    magic = _read_executable_magic(candidate)
+    if magic.startswith(b"#!"):
+        return True
+    if sys.platform == "darwin":
+        return magic in _MACHO_MAGICS
+    if sys.platform.startswith("linux"):
+        return magic == _ELF_MAGIC
+    return True
+
 
 # Adopted from antismash.utils
 def locate_executable(name):
@@ -141,15 +252,15 @@ def locate_executable(name):
             return False
         if sys.platform == 'win32':
             return os.path.splitext(candidate)[1].lower() in valid_windows_suffixes
-        return os.access(candidate, os.X_OK)
+        return os.access(candidate, os.X_OK) and _is_unix_binary_compatible(candidate)
 
     candidate_names = [name]
     if sys.platform == 'win32' and os.path.splitext(name)[1] == "":
         candidate_names = [name + ".exe", name + ".bat", name + ".cmd"]
 
     repo_root = abspath(join(dirname(__file__), os.pardir))
-    search_paths = [join(repo_root, "bin"), join(os.getcwd(), "bin")]
-    search_paths.extend(os.environ.get("PATH", "").split(os.pathsep))
+    search_paths = list(os.environ.get("PATH", "").split(os.pathsep))
+    search_paths.extend([join(repo_root, "bin"), join(os.getcwd(), "bin")])
 
     for candidate_name in candidate_names:
         file_path, _ = split(candidate_name)

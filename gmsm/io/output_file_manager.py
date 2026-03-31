@@ -129,6 +129,10 @@ def write_markdown_report(folder, model_summary_dict):
         ('Program version', model_summary_dict['program version']),
         ('Input file', model_summary_dict['input_file']),
         ('Template model', model_summary_dict['template_model_organism']),
+        ('Template selection mode', model_summary_dict.get('template_selection_mode')),
+        ('Template recommendation backend', model_summary_dict.get('template_selection_backend')),
+        ('Template selection strategy', model_summary_dict.get('template_selection_strategy')),
+        ('Template recommendation confidence', model_summary_dict.get('template_selection_confidence')),
         ('Primary modeling', model_summary_dict['primary_metabolic_modeling']),
         ('Secondary modeling', model_summary_dict['secondary_metabolic_modeling']),
         ('Reactions', model_summary_dict['number_reactions']),
@@ -147,6 +151,11 @@ def write_markdown_report(folder, model_summary_dict):
         ('`metabolites.tsv`', 'Metabolite table for review and joins.'),
         ('`gpr_notes.tsv`', 'Template-gene carryover and duplicate-gene notes.'),
     ]
+    
+    if model_summary_dict.get('template_selection_mode') == 'auto':
+        recommended_files.append(
+            ('`../0_template_recommendation/template_candidates.tsv`', 'Template ranking that fed the selected template.')
+        )
 
     if '3_complete_model' in folder:
         recommended_files.extend([
@@ -430,6 +439,10 @@ def get_summary_report(folder, cobra_model, runtime,
     model_summary_dict['input_file']=getattr(run_ns, 'input', None)
     model_summary_dict['outputfolder']=getattr(run_ns, 'outputfolder', None)
     model_summary_dict['template_model_organism']=getattr(run_ns, 'orgName', None)
+    model_summary_dict['template_selection_mode']=getattr(run_ns, 'template_selection_mode', 'manual')
+    model_summary_dict['template_selection_backend']=getattr(run_ns, 'template_selection_backend', None)
+    model_summary_dict['template_selection_strategy']=getattr(run_ns, 'template_selection_strategy', None)
+    model_summary_dict['template_selection_confidence']=getattr(run_ns, 'template_selection_confidence', None)
     model_summary_dict['primary_metabolic_modeling']=getattr(run_ns, 'pmr_generation', None)
     model_summary_dict['secondary_metabolic_modeling']=getattr(run_ns, 'smr_generation', None)
     model_summary_dict['EC_number_file']=getattr(run_ns, 'ec_file', None)

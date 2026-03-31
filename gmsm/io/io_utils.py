@@ -4,6 +4,14 @@ import os
 import sys
 
 
+def _resolve_feature_gene_id(feature):
+    for qualifier_name in ('locus_tag', 'protein_id', 'gene'):
+        values = feature.qualifiers.get(qualifier_name)
+        if values:
+            return values[0].replace("-", "_")
+    return None
+
+
 def _is_bgc_feature(feature):
     return feature.type in ('region', 'cluster')
 
@@ -45,11 +53,11 @@ def get_features_from_gbk(seq_record, run_ns, io_ns):
     for feature in seq_record.features:
         if feature.type == 'CDS':
 
-            # Retrieving "locus_tag (i.e., ORF name)" for each CDS
-            if feature.qualifiers.get('locus_tag'):
-                locusTag = feature.qualifiers['locus_tag'][0].replace("-", "_")
-            else:
-                logging.error("No 'locus_tag' found in gbk file")
+            # Prefer locus_tag, but accept protein_id or gene for GenBank inputs
+            # that omit locus_tag qualifiers entirely.
+            locusTag = _resolve_feature_gene_id(feature)
+            if locusTag is None:
+                logging.error("No usable gene identifier found in gbk file")
                 sys.exit(1)
 
             # Note that the numbers of CDS and "translation" do not match.

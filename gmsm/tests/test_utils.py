@@ -1,9 +1,13 @@
 
 import warnings
-from cobra import Reaction, Metabolite
+import pytest
+import stat
+from cobra import Model, Reaction, Metabolite
+from cobra.core import Group
 from gmsm import utils
 from gmsm.config import load_config
 from os import remove
+from os import pathsep
 from os.path import isfile, join
 from pathlib import Path
 
@@ -48,6 +52,43 @@ class TestUtils:
         options.comp = ' '
         
         utils.check_input_options(options)
+
+
+    def test_check_input_options_rejects_removed_eficaz(self, options):
+
+        options.input = 'input.gbk'
+        options.ec_file = False
+        options.pmr_generation = False
+        options.smr_generation = False
+        options.comp = False
+
+        with pytest.raises(SystemExit):
+            utils.check_input_options(options)
+
+
+    def test_check_input_options_rejects_template_weight_out_of_range(self, options):
+
+        options.input = 'input.gbk'
+        options.pmr_generation = True
+        options.smr_generation = False
+        options.comp = False
+        options.template_ani_weight = 1.2
+
+        with pytest.raises(SystemExit):
+            utils.check_input_options(options)
+
+
+    def test_check_input_options_rejects_template_weight_pairs_that_do_not_sum_to_one(self, options):
+
+        options.input = 'input.gbk'
+        options.pmr_generation = True
+        options.smr_generation = False
+        options.comp = False
+        options.template_coarse_weight = 0.8
+        options.template_rerank_weight = 0.3
+
+        with pytest.raises(SystemExit):
+            utils.check_input_options(options)
         
         
     def test_locate_executable(self):
@@ -92,6 +133,54 @@ class TestUtils:
         output = utils.locate_executable(tool_name)
 
         assert output == str(expected)
+
+
+    def test_locate_executable_prefers_path_over_repo_bin(self, monkeypatch, tmp_test_dir):
+
+        tmp_path = Path(tmp_test_dir)
+        path_dir = tmp_path / 'path_dir'
+        cwd_bin_dir = tmp_path / 'bin'
+        path_dir.mkdir()
+        cwd_bin_dir.mkdir()
+        tool_name = 'codex_test_tool'
+        expected = path_dir / tool_name
+        fallback = cwd_bin_dir / tool_name
+
+        expected.write_text('#!/bin/sh\necho path\n')
+        fallback.write_text('#!/bin/sh\necho cwd\n')
+        expected.chmod(expected.stat().st_mode | stat.S_IXUSR)
+        fallback.chmod(fallback.stat().st_mode | stat.S_IXUSR)
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv('PATH', str(path_dir))
+
+        output = utils.locate_executable(tool_name)
+
+        assert output == str(expected)
+
+
+    def test_locate_executable_darwin_skips_elf_binary(self, monkeypatch, tmp_test_dir):
+
+        tmp_path = Path(tmp_test_dir)
+        elf_dir = tmp_path / 'elf_dir'
+        macho_dir = tmp_path / 'macho_dir'
+        elf_dir.mkdir()
+        macho_dir.mkdir()
+        tool_name = 'codex_test_tool'
+        elf_candidate = elf_dir / tool_name
+        macho_candidate = macho_dir / tool_name
+
+        elf_candidate.write_bytes(b'\x7fELFplaceholder')
+        macho_candidate.write_bytes(b'\xcf\xfa\xed\xfetool')
+        elf_candidate.chmod(elf_candidate.stat().st_mode | stat.S_IXUSR)
+        macho_candidate.chmod(macho_candidate.stat().st_mode | stat.S_IXUSR)
+
+        monkeypatch.setenv('PATH', pathsep.join([str(elf_dir), str(macho_dir)]))
+        monkeypatch.setattr(utils.sys, 'platform', 'darwin')
+
+        output = utils.locate_executable(tool_name)
+
+        assert output == str(macho_candidate)
         
         
     def test_execute(self):
@@ -261,8 +350,20 @@ class TestUtils:
         label = 'test'
         
         model = utils.stabilize_model(sci_primary_model, folder, label)
-        
+
         assert len(model.reactions) == int(2009)
+
+
+    def test_ensure_modern_cobra_attrs_backfills_group_annotation(self):
+
+        model = Model("grouped_model")
+        group = Group("test_group")
+        model.add_groups([group])
+        delattr(group, "_annotation")
+
+        utils.ensure_modern_cobra_attrs(model)
+
+        assert group.annotation == {}
     
     
     def test_get_exrnxid_flux(self, sci_primary_model, sco_tmp_model_flux):

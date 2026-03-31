@@ -1,6 +1,9 @@
 # GMSM I/O
 input/
 output*/
+output*.zip
+benchmark-results/
+dist/
 kegg_cache/
 gmsm/tests/data/model.xml
 scripts/bigg/model.xml
@@ -29,6 +32,7 @@ scripts/bigg/model.xml
 tmp
 gmsm/tests/_tmp/
 pytest-cache-files-*
+.runtime-assets/
 
 # System
 *.log
